@@ -3,6 +3,7 @@ using System;
 using FiletOFiles.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,45 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FiletOFiles.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250831153451_RecipesAndTagsIndexes")]
+    partial class RecipesAndTagsIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
-
-            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.File", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsTitle")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("MimeType")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long?>("RecipeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("Size")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RecipeId");
-
-                    b.ToTable("File");
-                });
 
             modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.Recipe", b =>
                 {
@@ -60,6 +30,9 @@ namespace FiletOFiles.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Descriptions")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FilePath")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -297,15 +270,6 @@ namespace FiletOFiles.Api.Migrations
                     b.ToTable("RecipeTag", (string)null);
                 });
 
-            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.File", b =>
-                {
-                    b.HasOne("FiletOFiles.Api.Domain.Entities.Recipe", "Recipe")
-                        .WithMany("Files")
-                        .HasForeignKey("RecipeId");
-
-                    b.Navigation("Recipe");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -370,11 +334,6 @@ namespace FiletOFiles.Api.Migrations
                         .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.Recipe", b =>
-                {
-                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }
