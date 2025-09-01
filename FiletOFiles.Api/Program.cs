@@ -1,3 +1,4 @@
+using FiletOFiles.Api.Features;
 using FiletOFiles.Api.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ builder
     )
     .AddEntityFrameworkStores<AppDbContext>();
 
+builder.Services.AddFeatures(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
