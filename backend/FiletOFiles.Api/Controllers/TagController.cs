@@ -5,7 +5,5 @@ namespace FiletOFiles.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TagController : ControllerBase
-    {
-    }
+    public class TagController : ControllerBase { }
 }

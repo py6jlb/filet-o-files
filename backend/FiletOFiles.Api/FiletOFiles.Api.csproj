@@ -7,12 +7,18 @@
     <ItemGroup>
         <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
         <PackageReference Include="FluentValidation" Version="8.2.3" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.19" />
+        <PackageReference
+            Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore"
+            Version="8.0.19"
+        />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Features/AddRecipe/Models/" />
     </ItemGroup>
 </Project>

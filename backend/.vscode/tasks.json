@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/FiletOFiles.Api.csproj",
+                "${workspaceFolder}/FiletOFiles.Api/FiletOFiles.Api.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/FiletOFiles.Api.csproj",
+                "${workspaceFolder}/FiletOFiles.Api/FiletOFiles.Api.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/FiletOFiles.Api.csproj"
+                "${workspaceFolder}/FiletOFiles.Api/FiletOFiles.Api.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

@@ -14,7 +14,7 @@ builder
     )
     .AddEntityFrameworkStores<AppDbContext>();
 
-builder.Services.AddFeatures(builder.Configuration);
+builder.Services.AddFeatures();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

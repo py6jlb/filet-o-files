@@ -5,7 +5,7 @@
             "name": "C#: FiletOFiles.Api Debug",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/FiletOFiles.Api.csproj"
+            "projectPath": "${workspaceFolder}/FiletOFiles.Api/FiletOFiles.Api.csproj"
         },
         {
             "name": ".NET Core Attach",
