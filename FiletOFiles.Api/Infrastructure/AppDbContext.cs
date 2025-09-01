@@ -8,9 +8,7 @@ namespace FiletOFiles.Api.Infrastructure;
 public class AppDbContext : IdentityDbContext<IdentityUser>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
-    {
-    }
+        : base(options) { }
 
     public DbSet<Tag> Tags { get; set; }
     public DbSet<Recipe> Recipes { get; set; }
@@ -20,9 +18,9 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
         base.OnModelCreating(mb);
 
         mb.Entity<Recipe>()
-                .HasMany(c => c.Tags)
-                .WithMany(s => s.Recipes)
-                .UsingEntity(j => j.ToTable("RecipeTag"));
+            .HasMany(c => c.Tags)
+            .WithMany(s => s.Recipes)
+            .UsingEntity(j => j.ToTable("RecipeTag"));
 
         mb.Entity<Recipe>().HasIndex(r => r.Title);
         mb.Entity<Tag>().HasIndex(t => t.Name);
@@ -33,5 +31,4 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
             .HasForeignKey(x => x.RecipeId)
             .IsRequired(false);
     }
-
 }
