@@ -16,7 +16,7 @@
 	//		}
 	// }
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "dotnet restore",
+	"postCreateCommand": "dotnet tool install --global dotnet-ef && dotnet restore",
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
