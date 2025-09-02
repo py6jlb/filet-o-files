@@ -49,12 +49,12 @@ public class RecipeController : ControllerBase
     [HttpPut]
     public IActionResult Put()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 
     [HttpDelete]
     public IActionResult Delete()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 }

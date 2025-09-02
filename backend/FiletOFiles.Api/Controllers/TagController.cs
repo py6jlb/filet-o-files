@@ -1,3 +1,6 @@
+using FiletOFiles.Api.Features.AddTag;
+using FiletOFiles.Api.Features.GetTags;
+using FiletOFiles.Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,32 +18,34 @@ public class TagController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Get()
+    public async Task<IActionResult> Get(
+        [FromServices] IGetTagsHandler handler,
+        string textFragment
+    )
     {
-        return Ok();
-    }
-
-    [HttpPost("search")]
-    public IActionResult Search()
-    {
-        return Ok();
+        var result = await handler.GetTags(textFragment);
+        return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 
     [HttpPost]
-    public IActionResult Post()
+    public async Task<IActionResult> Post(
+        [FromServices] IAddTagHandler handler,
+        AddTagRequest request
+    )
     {
-        return Ok();
+        var result = await handler.AddTag(request);
+        return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 
     [HttpPut]
     public IActionResult Put()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 
     [HttpDelete]
     public IActionResult Delete()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 }

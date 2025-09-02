@@ -17,30 +17,30 @@ public class FileController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 
     [HttpPost("search")]
     public IActionResult Search()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 
     [HttpPost]
     public IActionResult Post()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 
     [HttpPut]
     public IActionResult Put()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 
     [HttpDelete]
     public IActionResult Delete()
     {
-        return Ok();
+        return Ok("Пока не реализовано");
     }
 }
