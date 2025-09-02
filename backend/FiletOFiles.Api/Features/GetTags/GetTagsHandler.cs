@@ -1,6 +1,6 @@
 using System;
 using CSharpFunctionalExtensions;
-using FiletOFiles.Api.Infrastructure;
+using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Mappings;
 using FiletOFiles.Api.Models;
 using Microsoft.EntityFrameworkCore;

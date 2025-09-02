@@ -1,12 +1,8 @@
+using FiletOFiles.Api.Extensions;
 using FiletOFiles.Api.Features;
-using FiletOFiles.Api.Infrastructure;
+using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
-// using OpenTelemetry;
-// using OpenTelemetry.Metrics;
-// using OpenTelemetry.Resources;
-// using OpenTelemetry.Trace;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -24,20 +20,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// builder
-//     .Services.AddOpenTelemetry()
-//     .ConfigureResource(r => r.AddService(builder.Environment.ApplicationName))
-//     .WithTracing(t => t.AddHttpClientInstrumentation().AddAspNetCoreInstrumentation())
-//     .WithMetrics(m =>
-//         m.AddHttpClientInstrumentation().AddAspNetCoreInstrumentation().AddRuntimeInstrumentation()
-//     )
-//     .UseOtlpExporter();
-
-// builder.Logging.AddOpenTelemetry(o =>
-// {
-//     o.IncludeScopes = true;
-//     o.IncludeFormattedMessage = true;
-// });
+//builder.Services.AddOpenTelemetry();
 
 WebApplication app = builder.Build();
 
@@ -45,6 +28,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    await app.ApplyMigrations();
 }
 app.MapIdentityApi<IdentityUser>();
 app.UseHttpsRedirection();

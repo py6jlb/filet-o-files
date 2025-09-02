@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 
 namespace FiletOFiles.Api.Domain.Entities;
 
-public class File : Entity
+public sealed class File : Entity
 {
     public required string FileName { get; set; }
     public string? MimeType { get; set; }

@@ -2,7 +2,7 @@ using CSharpFunctionalExtensions;
 
 namespace FiletOFiles.Api.Domain.Entities;
 
-public class Recipe : Entity<long>
+public sealed class Recipe : Entity<long>
 {
     public DateTime Created { get; set; }
     public required string Title { get; set; }
