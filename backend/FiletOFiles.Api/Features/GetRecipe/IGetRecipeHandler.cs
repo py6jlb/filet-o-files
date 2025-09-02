@@ -1,10 +1,10 @@
 using System;
 using CSharpFunctionalExtensions;
-using FiletOFiles.Api.Models;
+using FiletOFiles.Api.DTOs.Recipes;
 
 namespace FiletOFiles.Api.Features.GetRecipe;
 
 public interface IGetRecipeHandler
 {
-    Task<Result<GetRecipeResponse?>> GetRecipe(long id);
+    Task<Result<RecipeDto?>> GetRecipe(string id);
 }

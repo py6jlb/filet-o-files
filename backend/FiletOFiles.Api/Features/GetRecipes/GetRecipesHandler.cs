@@ -1,9 +1,8 @@
 using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Domain.Entities;
+using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Infrastructure.Database;
-using FiletOFiles.Api.Mappings;
-using FiletOFiles.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FiletOFiles.Api.Features.GetRecipes;
@@ -19,26 +18,27 @@ public sealed class GetRecipesHandler : IGetRecipesHandler
         _logger = logger;
     }
 
-    public async Task<Result<IReadOnlyCollection<GetRecipeResponse>>> GetRecipes(
-        GetRecipesRequest request
+    public async Task<Result<IReadOnlyCollection<RecipeDto>>> GetRecipes(
+        RecipeQueryParameters request
     )
     {
         try
         {
             var recipes = await _db
-                .Recipes.Include(x => x.Tags)
+                .Recipes.Where(x => EF.Functions.Like(x.Title, $"%{request.Search}%"))
+                .Include(x => x.Tags)
                 .Include(x => x.Files)
                 .Skip(request.Skip)
                 .Take(request.Take)
-                .Select(x => x.ToResponse())
+                .Select(x => x.ToDto())
                 .ToArrayAsync();
-            IReadOnlyCollection<GetRecipeResponse> result = recipes ?? [];
+            IReadOnlyCollection<RecipeDto> result = recipes ?? [];
             return Result.Success(result);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Ошибка получения списка рецептов");
-            return Result.Failure<IReadOnlyCollection<GetRecipeResponse>>(
+            return Result.Failure<IReadOnlyCollection<RecipeDto>>(
                 "Ошибка получения списка рецептов"
             );
         }

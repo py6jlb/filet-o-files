@@ -1,11 +1,11 @@
 using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Domain.Entities;
-using FiletOFiles.Api.Models;
+using FiletOFiles.Api.DTOs.Recipes;
 
 namespace FiletOFiles.Api.Features.AddRecipe;
 
 public interface IAddRecipeHandler
 {
-    Task<Result<GetRecipeResponse>> AddRecipe(AddRecipeRequest request);
+    Task<Result<RecipeDto>> AddRecipe(RecipeDto request);
 }

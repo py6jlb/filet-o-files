@@ -1,7 +1,6 @@
 using CSharpFunctionalExtensions;
+using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
-using FiletOFiles.Api.Mappings;
-using FiletOFiles.Api.Models;
 
 namespace FiletOFiles.Api.Features.AddTag;
 
@@ -16,20 +15,20 @@ public class AddTagHandler : IAddTagHandler
         _logger = logger;
     }
 
-    public async Task<Result<GetTagResponse>> AddTag(AddTagRequest request)
+    public async Task<Result<TagDto>> AddTag(TagDto request)
     {
         try
         {
-            var newTag = request.ToTag();
+            var newTag = request.ToEntity();
             await _db.Tags.AddAsync(newTag);
             await _db.SaveChangesAsync();
-            var result = newTag.ToResponse();
+            var result = newTag.ToDto();
             return Result.Success(result);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Ошибка создания новой метки");
-            return Result.Failure<GetTagResponse>("Ошибка создания новой метки");
+            return Result.Failure<TagDto>("Ошибка создания новой метки");
         }
     }
 }

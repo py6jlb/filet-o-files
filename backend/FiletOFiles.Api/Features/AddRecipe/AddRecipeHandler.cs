@@ -1,9 +1,8 @@
 using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Domain.Entities;
+using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Infrastructure.Database;
-using FiletOFiles.Api.Mappings;
-using FiletOFiles.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FiletOFiles.Api.Features.AddRecipe;
@@ -19,20 +18,20 @@ public sealed class AddRecipeHandler : IAddRecipeHandler
         _logger = logger;
     }
 
-    public async Task<Result<GetRecipeResponse>> AddRecipe(AddRecipeRequest request)
+    public async Task<Result<RecipeDto>> AddRecipe(RecipeDto request)
     {
         try
         {
-            var newRecipe = request.ToRecipe();
+            var newRecipe = request.ToEntity();
             await _db.Recipes.AddAsync(newRecipe);
             await _db.SaveChangesAsync();
-            var result = newRecipe.ToResponse();
+            var result = newRecipe.ToDto();
             return Result.Success(result);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Ошибка добавления нового рецепта");
-            return Result.Failure<GetRecipeResponse>("Ошибка добавления нового рецепта");
+            return Result.Failure<RecipeDto>("Ошибка добавления нового рецепта");
         }
     }
 }

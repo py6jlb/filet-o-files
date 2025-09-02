@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
+using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Features.AddRecipe;
 using FiletOFiles.Api.Features.GetRecipe;
 using FiletOFiles.Api.Features.GetRecipes;
-using FiletOFiles.Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,17 +19,17 @@ public class RecipeController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Get([FromServices] IGetRecipeHandler handler, long id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Recipe([FromServices] IGetRecipeHandler handler, string id)
     {
         var result = await handler.GetRecipe(id);
         return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 
-    [HttpPost("search")]
-    public async Task<IActionResult> Search(
+    [HttpGet]
+    public async Task<IActionResult> Recipes(
         [FromServices] IGetRecipesHandler handler,
-        GetRecipesRequest request
+        RecipeQueryParameters request
     )
     {
         var result = await handler.GetRecipes(request);
@@ -39,7 +39,7 @@ public class RecipeController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(
         [FromServices] IAddRecipeHandler handler,
-        AddRecipeRequest request
+        RecipeDto request
     )
     {
         var result = await handler.AddRecipe(request);

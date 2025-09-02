@@ -1,10 +1,10 @@
 using System;
 using CSharpFunctionalExtensions;
-using FiletOFiles.Api.Models;
+using FiletOFiles.Api.DTOs.Tags;
 
 namespace FiletOFiles.Api.Features.GetTags;
 
 public interface IGetTagsHandler
 {
-    Task<Result<IReadOnlyCollection<GetTagResponse>>> GetTags(string textFragment);
+    Task<Result<IReadOnlyCollection<TagDto>>> GetTags(string textFragment);
 }

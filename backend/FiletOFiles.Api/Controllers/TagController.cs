@@ -1,6 +1,6 @@
+using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Features.AddTag;
 using FiletOFiles.Api.Features.GetTags;
-using FiletOFiles.Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,7 +30,7 @@ public class TagController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(
         [FromServices] IAddTagHandler handler,
-        AddTagRequest request
+        TagDto request
     )
     {
         var result = await handler.AddTag(request);

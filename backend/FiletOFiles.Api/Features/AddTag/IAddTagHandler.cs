@@ -1,10 +1,10 @@
 using System;
 using CSharpFunctionalExtensions;
-using FiletOFiles.Api.Models;
+using FiletOFiles.Api.DTOs.Tags;
 
 namespace FiletOFiles.Api.Features.AddTag;
 
 public interface IAddTagHandler
 {
-    Task<Result<GetTagResponse>> AddTag(AddTagRequest request);
+    Task<Result<TagDto>> AddTag(TagDto request);
 }
