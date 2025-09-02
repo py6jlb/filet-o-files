@@ -5,11 +5,11 @@ namespace FiletOFiles.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TagController : ControllerBase
+public class FileController : ControllerBase
 {
-    private readonly ILogger<TagController> _logger;
+    private readonly ILogger<FileController> _logger;
 
-    public TagController(ILogger<TagController> logger)
+    public FileController(ILogger<FileController> logger)
     {
         _logger = logger;
     }

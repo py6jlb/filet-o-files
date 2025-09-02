@@ -21,14 +21,13 @@ internal static class FileMapping
 
     public static GetFileResponse ToResponse(this Domain.Entities.File file)
     {
-        return new()
-        {
-            Id = file.Id,
-            FileName = file.FileName,
-            IsTitle = file.IsTitle,
-            MimeType = file.MimeType,
-            Size = file.Size,
-            Source = file.Source,
-        };
+        return new(
+            file.Id,
+            file.FileName,
+            file.MimeType ?? "application/octet-stream",
+            file.Source,
+            file.Size,
+            file.IsTitle
+        );
     }
 }

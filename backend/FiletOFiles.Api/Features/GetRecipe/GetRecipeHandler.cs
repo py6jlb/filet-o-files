@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FiletOFiles.Api.Features.GetRecipe;
 
-internal sealed class GetRecipeHandler : IGetRecipeHandler
+public sealed class GetRecipeHandler : IGetRecipeHandler
 {
     private readonly ILogger<GetRecipeHandler> _logger;
     private readonly AppDbContext _db;

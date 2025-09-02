@@ -1,4 +1,3 @@
-using System;
 using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.Models;
 
@@ -13,11 +12,6 @@ internal static class TagMapping
 
     public static GetTagResponse ToResponse(this Tag tag)
     {
-        return new()
-        {
-            Id = tag.Id,
-            Color = tag.Color,
-            Name = tag.Name,
-        };
+        return new(tag.Id, tag.Name, tag.Color);
     }
 }

@@ -5,7 +5,7 @@ using FiletOFiles.Api.Models;
 
 namespace FiletOFiles.Api.Features.AddRecipe;
 
-internal interface IAddRecipeHandler
+public interface IAddRecipeHandler
 {
-    Task<Result> AddRecipe(AddRecipeRequest request);
+    Task<Result<GetRecipeResponse>> AddRecipe(AddRecipeRequest request);
 }

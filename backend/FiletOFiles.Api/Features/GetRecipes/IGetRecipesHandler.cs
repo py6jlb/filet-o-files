@@ -4,7 +4,7 @@ using FiletOFiles.Api.Models;
 
 namespace FiletOFiles.Api.Features.GetRecipes;
 
-internal interface IGetRecipesHandler
+public interface IGetRecipesHandler
 {
-    Task<Result<IReadOnlyCollection<GetRecipeResponse>>> GetRecipes(int take, int skip);
+    Task<Result<IReadOnlyCollection<GetRecipeResponse>>> GetRecipes(GetRecipesRequest request);
 }

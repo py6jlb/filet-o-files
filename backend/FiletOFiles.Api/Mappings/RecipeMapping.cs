@@ -18,13 +18,10 @@ internal static class RecipeMapping
 
     public static GetRecipeResponse ToResponse(this Recipe recipe)
     {
-        return new()
+        return new(recipe.Id, recipe.Title, recipe.Descriptions)
         {
-            Descriptions = recipe.Descriptions,
-            Title = recipe.Title,
-            Id = recipe.Id,
-            Tags = recipe.Tags.Select(x => x.ToResponse()),
-            Files = recipe.Files.Select(x => x.ToResponse()),
+            Tags = recipe.Tags.Select(x => x.ToResponse()) ?? [],
+            Files = recipe.Files.Select(x => x.ToResponse()) ?? [],
         };
     }
 }

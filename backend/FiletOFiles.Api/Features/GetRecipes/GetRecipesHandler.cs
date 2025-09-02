@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FiletOFiles.Api.Features.GetRecipes;
 
-internal sealed class GetRecipesHandler : IGetRecipesHandler
+public sealed class GetRecipesHandler : IGetRecipesHandler
 {
     private readonly ILogger<GetRecipesHandler> _logger;
     private readonly AppDbContext _db;
@@ -19,15 +19,17 @@ internal sealed class GetRecipesHandler : IGetRecipesHandler
         _logger = logger;
     }
 
-    public async Task<Result<IReadOnlyCollection<GetRecipeResponse>>> GetRecipes(int take, int skip)
+    public async Task<Result<IReadOnlyCollection<GetRecipeResponse>>> GetRecipes(
+        GetRecipesRequest request
+    )
     {
         try
         {
             var recipes = await _db
                 .Recipes.Include(x => x.Tags)
                 .Include(x => x.Files)
-                .Skip(skip)
-                .Take(skip)
+                .Skip(request.Skip)
+                .Take(request.Take)
                 .Select(x => x.ToResponse())
                 .ToArrayAsync();
             IReadOnlyCollection<GetRecipeResponse> result = recipes ?? [];
