@@ -3,7 +3,12 @@ using FiletOFiles.Api.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+// using OpenTelemetry;
+// using OpenTelemetry.Metrics;
+// using OpenTelemetry.Resources;
+// using OpenTelemetry.Trace;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
@@ -19,7 +24,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+// builder
+//     .Services.AddOpenTelemetry()
+//     .ConfigureResource(r => r.AddService(builder.Environment.ApplicationName))
+//     .WithTracing(t => t.AddHttpClientInstrumentation().AddAspNetCoreInstrumentation())
+//     .WithMetrics(m =>
+//         m.AddHttpClientInstrumentation().AddAspNetCoreInstrumentation().AddRuntimeInstrumentation()
+//     )
+//     .UseOtlpExporter();
+
+// builder.Logging.AddOpenTelemetry(o =>
+// {
+//     o.IncludeScopes = true;
+//     o.IncludeFormattedMessage = true;
+// });
+
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
@@ -28,7 +48,6 @@ if (app.Environment.IsDevelopment())
 }
 app.MapIdentityApi<IdentityUser>();
 app.UseHttpsRedirection();
-app.UseAuthorization();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
