@@ -1,8 +1,7 @@
 using System;
 using CSharpFunctionalExtensions;
+using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
-using FiletOFiles.Api.Mappings;
-using FiletOFiles.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FiletOFiles.Api.Features.GetTags;
@@ -18,20 +17,20 @@ public class GetTagsHandler : IGetTagsHandler
         _logger = logger;
     }
 
-    public async Task<Result<IReadOnlyCollection<GetTagResponse>>> GetTags(string textFragment)
+    public async Task<Result<IReadOnlyCollection<TagDto>>> GetTags(string textFragment)
     {
         try
         {
-            IReadOnlyCollection<GetTagResponse> result = await _db
+            IReadOnlyCollection<TagDto> result = await _db
                 .Tags.Where(x => EF.Functions.Like(x.Name, $"%{textFragment}%"))
-                .Select(x => x.ToResponse())
+                .Select(x => x.ToDto())
                 .ToArrayAsync();
             return Result.Success(result);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Ошибка поиска меток");
-            return Result.Failure<IReadOnlyCollection<GetTagResponse>>("Ошибка поиска меток");
+            return Result.Failure<IReadOnlyCollection<TagDto>>("Ошибка поиска меток");
         }
     }
 }

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FiletOFiles.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250901203735_TagColor")]
-    partial class TagColor
+    [Migration("20250902202747_initDatabase")]
+    partial class initDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,9 +22,8 @@ namespace FiletOFiles.Api.Migrations
 
             modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.File", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -36,8 +35,8 @@ namespace FiletOFiles.Api.Migrations
                     b.Property<string>("MimeType")
                         .HasColumnType("TEXT");
 
-                    b.Property<long?>("RecipeId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("RecipeId")
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER");
@@ -50,14 +49,13 @@ namespace FiletOFiles.Api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("File");
+                    b.ToTable("Files");
                 });
 
             modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.Recipe", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
@@ -78,9 +76,8 @@ namespace FiletOFiles.Api.Migrations
 
             modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.Tag", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Color")
                         .IsRequired()
@@ -291,11 +288,11 @@ namespace FiletOFiles.Api.Migrations
 
             modelBuilder.Entity("RecipeTag", b =>
                 {
-                    b.Property<long>("RecipesId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("RecipesId")
+                        .HasColumnType("TEXT");
 
-                    b.Property<long>("TagsId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("TagsId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("RecipesId", "TagsId");
 
