@@ -28,10 +28,7 @@ public class TagsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(
-        [FromServices] IAddTagHandler handler,
-        TagDto request
-    )
+    public async Task<IActionResult> Post([FromServices] IAddTagHandler handler, TagDto request)
     {
         var result = await handler.AddTag(request);
         return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
