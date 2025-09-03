@@ -6,5 +6,5 @@ namespace FiletOFiles.Api.Features.GetRecipes;
 
 public interface IGetRecipesHandler
 {
-    Task<Result<IReadOnlyCollection<RecipeDto>>> GetRecipes(RecipeQueryParameters request);
+    Task<Result<RecipesCollectionDto>> GetRecipes(RecipeQueryParameters request);
 }

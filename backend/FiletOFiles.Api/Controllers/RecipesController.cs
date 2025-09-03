@@ -20,14 +20,17 @@ public class RecipesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Recipe([FromServices] IGetRecipeHandler handler, string id)
+    public async Task<ActionResult<RecipeDto>> GetRecipe(
+        [FromServices] IGetRecipeHandler handler,
+        string id
+    )
     {
         var result = await handler.GetRecipe(id);
         return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 
     [HttpGet]
-    public async Task<IActionResult> Recipes(
+    public async Task<ActionResult<RecipesCollectionDto>> GetRecipes(
         [FromServices] IGetRecipesHandler handler,
         RecipeQueryParameters request
     )
@@ -37,7 +40,7 @@ public class RecipesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(
+    public async Task<IActionResult> AddRecipe(
         [FromServices] IAddRecipeHandler handler,
         RecipeDto request
     )
@@ -47,7 +50,7 @@ public class RecipesController : ControllerBase
     }
 
     [HttpPut]
-    public IActionResult Put()
+    public IActionResult Update()
     {
         return Ok("Пока не реализовано");
     }

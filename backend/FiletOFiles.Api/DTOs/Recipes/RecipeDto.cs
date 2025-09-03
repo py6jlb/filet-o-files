@@ -4,6 +4,8 @@ using FiletOFiles.Api.DTOs.Tags;
 
 namespace FiletOFiles.Api.DTOs.Recipes;
 
+public sealed record RecipesCollectionDto(IEnumerable<RecipeDto> Data);
+
 public sealed record RecipeDto
 {
     public string Id { get; init; }

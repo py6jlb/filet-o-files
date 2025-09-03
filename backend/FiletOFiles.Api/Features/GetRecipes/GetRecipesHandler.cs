@@ -18,9 +18,7 @@ public sealed class GetRecipesHandler : IGetRecipesHandler
         _logger = logger;
     }
 
-    public async Task<Result<IReadOnlyCollection<RecipeDto>>> GetRecipes(
-        RecipeQueryParameters request
-    )
+    public async Task<Result<RecipesCollectionDto>> GetRecipes(RecipeQueryParameters request)
     {
         try
         {
@@ -32,15 +30,13 @@ public sealed class GetRecipesHandler : IGetRecipesHandler
                 .Take(request.Take)
                 .Select(x => x.ToDto())
                 .ToArrayAsync();
-            IReadOnlyCollection<RecipeDto> result = recipes ?? [];
+            var result = new RecipesCollectionDto(recipes);
             return Result.Success(result);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Ошибка получения списка рецептов");
-            return Result.Failure<IReadOnlyCollection<RecipeDto>>(
-                "Ошибка получения списка рецептов"
-            );
+            return Result.Failure<RecipesCollectionDto>("Ошибка получения списка рецептов");
         }
     }
 }
