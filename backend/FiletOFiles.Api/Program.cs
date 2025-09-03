@@ -7,7 +7,11 @@ using Microsoft.EntityFrameworkCore;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlite(connectionString);
+    options.UseSnakeCaseNamingConvention();
+});
 
 builder
     .Services.AddIdentityApiEndpoints<IdentityUser>(options =>
@@ -16,7 +20,10 @@ builder
     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddFeatures();
-builder.Services.AddControllers();
+builder.Services.AddControllers(o =>
+{
+    o.ReturnHttpNotAcceptable = true;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

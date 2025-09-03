@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
-public class FileController : ControllerBase
+public class FilesController : ControllerBase
 {
-    private readonly ILogger<FileController> _logger;
+    private readonly ILogger<FilesController> _logger;
 
-    public FileController(ILogger<FileController> logger)
+    public FilesController(ILogger<FilesController> logger)
     {
         _logger = logger;
     }

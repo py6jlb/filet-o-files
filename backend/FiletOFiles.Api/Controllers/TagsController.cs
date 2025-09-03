@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
-public class TagController : ControllerBase
+public class TagsController : ControllerBase
 {
-    private readonly ILogger<TagController> _logger;
+    private readonly ILogger<TagsController> _logger;
 
-    public TagController(ILogger<TagController> logger)
+    public TagsController(ILogger<TagsController> logger)
     {
         _logger = logger;
     }

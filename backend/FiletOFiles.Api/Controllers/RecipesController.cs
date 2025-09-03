@@ -8,13 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
-public class RecipeController : ControllerBase
+public class RecipesController : ControllerBase
 {
-    private readonly ILogger<RecipeController> _logger;
+    private readonly ILogger<RecipesController> _logger;
 
-    public RecipeController(ILogger<RecipeController> logger)
+    public RecipesController(ILogger<RecipesController> logger)
     {
         _logger = logger;
     }
