@@ -15,13 +15,16 @@ public class AddTagHandler : IAddTagHandler
         _logger = logger;
     }
 
-    public async Task<Result<TagDto>> AddTag(TagDto request)
+    public async Task<Result<TagDto>> AddTag(
+        TagDto request,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
             var newTag = request.ToEntity();
-            await _db.Tags.AddAsync(newTag);
-            await _db.SaveChangesAsync();
+            await _db.Tags.AddAsync(newTag, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
             var result = newTag.ToDto();
             return Result.Success(result);
         }

@@ -6,5 +6,8 @@ namespace FiletOFiles.Api.Features.GetRecipes;
 
 public interface IGetRecipesHandler
 {
-    Task<Result<RecipesCollectionDto>> GetRecipes(RecipeQueryParameters request);
+    Task<Result<RecipesCollectionDto>> GetRecipes(
+        RecipeQueryParameters request,
+        CancellationToken cancellationToken = default
+    );
 }

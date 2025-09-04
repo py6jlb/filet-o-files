@@ -13,12 +13,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSnakeCaseNamingConvention();
 });
 
-builder
-    .Services.AddIdentityApiEndpoints<IdentityUser>(options =>
-        options.SignIn.RequireConfirmedAccount = true
-    )
-    .AddEntityFrameworkStores<AppDbContext>();
-
 builder.Services.AddFeatures();
 builder.Services.AddControllers(o =>
 {

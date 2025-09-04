@@ -20,17 +20,22 @@ public class TagsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(
         [FromServices] IGetTagsHandler handler,
-        string textFragment
+        string textFragment,
+        CancellationToken cancellationToken
     )
     {
-        var result = await handler.GetTags(textFragment);
+        var result = await handler.GetTags(textFragment, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromServices] IAddTagHandler handler, TagDto request)
+    public async Task<IActionResult> Post(
+        [FromServices] IAddTagHandler handler,
+        TagDto request,
+        CancellationToken cancellationToken
+    )
     {
-        var result = await handler.AddTag(request);
+        var result = await handler.AddTag(request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 

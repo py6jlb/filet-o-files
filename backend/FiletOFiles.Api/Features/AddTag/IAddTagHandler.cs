@@ -6,5 +6,5 @@ namespace FiletOFiles.Api.Features.AddTag;
 
 public interface IAddTagHandler
 {
-    Task<Result<TagDto>> AddTag(TagDto request);
+    Task<Result<TagDto>> AddTag(TagDto request, CancellationToken cancellationToken = default);
 }

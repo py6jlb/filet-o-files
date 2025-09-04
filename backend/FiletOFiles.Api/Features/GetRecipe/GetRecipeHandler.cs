@@ -18,7 +18,10 @@ public sealed class GetRecipeHandler : IGetRecipeHandler
         _logger = logger;
     }
 
-    public async Task<Result<RecipeDto?>> GetRecipe(string id)
+    public async Task<Result<RecipeDto?>> GetRecipe(
+        string id,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -26,7 +29,7 @@ public sealed class GetRecipeHandler : IGetRecipeHandler
                 .Recipes.Where(x => x.Id == id)
                 .Include(x => x.Tags)
                 .Include(x => x.Files)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
             return Result.Success(recipe?.ToDto());
         }
         catch (Exception e)

@@ -22,31 +22,36 @@ public class RecipesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<RecipeDto>> GetRecipe(
         [FromServices] IGetRecipeHandler handler,
-        string id
+        string id,
+        CancellationToken cancellationToken
     )
     {
-        var result = await handler.GetRecipe(id);
+        var result = await handler.GetRecipe(id, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 
     [HttpGet]
     public async Task<ActionResult<RecipesCollectionDto>> GetRecipes(
         [FromServices] IGetRecipesHandler handler,
-        RecipeQueryParameters request
+        RecipeQueryParameters request,
+        CancellationToken cancellationToken
     )
     {
-        var result = await handler.GetRecipes(request);
+        var result = await handler.GetRecipes(request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 
     [HttpPost]
     public async Task<IActionResult> AddRecipe(
         [FromServices] IAddRecipeHandler handler,
-        RecipeDto request
+        CreateRecipeDto request,
+        CancellationToken cancellationToken
     )
     {
-        var result = await handler.AddRecipe(request);
-        return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
+        var result = await handler.AddRecipe(request, cancellationToken);
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(GetRecipe), new { id = result.Value.Id }, result.Value)
+            : Problem(result.Error);
     }
 
     [HttpPut]

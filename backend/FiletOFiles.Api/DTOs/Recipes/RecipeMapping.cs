@@ -8,7 +8,7 @@ namespace FiletOFiles.Api.DTOs.Recipes;
 
 internal static class RecipeMapping
 {
-    public static Recipe ToEntity(this RecipeDto dto)
+    public static Recipe ToEntity(this CreateRecipeDto dto)
     {
         return new Recipe
         {

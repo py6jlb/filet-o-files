@@ -7,5 +7,8 @@ namespace FiletOFiles.Api.Features.AddRecipe;
 
 public interface IAddRecipeHandler
 {
-    Task<Result<RecipeDto>> AddRecipe(RecipeDto request);
+    Task<Result<RecipeDto>> AddRecipe(
+        CreateRecipeDto request,
+        CancellationToken cancellationToken = default
+    );
 }

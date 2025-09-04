@@ -18,7 +18,10 @@ public sealed class GetRecipesHandler : IGetRecipesHandler
         _logger = logger;
     }
 
-    public async Task<Result<RecipesCollectionDto>> GetRecipes(RecipeQueryParameters request)
+    public async Task<Result<RecipesCollectionDto>> GetRecipes(
+        RecipeQueryParameters request,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -29,7 +32,7 @@ public sealed class GetRecipesHandler : IGetRecipesHandler
                 .Skip(request.Skip)
                 .Take(request.Take)
                 .Select(x => x.ToDto())
-                .ToArrayAsync();
+                .ToArrayAsync(cancellationToken);
             var result = new RecipesCollectionDto(recipes);
             return Result.Success(result);
         }

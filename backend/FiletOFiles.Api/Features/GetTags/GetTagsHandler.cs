@@ -17,14 +17,17 @@ public class GetTagsHandler : IGetTagsHandler
         _logger = logger;
     }
 
-    public async Task<Result<IReadOnlyCollection<TagDto>>> GetTags(string textFragment)
+    public async Task<Result<IReadOnlyCollection<TagDto>>> GetTags(
+        string textFragment,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
             IReadOnlyCollection<TagDto> result = await _db
                 .Tags.Where(x => EF.Functions.Like(x.Name, $"%{textFragment}%"))
                 .Select(x => x.ToDto())
-                .ToArrayAsync();
+                .ToArrayAsync(cancellationToken);
             return Result.Success(result);
         }
         catch (Exception e)

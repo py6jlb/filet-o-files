@@ -18,13 +18,16 @@ public sealed class AddRecipeHandler : IAddRecipeHandler
         _logger = logger;
     }
 
-    public async Task<Result<RecipeDto>> AddRecipe(RecipeDto request)
+    public async Task<Result<RecipeDto>> AddRecipe(
+        CreateRecipeDto request,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
             var newRecipe = request.ToEntity();
-            await _db.Recipes.AddAsync(newRecipe);
-            await _db.SaveChangesAsync();
+            await _db.Recipes.AddAsync(newRecipe, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
             var result = newRecipe.ToDto();
             return Result.Success(result);
         }
