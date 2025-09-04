@@ -3,6 +3,7 @@ using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Features.AddRecipe;
 using FiletOFiles.Api.Features.GetRecipe;
 using FiletOFiles.Api.Features.GetRecipes;
+using FiletOFiles.Api.Features.UpdateRecipe;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,10 +55,16 @@ public class RecipesController : ControllerBase
             : Problem(result.Error);
     }
 
-    [HttpPut]
-    public IActionResult Update()
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+        string id,
+        [FromBody] UpdateRecipeDto request,
+        [FromServices] IUpdateRecipeHandler handler,
+        CancellationToken cancellationToken
+    )
     {
-        return Ok("Пока не реализовано");
+        var result = await handler.Update(id, request, cancellationToken);
+        return result.IsSuccess ? NoContent() : Problem(result.Error);
     }
 
     [HttpDelete]

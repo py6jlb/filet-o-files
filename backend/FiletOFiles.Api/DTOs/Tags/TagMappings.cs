@@ -5,7 +5,7 @@ namespace FiletOFiles.Api.DTOs.Tags;
 
 public static class TagMappings
 {
-    public static Tag ToEntity(this TagDto dto)
+    public static Tag ToEntity(this CreateTagDto dto)
     {
         return new()
         {

@@ -2,11 +2,8 @@ using System;
 
 namespace FiletOFiles.Api.DTOs.Tags;
 
-public sealed record TagsCollectionDto(IEnumerable<TagDto> Data);
-
-public sealed record TagDto
+public sealed record CreateTagDto
 {
-    public string Id { get; init; }
     public string Name { get; init; }
     public string Color { get; init; }
 }

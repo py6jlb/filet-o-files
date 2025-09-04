@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace FiletOFiles.Api.Features.AddTag;
 
@@ -16,16 +17,21 @@ public class AddTagHandler : IAddTagHandler
     }
 
     public async Task<Result<TagDto>> AddTag(
-        TagDto request,
+        CreateTagDto request,
         CancellationToken cancellationToken = default
     )
     {
         try
         {
-            var newTag = request.ToEntity();
-            await _db.Tags.AddAsync(newTag, cancellationToken);
+            var tag = request.ToEntity();
+            var exists = await _db.Tags.AnyAsync(x => x.Name == tag.Name, cancellationToken);
+            if (exists)
+            {
+                return Result.Failure<TagDto>($"Метка с названием '{tag.Name}' уже существует");
+            }
+            await _db.Tags.AddAsync(tag, cancellationToken);
             await _db.SaveChangesAsync(cancellationToken);
-            var result = newTag.ToDto();
+            var result = tag.ToDto();
             return Result.Success(result);
         }
         catch (Exception e)

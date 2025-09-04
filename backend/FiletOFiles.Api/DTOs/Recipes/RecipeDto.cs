@@ -10,7 +10,7 @@ public sealed record RecipeDto
 {
     public string Id { get; init; }
     public DateTime Created { get; init; }
-    public required string Title { get; init; }
+    public string Title { get; init; }
     public string? Descriptions { get; init; }
     public IEnumerable<TagDto> Tags { get; init; }
     public IEnumerable<FileDto> Files { get; init; }

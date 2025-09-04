@@ -4,6 +4,7 @@ using FiletOFiles.Api.Features.AddTag;
 using FiletOFiles.Api.Features.GetRecipe;
 using FiletOFiles.Api.Features.GetRecipes;
 using FiletOFiles.Api.Features.GetTags;
+using FiletOFiles.Api.Features.UpdateRecipe;
 
 namespace FiletOFiles.Api.Features;
 
@@ -14,6 +15,7 @@ public static class FeatureStartupExtensions
         services.AddScoped<IGetRecipeHandler, GetRecipeHandler>();
         services.AddScoped<IGetRecipesHandler, GetRecipesHandler>();
         services.AddScoped<IAddRecipeHandler, AddRecipeHandler>();
+        services.AddScoped<IUpdateRecipeHandler, UpdateRecipeHandler>();
 
         services.AddScoped<IAddTagHandler, AddTagHandler>();
         services.AddScoped<IGetTagsHandler, GetTagsHandler>();

@@ -31,4 +31,10 @@ internal static class RecipeMapping
             Files = recipe.Files.Select(x => x.ToDto()) ?? [],
         };
     }
+
+    public static void UpdateFromDto(this Recipe recipe, UpdateRecipeDto dto)
+    {
+        recipe.Title = dto.Title;
+        recipe.Descriptions = dto.Descriptions;
+    }
 }

@@ -6,6 +6,8 @@ namespace FiletOFiles.Api.Features.GetTags;
 
 public interface IGetTagsHandler
 {
-    Task<Result<IReadOnlyCollection<TagDto>>> GetTags(string textFragment,
-        CancellationToken cancellationToken = default);
+    Task<Result<TagsCollectionDto>> GetTags(
+        string textFragment,
+        CancellationToken cancellationToken = default
+    );
 }
