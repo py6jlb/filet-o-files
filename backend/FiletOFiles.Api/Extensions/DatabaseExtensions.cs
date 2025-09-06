@@ -21,4 +21,16 @@ public static class DatabaseExtensions
             throw;
         }
     }
+
+    public static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)
+    {
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        builder.Services.AddDbContext<AppDbContext>(options =>
+        {
+            options.UseSqlite(connectionString);
+            options.UseSnakeCaseNamingConvention();
+        });
+
+        return builder;
+    }
 }

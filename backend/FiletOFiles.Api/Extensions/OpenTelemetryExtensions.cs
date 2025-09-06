@@ -8,28 +8,26 @@ namespace FiletOFiles.Api.Extensions;
 
 public static class OpenTelemetryExtensions
 {
-    public static IServiceCollection AddOpenTelemetry(
-        this IServiceCollection services,
-        WebApplicationBuilder builder
-    )
+    public static WebApplicationBuilder AddOpenTelemetry(this WebApplicationBuilder builder)
     {
-        services
-            .AddOpenTelemetry()
+        builder
+            .Services.AddOpenTelemetry()
             .ConfigureResource(r => r.AddService(builder.Environment.ApplicationName))
-            .WithTracing(t => t.AddHttpClientInstrumentation().AddAspNetCoreInstrumentation())
+            .WithTracing(t =>
+                t.AddHttpClientInstrumentation().AddAspNetCoreInstrumentation().AddConsoleExporter()
+            )
             .WithMetrics(m =>
                 m.AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddRuntimeInstrumentation()
-            )
-            .UseOtlpExporter();
+            );
 
         builder.Logging.AddOpenTelemetry(o =>
         {
             o.IncludeScopes = true;
             o.IncludeFormattedMessage = true;
         });
-        
-        return services;
+
+        return builder;
     }
 }

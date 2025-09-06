@@ -7,24 +7,19 @@ using Microsoft.EntityFrameworkCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlite(connectionString);
-    options.UseSnakeCaseNamingConvention();
-});
-
+builder.AddOpenTelemetry();
+builder.AddDatabase();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-builder.Services.AddFeatures();
+builder.AddErrorHandling();
+builder.AddFeatures();
+
 builder.Services.AddControllers(o =>
 {
     o.ReturnHttpNotAcceptable = true;
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-//builder.Services.AddOpenTelemetry();
 
 WebApplication app = builder.Build();
 
@@ -34,7 +29,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     await app.ApplyMigrations();
 }
-app.MapIdentityApi<IdentityUser>();
 app.UseHttpsRedirection();
 app.MapControllers();
 
