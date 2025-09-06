@@ -7,6 +7,7 @@ using FiletOFiles.Api.Features.UpdateTag;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace FiletOFiles.Api.Controllers;
 
@@ -51,6 +52,7 @@ public class TagsController : ControllerBase
     public async Task<IActionResult> Post(
         [FromServices] IAddTagHandler handler,
         [FromServices] IValidator<CreateTagDto> validator,
+        [FromServices] ProblemDetailsFactory problemDetailsFactory,
         CreateTagDto request,
         CancellationToken cancellationToken
     )
@@ -58,7 +60,12 @@ public class TagsController : ControllerBase
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            return BadRequest();
+            ProblemDetails problem = problemDetailsFactory.CreateProblemDetails(
+                HttpContext,
+                StatusCodes.Status400BadRequest
+            );
+            problem.Extensions.Add("errors", validationResult.ToDictionary());
+            return BadRequest(problem);
         }
         var result = await handler.AddTag(request, cancellationToken);
         return result.IsSuccess
@@ -70,6 +77,7 @@ public class TagsController : ControllerBase
     public async Task<IActionResult> Put(
         [FromServices] IUpdateTagHandler handler,
         [FromServices] IValidator<UpdateTagDto> validator,
+        [FromServices] ProblemDetailsFactory problemDetailsFactory,
         string id,
         UpdateTagDto request,
         CancellationToken cancellationToken
@@ -78,7 +86,12 @@ public class TagsController : ControllerBase
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            return BadRequest();
+            ProblemDetails problem = problemDetailsFactory.CreateProblemDetails(
+                HttpContext,
+                StatusCodes.Status400BadRequest
+            );
+            problem.Extensions.Add("errors", validationResult.ToDictionary());
+            return BadRequest(problem);
         }
 
         var result = await handler.Update(id, request, cancellationToken);
