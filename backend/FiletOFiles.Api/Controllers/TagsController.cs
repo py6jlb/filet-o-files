@@ -1,13 +1,16 @@
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Features.AddTag;
+using FiletOFiles.Api.Features.DeleteTag;
 using FiletOFiles.Api.Features.GetTag;
 using FiletOFiles.Api.Features.GetTags;
+using FiletOFiles.Api.Features.UpdateTag;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
-[Route("[controller]")]
+[Route("tags")]
 [ApiController]
 public class TagsController : ControllerBase
 {
@@ -47,25 +50,49 @@ public class TagsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(
         [FromServices] IAddTagHandler handler,
+        [FromServices] IValidator<CreateTagDto> validator,
         CreateTagDto request,
         CancellationToken cancellationToken
     )
     {
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest();
+        }
         var result = await handler.AddTag(request, cancellationToken);
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetTag), new { id = result.Value.Id }, result.Value)
             : Problem(result.Error);
     }
 
-    [HttpPut]
-    public IActionResult Put()
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put(
+        [FromServices] IUpdateTagHandler handler,
+        [FromServices] IValidator<UpdateTagDto> validator,
+        string id,
+        UpdateTagDto request,
+        CancellationToken cancellationToken
+    )
     {
-        return Ok("Пока не реализовано");
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest();
+        }
+
+        var result = await handler.Update(id, request, cancellationToken);
+        return result.IsSuccess ? NoContent() : Problem(result.Error);
     }
 
-    [HttpDelete]
-    public IActionResult Delete()
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(
+        [FromServices] IDeleteTagHandler handler,
+        string id,
+        CancellationToken cancellationToken
+    )
     {
-        return Ok("Пока не реализовано");
+        var result = await handler.Delete(id, cancellationToken);
+        return result.IsSuccess ? NoContent() : Problem(result.Error);
     }
 }

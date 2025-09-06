@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Features.AddRecipe;
+using FiletOFiles.Api.Features.DeleteRecipe;
 using FiletOFiles.Api.Features.GetRecipe;
 using FiletOFiles.Api.Features.GetRecipes;
 using FiletOFiles.Api.Features.UpdateRecipe;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
-[Route("[controller]")]
+[Route("recipes")]
 [ApiController]
 public class RecipesController : ControllerBase
 {
@@ -67,9 +68,14 @@ public class RecipesController : ControllerBase
         return result.IsSuccess ? NoContent() : Problem(result.Error);
     }
 
-    [HttpDelete]
-    public IActionResult Delete()
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(
+        [FromServices] IDeleteRecipeHandler handler,
+        string id,
+        CancellationToken cancellationToken
+    )
     {
-        return Ok("Пока не реализовано");
+        var result = await handler.Delete(id, cancellationToken);
+        return result.IsSuccess ? NoContent() : Problem(result.Error);
     }
 }

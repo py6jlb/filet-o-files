@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
-[Route("[controller]")]
+[Route("files")]
 [ApiController]
 public class FilesController : ControllerBase
 {

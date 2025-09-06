@@ -24,7 +24,7 @@ public class GetTagsHandler : IGetTagsHandler
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(textFragment))
+            if (!string.IsNullOrWhiteSpace(textFragment))
             {
                 var result = await _db
                     .Tags.Where(x => EF.Functions.Like(x.Name, $"%{textFragment}%"))

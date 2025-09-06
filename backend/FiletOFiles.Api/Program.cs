@@ -1,6 +1,7 @@
 using FiletOFiles.Api.Extensions;
 using FiletOFiles.Api.Features;
 using FiletOFiles.Api.Infrastructure.Database;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString);
     options.UseSnakeCaseNamingConvention();
 });
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddFeatures();
 builder.Services.AddControllers(o =>

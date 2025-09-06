@@ -12,15 +12,12 @@ public sealed class RecipeConfigurations : IEntityTypeConfiguration<Recipe>
         builder.HasKey(h => h.Id);
 
         builder
-            .HasMany(c => c.Tags)
-            .WithMany(s => s.Recipes)
-            .UsingEntity(j => j.ToTable("RecipeTag"));
-
-        builder
             .HasMany(r => r.Files)
             .WithOne(f => f.Recipe)
             .HasForeignKey(x => x.RecipeId)
             .IsRequired(false);
+
+        builder.HasMany(h => h.Tags).WithMany().UsingEntity<RecipeTag>();
 
         builder.HasIndex(r => r.Title);
     }

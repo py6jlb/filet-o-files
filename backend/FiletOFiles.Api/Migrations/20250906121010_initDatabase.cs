@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FiletOFiles.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class addTables : Migration
+    public partial class initDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,24 +61,24 @@ namespace FiletOFiles.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RecipeTag",
+                name: "recipe_tag",
                 columns: table => new
                 {
-                    recipes_id = table.Column<string>(type: "TEXT", nullable: false),
-                    tags_id = table.Column<string>(type: "TEXT", nullable: false)
+                    recipe_id = table.Column<string>(type: "TEXT", nullable: false),
+                    tag_id = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_recipe_tag", x => new { x.recipes_id, x.tags_id });
+                    table.PrimaryKey("pk_recipe_tag", x => new { x.recipe_id, x.tag_id });
                     table.ForeignKey(
-                        name: "fk_recipe_tag_recipes_recipes_id",
-                        column: x => x.recipes_id,
+                        name: "fk_recipe_tag_recipes_recipe_id",
+                        column: x => x.recipe_id,
                         principalTable: "recipes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_recipe_tag_tags_tags_id",
-                        column: x => x.tags_id,
+                        name: "fk_recipe_tag_tags_tag_id",
+                        column: x => x.tag_id,
                         principalTable: "tags",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -90,19 +90,20 @@ namespace FiletOFiles.Api.Migrations
                 column: "recipe_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_recipe_tag_tag_id",
+                table: "recipe_tag",
+                column: "tag_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_recipes_title",
                 table: "recipes",
                 column: "title");
 
             migrationBuilder.CreateIndex(
-                name: "ix_recipe_tag_tags_id",
-                table: "RecipeTag",
-                column: "tags_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_tags_name",
                 table: "tags",
-                column: "name");
+                column: "name",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -112,7 +113,7 @@ namespace FiletOFiles.Api.Migrations
                 name: "files");
 
             migrationBuilder.DropTable(
-                name: "RecipeTag");
+                name: "recipe_tag");
 
             migrationBuilder.DropTable(
                 name: "recipes");

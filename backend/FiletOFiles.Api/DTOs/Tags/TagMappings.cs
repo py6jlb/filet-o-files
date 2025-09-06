@@ -24,4 +24,10 @@ public static class TagMappings
             Name = tag.Name,
         };
     }
+
+    public static void UpdateFromDto(this Tag tag, UpdateTagDto dto)
+    {
+        tag.Name = dto.Name;
+        tag.Color = dto.Color;
+    }
 }

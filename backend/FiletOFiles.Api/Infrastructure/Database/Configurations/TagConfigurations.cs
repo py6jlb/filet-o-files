@@ -9,8 +9,11 @@ public sealed class TagConfigurations : IEntityTypeConfiguration<Tag>
 {
     public void Configure(EntityTypeBuilder<Tag> builder)
     {
-        builder.HasKey(h => h.Id);
+        builder.HasKey(t => t.Id);
+        builder.Property(t => t.Color).IsRequired();
+        builder.Property(t => t.Name).IsRequired();
+        builder.HasIndex(t => new { t.Name }).IsUnique();
 
-        builder.HasIndex(t => t.Name);
+        builder.HasMany(h => h.Recipes).WithMany().UsingEntity<RecipeTag>();
     }
 }

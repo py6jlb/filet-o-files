@@ -86,6 +86,25 @@ namespace FiletOFiles.Api.Migrations
                     b.ToTable("recipes", (string)null);
                 });
 
+            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.RecipeTag", b =>
+                {
+                    b.Property<string>("RecipeId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("recipe_id");
+
+                    b.Property<string>("TagId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("tag_id");
+
+                    b.HasKey("RecipeId", "TagId")
+                        .HasName("pk_recipe_tag");
+
+                    b.HasIndex("TagId")
+                        .HasDatabaseName("ix_recipe_tag_tag_id");
+
+                    b.ToTable("recipe_tag", (string)null);
+                });
+
             modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.Tag", b =>
                 {
                     b.Property<string>("Id")
@@ -106,28 +125,10 @@ namespace FiletOFiles.Api.Migrations
                         .HasName("pk_tags");
 
                     b.HasIndex("Name")
+                        .IsUnique()
                         .HasDatabaseName("ix_tags_name");
 
                     b.ToTable("tags", (string)null);
-                });
-
-            modelBuilder.Entity("RecipeTag", b =>
-                {
-                    b.Property<string>("RecipesId")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("recipes_id");
-
-                    b.Property<string>("TagsId")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("tags_id");
-
-                    b.HasKey("RecipesId", "TagsId")
-                        .HasName("pk_recipe_tag");
-
-                    b.HasIndex("TagsId")
-                        .HasDatabaseName("ix_recipe_tag_tags_id");
-
-                    b.ToTable("RecipeTag", (string)null);
                 });
 
             modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.File", b =>
@@ -140,26 +141,33 @@ namespace FiletOFiles.Api.Migrations
                     b.Navigation("Recipe");
                 });
 
-            modelBuilder.Entity("RecipeTag", b =>
+            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.RecipeTag", b =>
                 {
                     b.HasOne("FiletOFiles.Api.Domain.Entities.Recipe", null)
-                        .WithMany()
-                        .HasForeignKey("RecipesId")
+                        .WithMany("RecipeTag")
+                        .HasForeignKey("RecipeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_recipe_tag_recipes_recipes_id");
+                        .HasConstraintName("fk_recipe_tag_recipes_recipe_id");
 
                     b.HasOne("FiletOFiles.Api.Domain.Entities.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsId")
+                        .WithMany("RecipeTag")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_recipe_tag_tags_tags_id");
+                        .HasConstraintName("fk_recipe_tag_tags_tag_id");
                 });
 
             modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.Recipe", b =>
                 {
                     b.Navigation("Files");
+
+                    b.Navigation("RecipeTag");
+                });
+
+            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.Tag", b =>
+                {
+                    b.Navigation("RecipeTag");
                 });
 #pragma warning restore 612, 618
         }

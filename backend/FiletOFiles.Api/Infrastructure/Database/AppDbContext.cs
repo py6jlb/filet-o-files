@@ -13,6 +13,7 @@ public sealed class AppDbContext : DbContext
     public DbSet<Tag> Tags { get; set; }
     public DbSet<Recipe> Recipes { get; set; }
     public DbSet<File> Files { get; set; }
+    public DbSet<RecipeTag> RecipeTag { get; set; }
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
