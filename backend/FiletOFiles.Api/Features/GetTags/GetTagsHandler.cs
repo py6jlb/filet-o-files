@@ -1,7 +1,9 @@
 using System;
 using CSharpFunctionalExtensions;
+using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
+using FiletOFiles.Api.Services.Sorting;
 using Microsoft.EntityFrameworkCore;
 
 namespace FiletOFiles.Api.Features.GetTags;
@@ -11,37 +13,47 @@ public class GetTagsHandler : IGetTagsHandler
     private readonly ILogger<GetTagsHandler> _logger;
     private readonly AppDbContext _db;
 
-    public GetTagsHandler(ILogger<GetTagsHandler> logger, AppDbContext db)
+    private readonly SortMappingProvider _sortMappingProvider;
+
+    public GetTagsHandler(
+        ILogger<GetTagsHandler> logger,
+        AppDbContext db,
+        SortMappingProvider sortMappingProvider
+    )
     {
         _db = db;
         _logger = logger;
+        _sortMappingProvider = sortMappingProvider;
     }
 
-    public async Task<Result<TagsCollectionDto>> GetTags(
-        string textFragment,
+    public async Task<Result<PaginationResult<TagDto>>> GetTags(
+        TagsQueryParameters request,
         CancellationToken cancellationToken = default
     )
     {
         try
         {
-            if (!string.IsNullOrWhiteSpace(textFragment))
-            {
-                var result = await _db
-                    .Tags.Where(x => EF.Functions.Like(x.Name, $"%{textFragment}%"))
-                    .Select(x => x.ToDto())
-                    .ToArrayAsync(cancellationToken);
-                return Result.Success(new TagsCollectionDto(result ?? []));
-            }
-            else
-            {
-                var result = await _db.Tags.Select(x => x.ToDto()).ToArrayAsync(cancellationToken);
-                return Result.Success(new TagsCollectionDto(result ?? []));
-            }
+            request.Search ??= request.Search?.Trim().ToLower();
+
+            IQueryable<TagDto> tagsQuery = _db
+                .Tags.Where(x =>
+                    request.Search == null || x.Name.ToLower().Contains(request.Search)
+                )
+                .Select(r => r.ToDto());
+
+            var tags = await PaginationResult<TagDto>.CreateAsync(
+                tagsQuery,
+                request.Page,
+                request.PageSize,
+                cancellationToken
+            );
+
+            return Result.Success(tags);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Ошибка поиска меток");
-            return Result.Failure<TagsCollectionDto>("Ошибка поиска меток");
+            return Result.Failure<PaginationResult<TagDto>>("Ошибка поиска меток");
         }
     }
 }

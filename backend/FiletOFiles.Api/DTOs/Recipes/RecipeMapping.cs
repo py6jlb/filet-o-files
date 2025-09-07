@@ -3,6 +3,7 @@ using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Files;
 using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.DTOs.Tags;
+using FiletOFiles.Api.Services.Sorting;
 
 namespace FiletOFiles.Api.DTOs.Recipes;
 
@@ -37,4 +38,14 @@ internal static class RecipeMapping
         recipe.Title = dto.Title;
         recipe.Descriptions = dto.Descriptions;
     }
+
+    public static readonly SortMappingDefinition<RecipeDto, Recipe> SortMapping = new()
+    {
+        Mappings =
+        [
+            new SortMapping(nameof(RecipeDto.Title), nameof(Recipe.Title)),
+            new SortMapping(nameof(RecipeDto.Descriptions), nameof(Recipe.Descriptions)),
+            new SortMapping(nameof(RecipeDto.Created), nameof(Recipe.Created)),
+        ],
+    };
 }

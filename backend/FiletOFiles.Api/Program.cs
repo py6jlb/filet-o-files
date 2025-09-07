@@ -9,7 +9,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddOpenTelemetry();
 builder.AddDatabase();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.AddApplicationServices();
 
 builder.AddErrorHandling();
 builder.AddFeatures();
@@ -30,6 +30,9 @@ if (app.Environment.IsDevelopment())
     await app.ApplyMigrations();
 }
 app.UseHttpsRedirection();
+
+app.UseExceptionHandler();
+
 app.MapControllers();
 
 await app.RunAsync();

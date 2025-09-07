@@ -1,4 +1,5 @@
 using System;
+using FiletOFiles.Api.Middleware;
 
 namespace FiletOFiles.Api.Extensions;
 
@@ -16,6 +17,9 @@ public static class ErrorHandlingExtensions
                 );
             };
         });
+
+        builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
         return builder;
     }

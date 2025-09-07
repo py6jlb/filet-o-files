@@ -1,3 +1,4 @@
+using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Features.AddTag;
 using FiletOFiles.Api.Features.DeleteTag;
@@ -38,13 +39,13 @@ public class TagsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<TagsCollectionDto>> GetTags(
+    public async Task<ActionResult<PaginationResult<TagDto>>> GetTags(
         [FromServices] IGetTagsHandler handler,
-        string textFragment,
+        TagsQueryParameters request,
         CancellationToken cancellationToken
     )
     {
-        var result = await handler.GetTags(textFragment, cancellationToken);
+        var result = await handler.GetTags(request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : Problem(result.Error);
     }
 
@@ -52,21 +53,11 @@ public class TagsController : ControllerBase
     public async Task<IActionResult> Post(
         [FromServices] IAddTagHandler handler,
         [FromServices] IValidator<CreateTagDto> validator,
-        [FromServices] ProblemDetailsFactory problemDetailsFactory,
         CreateTagDto request,
         CancellationToken cancellationToken
     )
     {
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            ProblemDetails problem = problemDetailsFactory.CreateProblemDetails(
-                HttpContext,
-                StatusCodes.Status400BadRequest
-            );
-            problem.Extensions.Add("errors", validationResult.ToDictionary());
-            return BadRequest(problem);
-        }
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
         var result = await handler.AddTag(request, cancellationToken);
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetTag), new { id = result.Value.Id }, result.Value)
@@ -77,23 +68,12 @@ public class TagsController : ControllerBase
     public async Task<IActionResult> Put(
         [FromServices] IUpdateTagHandler handler,
         [FromServices] IValidator<UpdateTagDto> validator,
-        [FromServices] ProblemDetailsFactory problemDetailsFactory,
         string id,
         UpdateTagDto request,
         CancellationToken cancellationToken
     )
     {
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            ProblemDetails problem = problemDetailsFactory.CreateProblemDetails(
-                HttpContext,
-                StatusCodes.Status400BadRequest
-            );
-            problem.Extensions.Add("errors", validationResult.ToDictionary());
-            return BadRequest(problem);
-        }
-
+        await validator.ValidateAndThrowAsync(request, cancellationToken);
         var result = await handler.Update(id, request, cancellationToken);
         return result.IsSuccess ? NoContent() : Problem(result.Error);
     }

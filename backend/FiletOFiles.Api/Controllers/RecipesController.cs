@@ -1,10 +1,13 @@
 using System.Threading.Tasks;
+using FiletOFiles.Api.Domain.Entities;
+using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Features.AddRecipe;
 using FiletOFiles.Api.Features.DeleteRecipe;
 using FiletOFiles.Api.Features.GetRecipe;
 using FiletOFiles.Api.Features.GetRecipes;
 using FiletOFiles.Api.Features.UpdateRecipe;
+using FiletOFiles.Api.Services.Sorting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,7 +36,7 @@ public class RecipesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<RecipesCollectionDto>> GetRecipes(
+    public async Task<ActionResult<PaginationResult<RecipeDto>>> GetRecipes(
         [FromServices] IGetRecipesHandler handler,
         RecipeQueryParameters request,
         CancellationToken cancellationToken

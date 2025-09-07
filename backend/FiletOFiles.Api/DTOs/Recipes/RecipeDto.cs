@@ -1,10 +1,14 @@
 using System;
+using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Files;
 using FiletOFiles.Api.DTOs.Tags;
 
 namespace FiletOFiles.Api.DTOs.Recipes;
 
-public sealed record RecipesCollectionDto(IEnumerable<RecipeDto> Data);
+public sealed record RecipesCollectionDto : ICollectionResponse<RecipeDto>
+{
+    public List<RecipeDto> Items { get; init; }
+}
 
 public sealed record RecipeDto
 {
