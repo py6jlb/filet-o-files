@@ -1,10 +1,12 @@
 using FiletOFiles.Api.Features.AddRecipe;
 using FiletOFiles.Api.Features.AddTag;
+using FiletOFiles.Api.Features.DeleteRecipe;
 using FiletOFiles.Api.Features.DeleteTag;
 using FiletOFiles.Api.Features.GetRecipe;
 using FiletOFiles.Api.Features.GetRecipes;
 using FiletOFiles.Api.Features.GetTag;
 using FiletOFiles.Api.Features.GetTags;
+using FiletOFiles.Api.Features.GetUser;
 using FiletOFiles.Api.Features.RemoveRecipeTag;
 using FiletOFiles.Api.Features.UpdateRecipe;
 using FiletOFiles.Api.Features.UpdateTag;
@@ -20,6 +22,7 @@ public static class FeatureStartupExtensions
         builder.Services.AddScoped<IGetRecipesHandler, GetRecipesHandler>();
         builder.Services.AddScoped<IAddRecipeHandler, AddRecipeHandler>();
         builder.Services.AddScoped<IUpdateRecipeHandler, UpdateRecipeHandler>();
+        builder.Services.AddScoped<IDeleteRecipeHandler, DeleteRecipeHandler>();
 
         builder.Services.AddScoped<IAddTagHandler, AddTagHandler>();
         builder.Services.AddScoped<IGetTagHandler, GetTagHandler>();
@@ -29,6 +32,8 @@ public static class FeatureStartupExtensions
 
         builder.Services.AddScoped<IRemoveRecipeTagHandler, RemoveRecipeTagHandler>();
         builder.Services.AddScoped<IUpsertRecipeTagsHandler, UpsertRecipeTagsHandler>();
+
+        builder.Services.AddScoped<IGetUserHandler, GetUserHandler>();
 
         return builder;
     }

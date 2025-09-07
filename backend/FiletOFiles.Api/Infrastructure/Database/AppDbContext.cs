@@ -15,6 +15,9 @@ public sealed class AppDbContext : DbContext
     public DbSet<File> Files { get; set; }
     public DbSet<RecipeTag> RecipeTag { get; set; }
 
+
+    public DbSet<User> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder mb)
     {
         mb.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

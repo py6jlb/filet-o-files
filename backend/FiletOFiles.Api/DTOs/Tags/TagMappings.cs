@@ -1,5 +1,6 @@
 using System;
 using FiletOFiles.Api.Domain.Entities;
+using FiletOFiles.Api.Services.Sorting;
 
 namespace FiletOFiles.Api.DTOs.Tags;
 
@@ -30,4 +31,13 @@ public static class TagMappings
         tag.Name = dto.Name;
         tag.Color = dto.Color;
     }
+
+    public static readonly SortMappingDefinition<TagDto, Tag> SortMapping = new()
+    {
+        Mappings =
+        [
+            new SortMapping(nameof(TagDto.Name), nameof(Tag.Name)),
+            new SortMapping(nameof(TagDto.Color), nameof(Tag.Color)),
+        ],
+    };
 }

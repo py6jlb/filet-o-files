@@ -1,6 +1,7 @@
 using System;
 using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Recipes;
+using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Services.Sorting;
 using FluentValidation;
 
@@ -17,11 +18,10 @@ public static class ApplicationServicesExtensions
             ISortMappingDefinition,
             SortMappingDefinition<RecipeDto, Recipe>
         >(_ => RecipeMapping.SortMapping);
-
-        //builder.Services.AddTransient<DataShapingService>();
-
+        builder.Services.AddSingleton<ISortMappingDefinition, SortMappingDefinition<TagDto, Tag>>(
+            _ => TagMappings.SortMapping
+        );
         builder.Services.AddHttpContextAccessor();
-        //builder.Services.AddTransient<LinkService>();
 
         return builder;
     }

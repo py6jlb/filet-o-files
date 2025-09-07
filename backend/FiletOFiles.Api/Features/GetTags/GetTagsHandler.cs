@@ -1,5 +1,6 @@
 using System;
 using CSharpFunctionalExtensions;
+using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
@@ -34,11 +35,12 @@ public class GetTagsHandler : IGetTagsHandler
         try
         {
             request.Search ??= request.Search?.Trim().ToLower();
-
+            SortMapping[] sortMappings = _sortMappingProvider.GetMappings<TagDto, Tag>();
             IQueryable<TagDto> tagsQuery = _db
                 .Tags.Where(x =>
                     request.Search == null || x.Name.ToLower().Contains(request.Search)
                 )
+                .ApplySort(request.Sort, sortMappings)
                 .Select(r => r.ToDto());
 
             var tags = await PaginationResult<TagDto>.CreateAsync(
