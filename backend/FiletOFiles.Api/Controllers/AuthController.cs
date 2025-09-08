@@ -1,6 +1,7 @@
 using FiletOFiles.Api.DTOs.Auth;
 using FiletOFiles.Api.Features.LoginUser;
 using FiletOFiles.Api.Features.RegisterUser;
+using FiletOFiles.Api.Features.TokenRefresh;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -33,6 +34,17 @@ public class AuthController : ControllerBase
     )
     {
         var result = await handler.Login(request, cancellationToken);
+        return result.IsSuccess ? Ok(result) : Unauthorized(result.Error);
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AccessTokenDto>> Refresh(
+        [FromServices] IRefreshTokenHandler handler,
+        RefreshTokenDto request,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await handler.Refresh(request, cancellationToken);
         return result.IsSuccess ? Ok(result) : Unauthorized(result.Error);
     }
 }

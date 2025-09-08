@@ -1,9 +1,12 @@
 using System;
 using CSharpFunctionalExtensions;
+using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Auth;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
+using FiletOFiles.Api.Settings;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace FiletOFiles.Api.Features.LoginUser;
 
@@ -14,13 +17,15 @@ public class LoginUserHandler : ILoginUserHandler
     private readonly AppDbContext _db;
     private readonly AppDbIdentityContext _identityDb;
     private readonly TokenProvider _tokenProvider;
+    private readonly JwtAuthOptions _jwtAuthOptions;
 
     public LoginUserHandler(
         ILogger<LoginUserHandler> logger,
         AppDbContext db,
         AppDbIdentityContext identityDb,
         UserManager<IdentityUser> userManager,
-        TokenProvider tokenProvider
+        TokenProvider tokenProvider,
+        IOptions<JwtAuthOptions> jwtAuthOptions
     )
     {
         _userManager = userManager;
@@ -28,6 +33,7 @@ public class LoginUserHandler : ILoginUserHandler
         _logger = logger;
         _identityDb = identityDb;
         _tokenProvider = tokenProvider;
+        _jwtAuthOptions = jwtAuthOptions.Value;
     }
 
     public async Task<Result<AccessTokenDto>> Login(
@@ -45,8 +51,19 @@ public class LoginUserHandler : ILoginUserHandler
         }
 
         var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email!);
-        var accessToken = _tokenProvider.Create(tokenRequest);
+        var accessTokens = _tokenProvider.Create(tokenRequest);
 
-        return Result.Success(accessToken);
+        var refreshToken = new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            Token = accessTokens.RefreshToken,
+            UserId = identityUser.Id,
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
+        };
+
+        await _identityDb.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _identityDb.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(accessTokens);
     }
 }
