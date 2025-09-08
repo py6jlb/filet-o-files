@@ -4,6 +4,7 @@ using FiletOFiles.Api.Infrastructure.Database;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -20,23 +21,19 @@ builder.Services.AddControllers(o =>
     o.ReturnHttpNotAcceptable = true;
 });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
     await app.ApplyMigrations();
 }
 app.UseHttpsRedirection();
-
 app.UseExceptionHandler();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 await app.RunAsync();

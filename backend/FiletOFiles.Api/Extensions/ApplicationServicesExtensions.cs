@@ -19,7 +19,7 @@ public static class ApplicationServicesExtensions
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-
+        builder.Services.AddOpenApi();
         builder.Services.AddTransient<SortMappingProvider>();
         builder.Services.AddTransient<TokenProvider>();
 
