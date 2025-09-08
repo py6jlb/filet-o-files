@@ -1,10 +1,12 @@
 using FiletOFiles.Api.DTOs.Users;
 using FiletOFiles.Api.Features.GetUser;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
+[Authorize]
 [Route("users")]
 [ApiController]
 public class UsersController : ControllerBase

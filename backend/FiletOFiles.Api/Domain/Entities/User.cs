@@ -3,8 +3,9 @@ using CSharpFunctionalExtensions;
 
 namespace FiletOFiles.Api.Domain.Entities;
 
-public sealed class User : Entity<string>
+public sealed class User
 {
+    public string Id { get; set; }
     public string Email { get; set; }
     public string Name { get; set; }
     public DateTime CreatedAtUtc { get; set; }

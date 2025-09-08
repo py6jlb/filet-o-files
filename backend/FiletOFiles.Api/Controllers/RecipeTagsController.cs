@@ -1,11 +1,13 @@
 using FiletOFiles.Api.DTOs.RecipeTag;
 using FiletOFiles.Api.Features.RemoveRecipeTag;
 using FiletOFiles.Api.Features.UpsertRecipeTags;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
+[Authorize]
 [Route("recipes/{recipeId}/tags")]
 [ApiController]
 public class RecipeTagsController : ControllerBase

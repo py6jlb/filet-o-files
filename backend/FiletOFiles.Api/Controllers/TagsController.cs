@@ -6,12 +6,14 @@ using FiletOFiles.Api.Features.GetTag;
 using FiletOFiles.Api.Features.GetTags;
 using FiletOFiles.Api.Features.UpdateTag;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace FiletOFiles.Api.Controllers;
 
+[Authorize]
 [Route("tags")]
 [ApiController]
 public class TagsController : ControllerBase

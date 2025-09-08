@@ -7,6 +7,8 @@ using FiletOFiles.Api.Features.GetRecipes;
 using FiletOFiles.Api.Features.GetTag;
 using FiletOFiles.Api.Features.GetTags;
 using FiletOFiles.Api.Features.GetUser;
+using FiletOFiles.Api.Features.LoginUser;
+using FiletOFiles.Api.Features.RegisterUser;
 using FiletOFiles.Api.Features.RemoveRecipeTag;
 using FiletOFiles.Api.Features.UpdateRecipe;
 using FiletOFiles.Api.Features.UpdateTag;
@@ -35,6 +37,8 @@ public static class FeatureStartupExtensions
 
         builder.Services.AddScoped<IGetUserHandler, GetUserHandler>();
 
+        builder.Services.AddScoped<IRegisterUserHandler, RegisterUserHandler>();
+        builder.Services.AddScoped<ILoginUserHandler, LoginUserHandler>();
         return builder;
     }
 }

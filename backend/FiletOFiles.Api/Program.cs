@@ -10,6 +10,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.AddOpenTelemetry();
 builder.AddDatabase();
 builder.AddApplicationServices();
+builder.AddAuthenticationServices();
 
 builder.AddErrorHandling();
 builder.AddFeatures();
@@ -32,6 +33,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

@@ -8,11 +8,13 @@ using FiletOFiles.Api.Features.GetRecipe;
 using FiletOFiles.Api.Features.GetRecipes;
 using FiletOFiles.Api.Features.UpdateRecipe;
 using FiletOFiles.Api.Services.Sorting;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FiletOFiles.Api.Controllers;
 
+[Authorize]
 [Route("recipes")]
 [ApiController]
 public class RecipesController : ControllerBase
