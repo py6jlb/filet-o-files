@@ -2,7 +2,7 @@ using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Tags;
 
-namespace FiletOFiles.Api.Features.GetTag;
+namespace FiletOFiles.Api.Features.Tags.GetTag;
 
 public interface IGetTagHandler
 {

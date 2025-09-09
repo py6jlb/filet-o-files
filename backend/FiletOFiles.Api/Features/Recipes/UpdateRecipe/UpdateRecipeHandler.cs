@@ -4,7 +4,7 @@ using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.UpdateRecipe;
+namespace FiletOFiles.Api.Features.Recipes.UpdateRecipe;
 
 public class UpdateRecipeHandler : IUpdateRecipeHandler
 {

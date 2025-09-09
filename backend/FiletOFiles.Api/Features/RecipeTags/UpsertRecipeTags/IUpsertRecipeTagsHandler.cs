@@ -2,7 +2,7 @@ using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.RecipeTag;
 
-namespace FiletOFiles.Api.Features.UpsertRecipeTags;
+namespace FiletOFiles.Api.Features.RecipeTags.UpsertRecipeTags;
 
 public interface IUpsertRecipeTagsHandler
 {

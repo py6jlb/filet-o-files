@@ -8,7 +8,7 @@ using FiletOFiles.Api.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace FiletOFiles.Api.Features.LoginUser;
+namespace FiletOFiles.Api.Features.Auth.LoginUser;
 
 public class LoginUserHandler : ILoginUserHandler
 {

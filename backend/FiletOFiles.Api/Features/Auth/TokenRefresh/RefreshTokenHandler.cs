@@ -1,14 +1,13 @@
 using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Auth;
-using FiletOFiles.Api.Features.TokenRefresh;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace FiletOFiles.Api.Features.TokenRefresh;
+namespace FiletOFiles.Api.Features.Auth.TokenRefresh;
 
 public class RefreshTokenHandler : IRefreshTokenHandler
 {

@@ -1,5 +1,5 @@
 using FiletOFiles.Api.DTOs.Users;
-using FiletOFiles.Api.Features.GetUser;
+using FiletOFiles.Api.Features.Users.GetUser;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

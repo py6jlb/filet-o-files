@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.DeleteRecipe;
+namespace FiletOFiles.Api.Features.Recipes.DeleteRecipe;
 
 public class DeleteRecipeHandler : IDeleteRecipeHandler
 {

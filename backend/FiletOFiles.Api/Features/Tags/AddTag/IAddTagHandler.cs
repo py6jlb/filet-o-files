@@ -2,7 +2,7 @@ using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Tags;
 
-namespace FiletOFiles.Api.Features.AddTag;
+namespace FiletOFiles.Api.Features.Tags.AddTag;
 
 public interface IAddTagHandler
 {

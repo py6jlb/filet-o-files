@@ -2,7 +2,7 @@ using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Recipes;
 
-namespace FiletOFiles.Api.Features.GetRecipe;
+namespace FiletOFiles.Api.Features.Recipes.GetRecipe;
 
 public interface IGetRecipeHandler
 {

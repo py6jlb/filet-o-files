@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.RemoveRecipeTag;
+namespace FiletOFiles.Api.Features.RecipeTags.RemoveRecipeTag;
 
 public class RemoveRecipeTagHandler : IRemoveRecipeTagHandler
 {

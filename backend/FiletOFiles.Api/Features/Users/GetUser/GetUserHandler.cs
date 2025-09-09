@@ -4,7 +4,7 @@ using FiletOFiles.Api.DTOs.Users;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.GetUser;
+namespace FiletOFiles.Api.Features.Users.GetUser;
 
 public class GetUserHandler : IGetUserHandler
 {

@@ -13,9 +13,7 @@ public static class OpenTelemetryExtensions
         builder
             .Services.AddOpenTelemetry()
             .ConfigureResource(r => r.AddService(builder.Environment.ApplicationName))
-            .WithTracing(t =>
-                t.AddHttpClientInstrumentation().AddAspNetCoreInstrumentation().AddConsoleExporter()
-            )
+            .WithTracing(t => t.AddHttpClientInstrumentation().AddAspNetCoreInstrumentation())
             .WithMetrics(m =>
                 m.AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation()

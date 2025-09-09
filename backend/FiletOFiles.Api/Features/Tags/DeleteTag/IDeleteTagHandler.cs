@@ -1,7 +1,7 @@
 using System;
 using CSharpFunctionalExtensions;
 
-namespace FiletOFiles.Api.Features.DeleteTag;
+namespace FiletOFiles.Api.Features.Tags.DeleteTag;
 
 public interface IDeleteTagHandler
 {

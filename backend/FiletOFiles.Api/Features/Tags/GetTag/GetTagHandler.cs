@@ -4,7 +4,7 @@ using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.GetTag;
+namespace FiletOFiles.Api.Features.Tags.GetTag;
 
 public class GetTagHandler : IGetTagHandler
 {

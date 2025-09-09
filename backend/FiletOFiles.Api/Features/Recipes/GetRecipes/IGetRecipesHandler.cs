@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Recipes;
 
-namespace FiletOFiles.Api.Features.GetRecipes;
+namespace FiletOFiles.Api.Features.Recipes.GetRecipes;
 
 public interface IGetRecipesHandler
 {

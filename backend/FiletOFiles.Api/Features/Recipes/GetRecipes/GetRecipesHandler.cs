@@ -7,7 +7,7 @@ using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services.Sorting;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.GetRecipes;
+namespace FiletOFiles.Api.Features.Recipes.GetRecipes;
 
 public sealed class GetRecipesHandler : IGetRecipesHandler
 {

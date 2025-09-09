@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 
-namespace FiletOFiles.Api.Features.RegisterUser;
+namespace FiletOFiles.Api.Features.Auth.RegisterUser;
 
 public class RegisterUserHandler : IRegisterUserHandler
 {

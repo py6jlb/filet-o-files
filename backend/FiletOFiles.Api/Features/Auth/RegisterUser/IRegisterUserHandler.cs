@@ -2,7 +2,7 @@ using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Auth;
 
-namespace FiletOFiles.Api.Features.RegisterUser;
+namespace FiletOFiles.Api.Features.Auth.RegisterUser;
 
 public interface IRegisterUserHandler
 {

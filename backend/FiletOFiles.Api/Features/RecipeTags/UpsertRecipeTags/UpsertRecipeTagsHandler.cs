@@ -5,7 +5,7 @@ using FiletOFiles.Api.DTOs.RecipeTag;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.UpsertRecipeTags;
+namespace FiletOFiles.Api.Features.RecipeTags.UpsertRecipeTags;
 
 public class UpsertRecipeTagsHandler : IUpsertRecipeTagsHandler
 {

@@ -4,7 +4,7 @@ using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.UpdateTag;
+namespace FiletOFiles.Api.Features.Tags.UpdateTag;
 
 public class UpdateTagHandler : IUpdateTagHandler
 {

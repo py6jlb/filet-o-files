@@ -3,7 +3,7 @@ using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.AddTag;
+namespace FiletOFiles.Api.Features.Tags.AddTag;
 
 public class AddTagHandler : IAddTagHandler
 {

@@ -7,7 +7,7 @@ using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services.Sorting;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.GetTags;
+namespace FiletOFiles.Api.Features.Tags.GetTags;
 
 public class GetTagsHandler : IGetTagsHandler
 {

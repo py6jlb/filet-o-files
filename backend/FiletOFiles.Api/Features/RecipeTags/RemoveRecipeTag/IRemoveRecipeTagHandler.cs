@@ -1,7 +1,7 @@
 using System;
 using CSharpFunctionalExtensions;
 
-namespace FiletOFiles.Api.Features.RemoveRecipeTag;
+namespace FiletOFiles.Api.Features.RecipeTags.RemoveRecipeTag;
 
 public interface IRemoveRecipeTagHandler
 {

@@ -1,7 +1,7 @@
 using FiletOFiles.Api.DTOs.Auth;
-using FiletOFiles.Api.Features.LoginUser;
-using FiletOFiles.Api.Features.RegisterUser;
-using FiletOFiles.Api.Features.TokenRefresh;
+using FiletOFiles.Api.Features.Auth.LoginUser;
+using FiletOFiles.Api.Features.Auth.RegisterUser;
+using FiletOFiles.Api.Features.Auth.TokenRefresh;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

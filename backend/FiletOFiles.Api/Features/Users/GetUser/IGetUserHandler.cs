@@ -2,7 +2,7 @@ using System;
 using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Users;
 
-namespace FiletOFiles.Api.Features.GetUser;
+namespace FiletOFiles.Api.Features.Users.GetUser;
 
 public interface IGetUserHandler
 {

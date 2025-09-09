@@ -5,7 +5,7 @@ using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.GetRecipe;
+namespace FiletOFiles.Api.Features.Recipes.GetRecipe;
 
 public sealed class GetRecipeHandler : IGetRecipeHandler
 {

@@ -1,10 +1,10 @@
 using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Tags;
-using FiletOFiles.Api.Features.AddTag;
-using FiletOFiles.Api.Features.DeleteTag;
-using FiletOFiles.Api.Features.GetTag;
-using FiletOFiles.Api.Features.GetTags;
-using FiletOFiles.Api.Features.UpdateTag;
+using FiletOFiles.Api.Features.Tags.AddTag;
+using FiletOFiles.Api.Features.Tags.DeleteTag;
+using FiletOFiles.Api.Features.Tags.GetTag;
+using FiletOFiles.Api.Features.Tags.GetTags;
+using FiletOFiles.Api.Features.Tags.UpdateTag;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

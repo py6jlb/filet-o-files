@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.DeleteTag;
+namespace FiletOFiles.Api.Features.Tags.DeleteTag;
 
 public class DeleteTagHandler : IDeleteTagHandler
 {

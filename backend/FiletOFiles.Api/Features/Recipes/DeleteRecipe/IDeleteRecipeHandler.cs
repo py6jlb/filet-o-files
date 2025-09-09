@@ -1,7 +1,7 @@
 using System;
 using CSharpFunctionalExtensions;
 
-namespace FiletOFiles.Api.Features.DeleteRecipe;
+namespace FiletOFiles.Api.Features.Recipes.DeleteRecipe;
 
 public interface IDeleteRecipeHandler
 {

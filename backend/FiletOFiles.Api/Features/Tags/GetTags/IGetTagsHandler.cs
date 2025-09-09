@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Tags;
 
-namespace FiletOFiles.Api.Features.GetTags;
+namespace FiletOFiles.Api.Features.Tags.GetTags;
 
 public interface IGetTagsHandler
 {
