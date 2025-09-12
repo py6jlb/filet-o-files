@@ -16,10 +16,10 @@ builder.AddAuthenticationServices();
 builder.AddErrorHandling();
 builder.AddFeatures();
 
-builder.Services.AddControllers(o =>
-{
-    o.ReturnHttpNotAcceptable = true;
-});
+// builder.Services.AddControllers(o =>
+// {
+//     o.ReturnHttpNotAcceptable = true;
+// });
 builder.Services.AddEndpointsApiExplorer();
 
 WebApplication app = builder.Build();
@@ -29,11 +29,12 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
     await app.ApplyMigrations();
+    app.UseDeveloperExceptionPage();
 }
 app.UseHttpsRedirection();
 app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+// app.MapControllers();
 
 await app.RunAsync();

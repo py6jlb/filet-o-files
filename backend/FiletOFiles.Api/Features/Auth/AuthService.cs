@@ -6,24 +6,25 @@ using FiletOFiles.Api.DTOs.Users;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Settings;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 
-namespace FiletOFiles.Api.Features.RegisterUser;
+namespace FiletOFiles.Api.Features.Auth;
 
-public class RegisterUserHandler : IRegisterUserHandler
+public sealed class AuthService
 {
     private readonly UserManager<IdentityUser> _userManager;
-    private readonly ILogger<RegisterUserHandler> _logger;
+    private readonly ILogger<AuthService> _logger;
     private readonly AppDbContext _db;
     private readonly AppDbIdentityContext _identityDb;
     private readonly TokenProvider _tokenProvider;
     private readonly JwtAuthOptions _jwtAuthOptions;
 
-    public RegisterUserHandler(
-        ILogger<RegisterUserHandler> logger,
+    public AuthService(
+        ILogger<AuthService> logger,
         AppDbContext db,
         AppDbIdentityContext identityDb,
         UserManager<IdentityUser> userManager,
@@ -37,6 +38,37 @@ public class RegisterUserHandler : IRegisterUserHandler
         _identityDb = identityDb;
         _tokenProvider = tokenProvider;
         _jwtAuthOptions = jwtAuthOptions.Value;
+    }
+
+    public async Task<Result<AccessTokenDto>> Login(
+        LoginUserDto request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var identityUser = await _userManager.FindByEmailAsync(request.Email);
+        if (
+            identityUser is null
+            || !await _userManager.CheckPasswordAsync(identityUser, request.Password)
+        )
+        {
+            return Result.Failure<AccessTokenDto>("Ошибка входа пользователя");
+        }
+
+        var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email!);
+        var accessTokens = _tokenProvider.Create(tokenRequest);
+
+        var refreshToken = new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            Token = accessTokens.RefreshToken,
+            UserId = identityUser.Id,
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
+        };
+
+        await _identityDb.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _identityDb.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(accessTokens);
     }
 
     public async Task<Result<AccessTokenDto>> Register(
@@ -77,6 +109,37 @@ public class RegisterUserHandler : IRegisterUserHandler
         await _identityDb.SaveChangesAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
+        return Result.Success(accessTokens);
+    }
+
+    public async Task<Result<AccessTokenDto>> Refresh(
+        RefreshTokenDto request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var refreshToken = await _identityDb
+            .RefreshTokens.Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, cancellationToken);
+
+        if (refreshToken is null)
+        {
+            return Result.Failure<AccessTokenDto>("Пользователь не авторизован");
+        }
+
+        if (refreshToken.ExpiresAtUtc < DateTime.UtcNow)
+        {
+            return Result.Failure<AccessTokenDto>("Токен обновления просрочен");
+        }
+
+        var tokenRequest = new TokenRequest(refreshToken.User.Id, refreshToken.User.Email!);
+        var accessTokens = _tokenProvider.Create(tokenRequest);
+
+        refreshToken.Token = accessTokens.RefreshToken;
+        refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(
+            _jwtAuthOptions.RefreshTokenExpirationDays
+        );
+
+        await _identityDb.SaveChangesAsync(cancellationToken);
         return Result.Success(accessTokens);
     }
 }
