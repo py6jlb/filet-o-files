@@ -26,6 +26,5 @@ public static class FeatureStartupExtensions
         app.MapRecipesGroup();
         app.MapTagsGroup();
         return app;
-        builder.Services.AddScoped<IRefreshTokenHandler, RefreshTokenHandler>();
     }
 }
