@@ -14,9 +14,6 @@ builder.AddApplicationServices();
 builder.AddAuthenticationServices();
 
 builder.AddErrorHandling();
-
-    o.ReturnHttpNotAcceptable = true;
-});
 builder.Services.AddEndpointsApiExplorer();
 
 WebApplication app = builder.Build();
