@@ -1,21 +1,19 @@
 using System;
-using FiletOFiles.Api.DTOs.Recipes;
+using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.Recipes.UpdateRecipe;
+namespace FiletOFiles.Api.Features.Tags.GetTag;
 
-public static class UpdateRecipeEndpoint
+public static class GetTagEndpoint
 {
-    public static IEndpointRouteBuilder MapUpdateRecipe(
-        this IEndpointRouteBuilder endpointRouteBuilder
-    )
+    public static IEndpointRouteBuilder MapGetTag(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapPost("{id}", HandleAsync)
-            .WithName(nameof(UpdateRecipeEndpoint))
-            .Produces(StatusCodes.Status204NoContent)
+            .MapGet("{id}", HandleAsync)
+            .WithName(nameof(GetTagEndpoint))
+            .Produces<TagDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -24,27 +22,23 @@ public static class UpdateRecipeEndpoint
 
     public static async Task<IResult> HandleAsync(
         string id,
-        UpdateRecipeDto request,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )
     {
-        var recipe = await db.Recipes.FirstOrDefaultAsync(
+        var tag = await db.Tags.FirstOrDefaultAsync(
             x => x.Id == id,
             cancellationToken: cancellationToken
         );
 
-        if (recipe is null)
+        if (tag is null)
         {
             return TypedResults.Problem(
-                detail: "Не найден рецепт",
+                detail: "Не найдена метка",
                 statusCode: StatusCodes.Status404NotFound
             );
         }
 
-        recipe.UpdateFromDto(request);
-        await db.SaveChangesAsync(cancellationToken);
-
-        return TypedResults.NoContent();
+        return TypedResults.Ok(tag.ToDto());
     }
 }

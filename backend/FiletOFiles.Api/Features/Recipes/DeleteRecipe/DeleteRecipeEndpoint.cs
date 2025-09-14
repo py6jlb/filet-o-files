@@ -14,7 +14,7 @@ public static class DeleteRecipeEndpoint
         endpointRouteBuilder
             .MapDelete("{id}", HandleAsync)
             .WithName(nameof(DeleteRecipeEndpoint))
-            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -41,6 +41,6 @@ public static class DeleteRecipeEndpoint
         }
         db.Recipes.Remove(recipe);
         await db.SaveChangesAsync(cancellationToken);
-        return TypedResults.Ok();
+        return TypedResults.NoContent();
     }
 }

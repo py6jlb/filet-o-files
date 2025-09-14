@@ -22,12 +22,6 @@ public static class FeatureStartupExtensions
 {
     public static WebApplicationBuilder AddFeatures(this WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IAddTagHandler, AddTagHandler>();
-        builder.Services.AddScoped<IGetTagHandler, GetTagHandler>();
-        builder.Services.AddScoped<IGetTagsHandler, GetTagsHandler>();
-        builder.Services.AddScoped<IDeleteTagHandler, DeleteTagHandler>();
-        builder.Services.AddScoped<IUpdateTagHandler, UpdateTagHandler>();
-
         builder.Services.AddScoped<IRemoveRecipeTagHandler, RemoveRecipeTagHandler>();
         builder.Services.AddScoped<IUpsertRecipeTagsHandler, UpsertRecipeTagsHandler>();
         return builder;

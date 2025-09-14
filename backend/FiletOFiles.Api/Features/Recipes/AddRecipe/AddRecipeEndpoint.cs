@@ -13,7 +13,7 @@ public static class AddRecipeEndpoint
     {
         endpointRouteBuilder
             .MapPost("", HandleAsync)
-            .WithName(nameof(MapAddRecipe))
+            .WithName(nameof(AddRecipeEndpoint))
             .Produces<RecipeDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
