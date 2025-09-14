@@ -8,7 +8,7 @@ using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.AddOpenTelemetry();
+//builder.AddOpenTelemetry();
 builder.AddDatabase();
 builder.AddApplicationServices();
 builder.AddAuthenticationServices();
