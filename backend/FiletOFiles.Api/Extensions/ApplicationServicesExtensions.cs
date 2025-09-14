@@ -8,6 +8,7 @@ using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Services.Sorting;
 using FiletOFiles.Api.Settings;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -45,24 +46,42 @@ public static class ApplicationServicesExtensions
             .AddEntityFrameworkStores<AppDbIdentityContext>();
 
         builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("Jwt"));
-        var jwtAuthOptions = builder.Configuration.GetSection("Jwt").Get<JwtAuthOptions>()!;
+
+        var oidc = builder.Configuration.GetSection("Oidc").Get<OpenIdOptions>()!;
+
         builder
-            .Services.AddAuthentication(options =>
+            .Services.AddOpenIddict()
+            .AddCore(opt =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.UseEntityFrameworkCore().UseDbContext<OpenIdDbContext>();
             })
-            .AddJwtBearer(options =>
+            .AddServer(opt =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidIssuer = jwtAuthOptions.Issuer,
-                    ValidAudience = jwtAuthOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtAuthOptions.Key)
-                    ),
-                };
+                opt.SetAuthorizationEndpointUris("authorize")
+                    .SetIntrospectionEndpointUris("introspect")
+                    .SetTokenEndpointUris("token");
+
+                opt.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();
+
+                opt.AddEncryptionKey(new SymmetricSecurityKey(Convert.FromBase64String(oidc.Key)));
+
+                opt.UseAspNetCore().EnableAuthorizationEndpointPassthrough();
+            })
+            .AddValidation(opt =>
+            {
+                opt.UseLocalServer();
+                opt.UseAspNetCore();
             });
+
+        builder
+            .Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie();
+
+        builder.Services.AddCors(options =>
+            options.AddDefaultPolicy(policy =>
+                policy.AllowAnyHeader().AllowAnyMethod().WithOrigins(oidc.RedirectUri)
+            )
+        );
 
         builder.Services.AddAuthorization();
         return builder;

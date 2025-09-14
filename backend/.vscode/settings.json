@@ -9,6 +9,7 @@
         "csdevkit",
         "devcontainers",
         "dotnettools",
-        "Hmac"
+        "Hmac",
+        "Iddict"
     ],
 }
