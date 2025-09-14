@@ -16,8 +16,9 @@ public static class LoginEndpoint
     public static IEndpointRouteBuilder MapLogin(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapPost("login", Handle)
+            .MapPost("/login", Handle)
             .WithName(nameof(LoginEndpoint))
+            .WithDescription("Вход")
             .Produces<AccessTokenDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -27,7 +28,7 @@ public static class LoginEndpoint
 
     public static async Task<IResult> Handle(
         [FromServices] AuthService service,
-        LoginUserDto request,
+        [FromBody] LoginUserDto request,
         CancellationToken cancellationToken = default
     )
     {

@@ -16,8 +16,9 @@ public static class GetRecipesEndpoint
     )
     {
         endpointRouteBuilder
-            .MapGet("", HandleAsync)
+            .MapGet("/", HandleAsync)
             .WithName(nameof(GetRecipesEndpoint))
+            .WithDescription("Получить рецепты")
             .Produces<PaginationResult<RecipeDto>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -26,36 +27,40 @@ public static class GetRecipesEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        string id,
+        [FromQuery(Name = "q")] string? Search,
+        [FromQuery(Name = "sort")] string? Sort,
+        [FromQuery(Name = "tags")] string? Tags,
+        [FromQuery(Name = "fields")] string? Fields,
         [FromServices] AppDbContext db,
         [FromServices] SortMappingProvider sortMappingProvider,
-        RecipeQueryParameters request,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        [FromQuery(Name = "page")] int Page = 1,
+        [FromQuery(Name = "pageSize")] int PageSize = 10
     )
     {
-        if (!sortMappingProvider.ValidateMappings<RecipeDto, Recipe>(request.Sort))
+        if (!sortMappingProvider.ValidateMappings<RecipeDto, Recipe>(Sort))
         {
             return TypedResults.Problem(
-                detail: $"The provided sort parameter isn't valid: '{request.Sort}'",
+                detail: $"The provided sort parameter isn't valid: '{Sort}'",
                 statusCode: StatusCodes.Status400BadRequest
             );
         }
 
-        request.Search ??= request.Search?.Trim().ToLower();
+        Search ??= Search?.Trim().ToLower();
         var sortMappings = sortMappingProvider.GetMappings<RecipeDto, Recipe>();
         var recipesQuery = db
             .Recipes.Where(r =>
-                request.Search == null
-                || r.Title.ToLower().Contains(request.Search)
-                || r.Descriptions != null && r.Descriptions.ToLower().Contains(request.Search)
+                Search == null
+                || r.Title.ToLower().Contains(Search)
+                || r.Descriptions != null && r.Descriptions.ToLower().Contains(Search)
             )
-            .ApplySort(request.Sort, sortMappings)
+            .ApplySort(Sort, sortMappings)
             .Select(r => r.ToDto());
 
         var result = await PaginationResult<RecipeDto>.CreateAsync(
             recipesQuery,
-            request.Page,
-            request.PageSize,
+            Page,
+            PageSize,
             cancellationToken
         );
 

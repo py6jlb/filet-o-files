@@ -13,8 +13,9 @@ public static class GetRecipeEndpoint
     )
     {
         endpointRouteBuilder
-            .MapGet("{id}", HandleAsync)
+            .MapGet("/{id}", HandleAsync)
             .WithName(nameof(GetRecipeEndpoint))
+            .WithDescription("Получить рецепт по его ID")
             .Produces<RecipeDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -23,7 +24,7 @@ public static class GetRecipeEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        string id,
+        [FromRoute] string id,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )

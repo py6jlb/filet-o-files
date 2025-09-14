@@ -12,8 +12,9 @@ public static class GetUserEndpoint
     public static IEndpointRouteBuilder MapGetUser(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapGet("{id}", HandleAsync)
+            .MapGet("/{id}", HandleAsync)
             .WithName(nameof(GetUserEndpoint))
+            .WithDescription("Получить пользователя по ID")
             .Produces<UserDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -22,7 +23,7 @@ public static class GetUserEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        string id,
+        [FromRoute] string id,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )

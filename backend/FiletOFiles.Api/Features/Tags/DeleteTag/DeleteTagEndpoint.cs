@@ -12,8 +12,9 @@ public static class DeleteTagEndpoint
     )
     {
         endpointRouteBuilder
-            .MapDelete("{id}", HandleAsync)
+            .MapDelete("/{id}", HandleAsync)
             .WithName(nameof(DeleteTagEndpoint))
+            .WithDescription("Удалить метку по ID")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -22,7 +23,7 @@ public static class DeleteTagEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        string id,
+        [FromRoute] string id,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )

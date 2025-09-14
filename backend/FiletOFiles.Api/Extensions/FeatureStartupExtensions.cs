@@ -6,7 +6,6 @@ using FiletOFiles.Api.Features.Recipes.GetRecipe;
 using FiletOFiles.Api.Features.Recipes.GetRecipes;
 using FiletOFiles.Api.Features.Recipes.UpdateRecipe;
 using FiletOFiles.Api.Features.RecipeTags.RemoveRecipeTag;
-using FiletOFiles.Api.Features.RemoveRecipeTag.UpsertRecipeTags;
 using FiletOFiles.Api.Features.Tags;
 using FiletOFiles.Api.Features.Tags.AddTag;
 using FiletOFiles.Api.Features.Tags.DeleteTag;
@@ -20,13 +19,6 @@ namespace FiletOFiles.Api.Extensions;
 
 public static class FeatureStartupExtensions
 {
-    public static WebApplicationBuilder AddFeatures(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<IRemoveRecipeTagHandler, RemoveRecipeTagHandler>();
-        builder.Services.AddScoped<IUpsertRecipeTagsHandler, UpsertRecipeTagsHandler>();
-        return builder;
-    }
-
     public static WebApplication MapFeatures(this WebApplication app)
     {
         app.MapAuthGroup();

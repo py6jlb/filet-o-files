@@ -12,8 +12,9 @@ public static class AddRecipeEndpoint
     )
     {
         endpointRouteBuilder
-            .MapPost("", HandleAsync)
+            .MapPost("/", HandleAsync)
             .WithName(nameof(AddRecipeEndpoint))
+            .WithDescription("Создать рецепт")
             .Produces<RecipeDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -21,7 +22,7 @@ public static class AddRecipeEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        CreateRecipeDto request,
+        [FromBody] CreateRecipeDto request,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )

@@ -11,8 +11,9 @@ public static class RefreshEndpoint
     public static IEndpointRouteBuilder MapRefresh(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapPost("refresh", Handle)
+            .MapPost("/refresh", Handle)
             .WithName(nameof(RefreshEndpoint))
+            .WithDescription("Обновление токенов")
             .Produces<AccessTokenDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -22,7 +23,7 @@ public static class RefreshEndpoint
 
     public static async Task<IResult> Handle(
         [FromServices] AuthService service,
-        RefreshTokenDto request,
+        [FromBody] RefreshTokenDto request,
         CancellationToken cancellationToken = default
     )
     {

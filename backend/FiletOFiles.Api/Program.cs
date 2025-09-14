@@ -14,7 +14,6 @@ builder.AddApplicationServices();
 builder.AddAuthenticationServices();
 
 builder.AddErrorHandling();
-builder.AddFeatures();
 
 builder.Services.AddEndpointsApiExplorer();
 

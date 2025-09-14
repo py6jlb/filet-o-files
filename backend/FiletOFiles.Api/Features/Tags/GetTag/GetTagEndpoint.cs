@@ -11,8 +11,9 @@ public static class GetTagEndpoint
     public static IEndpointRouteBuilder MapGetTag(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapGet("{id}", HandleAsync)
+            .MapGet("/{id}", HandleAsync)
             .WithName(nameof(GetTagEndpoint))
+            .WithDescription("ПОлучить метку")
             .Produces<TagDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -21,7 +22,7 @@ public static class GetTagEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        string id,
+        [FromRoute] string id,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )

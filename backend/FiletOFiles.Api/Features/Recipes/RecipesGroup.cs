@@ -4,6 +4,8 @@ using FiletOFiles.Api.Features.Recipes.DeleteRecipe;
 using FiletOFiles.Api.Features.Recipes.GetRecipe;
 using FiletOFiles.Api.Features.Recipes.GetRecipes;
 using FiletOFiles.Api.Features.Recipes.UpdateRecipe;
+using FiletOFiles.Api.Features.RecipeTags.RemoveRecipeTag;
+using FiletOFiles.Api.Features.RecipeTags.UpsertRecipeTags;
 
 namespace FiletOFiles.Api.Features.Recipes;
 
@@ -22,7 +24,9 @@ public static class RecipeGroup
             .MapGetRecipes()
             .MapAddRecipe()
             .MapDeleteRecipe()
-            .MapUpdateRecipe();
+            .MapUpdateRecipe()
+            .MapRemoveRecipeTag()
+            .MapUpdateRecipeTag();
 
         return endpointRouteBuilder;
     }

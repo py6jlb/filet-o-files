@@ -13,8 +13,9 @@ public static class UpdateTagEndpoint
     )
     {
         endpointRouteBuilder
-            .MapPost("{id}", HandleAsync)
+            .MapPost("/{id}", HandleAsync)
             .WithName(nameof(UpdateTagEndpoint))
+            .WithDescription("Обновить метку")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -24,8 +25,8 @@ public static class UpdateTagEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        string id,
-        UpdateTagDto request,
+        [FromRoute] string id,
+        [FromBody] UpdateTagDto request,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )

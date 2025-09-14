@@ -13,8 +13,9 @@ public static class GetTagsEndpoint
     public static IEndpointRouteBuilder MapGetTags(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapGet("", HandleAsync)
+            .MapGet("/", HandleAsync)
             .WithName(nameof(GetTagsEndpoint))
+            .WithDescription("Получить метки")
             .Produces<PaginationResult<TagDto>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -23,23 +24,25 @@ public static class GetTagsEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        string id,
+        [FromQuery(Name = "q")] string? Search,
+        [FromQuery(Name = "sort")] string? Sort,
         [FromServices] AppDbContext db,
         [FromServices] SortMappingProvider sortMappingProvider,
-        TagsQueryParameters request,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        [FromQuery(Name = "page")] int Page = 1,
+        [FromQuery(Name = "pageSize")] int PageSize = 10
     )
     {
-        request.Search ??= request.Search?.Trim().ToLower();
+        Search ??= Search?.Trim().ToLower();
         SortMapping[] sortMappings = sortMappingProvider.GetMappings<TagDto, Tag>();
         IQueryable<TagDto> tagsQuery = db
-            .Tags.Where(x => request.Search == null || x.Name.ToLower().Contains(request.Search))
-            .ApplySort(request.Sort, sortMappings)
+            .Tags.Where(x => Search == null || x.Name.ToLower().Contains(Search))
+            .ApplySort(Sort, sortMappings)
             .Select(r => r.ToDto());
         var tags = await PaginationResult<TagDto>.CreateAsync(
             tagsQuery,
-            request.Page,
-            request.PageSize,
+            Page,
+            PageSize,
             cancellationToken
         );
 

@@ -1,21 +1,20 @@
 using System;
-using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.Recipes.UpdateRecipe;
+namespace FiletOFiles.Api.Features.RecipeTags.RemoveRecipeTag;
 
-public static class UpdateRecipeEndpoint
+public static class RemoveRecipeTagEndpoint
 {
-    public static IEndpointRouteBuilder MapUpdateRecipe(
+    public static IEndpointRouteBuilder MapRemoveRecipeTag(
         this IEndpointRouteBuilder endpointRouteBuilder
     )
     {
         endpointRouteBuilder
-            .MapPost("/{id}", HandleAsync)
-            .WithName(nameof(UpdateRecipeEndpoint))
-            .WithDescription("Обновит рецепт")
+            .MapDelete("/{recipeId}/tags/{tagId}", HandleAsync)
+            .WithName(nameof(RemoveRecipeTagEndpoint))
+            .WithDescription("Удалить метку с рецепта")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -24,28 +23,27 @@ public static class UpdateRecipeEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        [FromRoute] string id,
-        [FromBody] UpdateRecipeDto request,
+        [FromRoute] string recipeId,
+        [FromRoute] string tagId,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )
     {
-        var recipe = await db.Recipes.FirstOrDefaultAsync(
-            x => x.Id == id,
+        var recipeTag = await db.RecipeTag.FirstOrDefaultAsync(
+            x => x.RecipeId == recipeId && x.TagId == tagId,
             cancellationToken: cancellationToken
         );
 
-        if (recipe is null)
+        if (recipeTag is null)
         {
             return TypedResults.Problem(
-                detail: "Не найден рецепт",
+                detail: "Нет записи для удаления",
                 statusCode: StatusCodes.Status404NotFound
             );
         }
 
-        recipe.UpdateFromDto(request);
+        db.RecipeTag.Remove(recipeTag);
         await db.SaveChangesAsync(cancellationToken);
-
         return TypedResults.NoContent();
     }
 }

@@ -11,8 +11,9 @@ public static class RegisterEndpoint
     public static IEndpointRouteBuilder MapRegister(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapPost("register", Handle)
+            .MapPost("/register", Handle)
             .WithName(nameof(RegisterEndpoint))
+            .WithDescription("Регистрация")
             .Produces<AccessTokenDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status409Conflict)
@@ -23,7 +24,7 @@ public static class RegisterEndpoint
 
     public static async Task<IResult> Handle(
         [FromServices] AuthService service,
-        RegisterUserDto request,
+        [FromBody] RegisterUserDto request,
         CancellationToken cancellationToken = default
     )
     {

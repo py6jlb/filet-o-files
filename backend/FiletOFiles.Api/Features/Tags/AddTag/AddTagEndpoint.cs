@@ -11,8 +11,9 @@ public static class AddTagEndpoint
     public static IEndpointRouteBuilder MapAddTag(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapPost("", HandleAsync)
+            .MapPost("/", HandleAsync)
             .WithName(nameof(AddTagEndpoint))
+            .WithDescription("Добавить новую метку")
             .Produces<TagDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -21,7 +22,7 @@ public static class AddTagEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        CreateTagDto request,
+        [FromBody] CreateTagDto request,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )
