@@ -1,5 +1,4 @@
 using System;
-using CSharpFunctionalExtensions;
 
 namespace FiletOFiles.Api.Domain.Entities;
 

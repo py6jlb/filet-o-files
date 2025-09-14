@@ -1,10 +1,10 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.GetTag;
+namespace FiletOFiles.Api.Features.Tags.GetTag;
 
 public class GetTagHandler : IGetTagHandler
 {
@@ -25,12 +25,12 @@ public class GetTagHandler : IGetTagHandler
         try
         {
             var tag = await _db.Tags.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-            return Result.Success(tag?.ToDto());
+            return Result.Ok(tag?.ToDto());
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Ошибка получения метки");
-            return Result.Failure<TagDto?>("Ошибка получения метки");
+            return Result.Fail<TagDto?>("Ошибка получения метки");
         }
     }
 }

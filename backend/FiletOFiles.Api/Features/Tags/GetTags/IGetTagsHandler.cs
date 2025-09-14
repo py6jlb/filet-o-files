@@ -1,9 +1,9 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Tags;
+using FluentResults;
 
-namespace FiletOFiles.Api.Features.GetTags;
+namespace FiletOFiles.Api.Features.Tags.GetTags;
 
 public interface IGetTagsHandler
 {

@@ -16,13 +16,11 @@ builder.AddAuthenticationServices();
 builder.AddErrorHandling();
 builder.AddFeatures();
 
-// builder.Services.AddControllers(o =>
-// {
-//     o.ReturnHttpNotAcceptable = true;
-// });
 builder.Services.AddEndpointsApiExplorer();
 
 WebApplication app = builder.Build();
+
+app.MapFeatures();
 
 if (app.Environment.IsDevelopment())
 {
@@ -35,6 +33,5 @@ app.UseHttpsRedirection();
 app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
-// app.MapControllers();
 
 await app.RunAsync();

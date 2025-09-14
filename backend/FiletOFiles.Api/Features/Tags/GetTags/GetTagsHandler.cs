@@ -1,13 +1,13 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Common;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services.Sorting;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.GetTags;
+namespace FiletOFiles.Api.Features.Tags.GetTags;
 
 public class GetTagsHandler : IGetTagsHandler
 {
@@ -50,12 +50,12 @@ public class GetTagsHandler : IGetTagsHandler
                 cancellationToken
             );
 
-            return Result.Success(tags);
+            return Result.Ok(tags);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Ошибка поиска меток");
-            return Result.Failure<PaginationResult<TagDto>>("Ошибка поиска меток");
+            return Result.Fail<PaginationResult<TagDto>>("Ошибка поиска меток");
         }
     }
 }

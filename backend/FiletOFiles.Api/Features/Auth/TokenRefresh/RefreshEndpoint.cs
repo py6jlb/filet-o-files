@@ -1,6 +1,6 @@
 using System;
-using CSharpFunctionalExtensions.HttpResults.ResultExtensions;
 using FiletOFiles.Api.DTOs.Auth;
+using FiletOFiles.Api.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,19 +8,27 @@ namespace FiletOFiles.Api.Features.Auth.TokenRefresh;
 
 public static class RefreshEndpoint
 {
-    public static IEndpointRouteBuilder MapRegister(this IEndpointRouteBuilder endpointRouteBuilder)
+    public static IEndpointRouteBuilder MapRefresh(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("register", Handle).WithName(nameof(RefreshEndpoint));
+        endpointRouteBuilder
+            .MapPost("refresh", Handle)
+            .WithName(nameof(RefreshEndpoint))
+            .Produces<AccessTokenDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+        ;
         return endpointRouteBuilder;
     }
 
-    public static async Task<Results<Ok<AccessTokenDto>, ProblemHttpResult>> Handle(
+    public static async Task<IResult> Handle(
         [FromServices] AuthService service,
         RefreshTokenDto request,
         CancellationToken cancellationToken = default
     )
     {
         var result = await service.Refresh(request, cancellationToken);
-        return result.ToOkHttpResult(401);
+        return result.IsSuccess
+            ? TypedResults.Ok(result.Value)
+            : ErrorHelper.GetProblem(result.Errors[0]);
     }
 }

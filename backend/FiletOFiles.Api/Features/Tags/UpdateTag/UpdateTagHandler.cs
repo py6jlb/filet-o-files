@@ -1,10 +1,10 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Infrastructure.Database;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.UpdateTag;
+namespace FiletOFiles.Api.Features.Tags.UpdateTag;
 
 public class UpdateTagHandler : IUpdateTagHandler
 {
@@ -29,12 +29,12 @@ public class UpdateTagHandler : IUpdateTagHandler
         );
         if (tag is null)
         {
-            return Result.Failure("Не найдена метка для обновления");
+            return Result.Fail("Не найдена метка для обновления");
         }
 
         tag.UpdateFromDto(request);
         await _db.SaveChangesAsync(cancellationToken);
 
-        return Result.Success();
+        return Result.Ok();
     }
 }

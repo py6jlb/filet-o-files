@@ -1,11 +1,11 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.RecipeTag;
 using FiletOFiles.Api.Infrastructure.Database;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.UpsertRecipeTags;
+namespace FiletOFiles.Api.Features.RemoveRecipeTag.UpsertRecipeTags;
 
 public class UpsertRecipeTagsHandler : IUpsertRecipeTagsHandler
 {
@@ -30,13 +30,13 @@ public class UpsertRecipeTagsHandler : IUpsertRecipeTagsHandler
 
         if (recipe is null)
         {
-            return Result.Failure("Рецепт не найден");
+            return Result.Fail("Рецепт не найден");
         }
 
         var currentTagIds = recipe.RecipeTags.Select(x => x.TagId).ToHashSet();
         if (currentTagIds.SetEquals(request.TagIds))
         {
-            return Result.Success();
+            return Result.Ok();
         }
 
         List<string> existingTagIds = await _db
@@ -46,7 +46,7 @@ public class UpsertRecipeTagsHandler : IUpsertRecipeTagsHandler
 
         if (existingTagIds.Count != request.TagIds.Count)
         {
-            return Result.Failure("One or more tag IDs is invalid");
+            return Result.Fail("One or more tag IDs is invalid");
         }
 
         recipe.RecipeTags.RemoveAll(rt => !request.TagIds.Contains(rt.TagId));
@@ -57,6 +57,6 @@ public class UpsertRecipeTagsHandler : IUpsertRecipeTagsHandler
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return Result.Success();
+        return Result.Ok();
     }
 }

@@ -1,7 +1,6 @@
 using System;
-using CSharpFunctionalExtensions;
-using CSharpFunctionalExtensions.HttpResults.ResultExtensions;
 using FiletOFiles.Api.DTOs.Auth;
+using FiletOFiles.Api.Helpers;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Settings;
@@ -16,17 +15,25 @@ public static class LoginEndpoint
 {
     public static IEndpointRouteBuilder MapLogin(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("login", Handle).WithName(nameof(LoginEndpoint));
+        endpointRouteBuilder
+            .MapPost("login", Handle)
+            .WithName(nameof(LoginEndpoint))
+            .Produces<AccessTokenDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
         return endpointRouteBuilder;
     }
 
-    public static async Task<Results<Ok<AccessTokenDto>, ProblemHttpResult>> Handle(
+    public static async Task<IResult> Handle(
         [FromServices] AuthService service,
         LoginUserDto request,
         CancellationToken cancellationToken = default
     )
     {
         var result = await service.Login(request, cancellationToken);
-        return result.ToOkHttpResult(401);
+        return result.IsSuccess
+            ? TypedResults.Ok(result.Value)
+            : ErrorHelper.GetProblem(result.Errors[0]);
     }
 }

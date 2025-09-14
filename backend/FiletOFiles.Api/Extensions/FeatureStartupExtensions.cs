@@ -1,17 +1,20 @@
-using FiletOFiles.Api.Features.AddRecipe;
-using FiletOFiles.Api.Features.AddTag;
 using FiletOFiles.Api.Features.Auth;
-using FiletOFiles.Api.Features.DeleteRecipe;
-using FiletOFiles.Api.Features.DeleteTag;
-using FiletOFiles.Api.Features.GetRecipe;
-using FiletOFiles.Api.Features.GetRecipes;
-using FiletOFiles.Api.Features.GetTag;
-using FiletOFiles.Api.Features.GetTags;
-using FiletOFiles.Api.Features.GetUser;
-using FiletOFiles.Api.Features.RemoveRecipeTag;
-using FiletOFiles.Api.Features.UpdateRecipe;
-using FiletOFiles.Api.Features.UpdateTag;
-using FiletOFiles.Api.Features.UpsertRecipeTags;
+using FiletOFiles.Api.Features.Recipes;
+using FiletOFiles.Api.Features.Recipes.AddRecipe;
+using FiletOFiles.Api.Features.Recipes.DeleteRecipe;
+using FiletOFiles.Api.Features.Recipes.GetRecipe;
+using FiletOFiles.Api.Features.Recipes.GetRecipes;
+using FiletOFiles.Api.Features.Recipes.UpdateRecipe;
+using FiletOFiles.Api.Features.RecipeTags.RemoveRecipeTag;
+using FiletOFiles.Api.Features.RemoveRecipeTag.UpsertRecipeTags;
+using FiletOFiles.Api.Features.Tags;
+using FiletOFiles.Api.Features.Tags.AddTag;
+using FiletOFiles.Api.Features.Tags.DeleteTag;
+using FiletOFiles.Api.Features.Tags.GetTag;
+using FiletOFiles.Api.Features.Tags.GetTags;
+using FiletOFiles.Api.Features.Tags.UpdateTag;
+using FiletOFiles.Api.Features.Users;
+using FiletOFiles.Api.Features.Users.GetUser;
 
 namespace FiletOFiles.Api.Extensions;
 
@@ -19,12 +22,6 @@ public static class FeatureStartupExtensions
 {
     public static WebApplicationBuilder AddFeatures(this WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IGetRecipeHandler, GetRecipeHandler>();
-        builder.Services.AddScoped<IGetRecipesHandler, GetRecipesHandler>();
-        builder.Services.AddScoped<IAddRecipeHandler, AddRecipeHandler>();
-        builder.Services.AddScoped<IUpdateRecipeHandler, UpdateRecipeHandler>();
-        builder.Services.AddScoped<IDeleteRecipeHandler, DeleteRecipeHandler>();
-
         builder.Services.AddScoped<IAddTagHandler, AddTagHandler>();
         builder.Services.AddScoped<IGetTagHandler, GetTagHandler>();
         builder.Services.AddScoped<IGetTagsHandler, GetTagsHandler>();
@@ -33,14 +30,15 @@ public static class FeatureStartupExtensions
 
         builder.Services.AddScoped<IRemoveRecipeTagHandler, RemoveRecipeTagHandler>();
         builder.Services.AddScoped<IUpsertRecipeTagsHandler, UpsertRecipeTagsHandler>();
-
-        builder.Services.AddScoped<IGetUserHandler, GetUserHandler>();
         return builder;
     }
 
-    public static WebApplication MapFEatures(this WebApplication app)
+    public static WebApplication MapFeatures(this WebApplication app)
     {
         app.MapAuthGroup();
+        app.MapUsersGroup();
+        app.MapRecipesGroup();
+        app.MapTagsGroup();
         return app;
     }
 }

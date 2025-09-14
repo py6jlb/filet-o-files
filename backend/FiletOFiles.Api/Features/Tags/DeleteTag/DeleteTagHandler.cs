@@ -1,9 +1,9 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Infrastructure.Database;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.DeleteTag;
+namespace FiletOFiles.Api.Features.Tags.DeleteTag;
 
 public class DeleteTagHandler : IDeleteTagHandler
 {
@@ -24,11 +24,11 @@ public class DeleteTagHandler : IDeleteTagHandler
         );
         if (tag is null)
         {
-            return Result.Failure("Не найдена метка для удаления");
+            return Result.Fail("Не найдена метка для удаления");
         }
 
         _db.Tags.Remove(tag);
         await _db.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return Result.Ok();
     }
 }

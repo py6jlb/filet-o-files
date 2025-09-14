@@ -1,6 +1,6 @@
 using FiletOFiles.Api.DTOs.RecipeTag;
-using FiletOFiles.Api.Features.RemoveRecipeTag;
-using FiletOFiles.Api.Features.UpsertRecipeTags;
+using FiletOFiles.Api.Features.RecipeTags.RemoveRecipeTag;
+using FiletOFiles.Api.Features.RemoveRecipeTag.UpsertRecipeTags;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +21,7 @@ public class RecipeTagsController : ControllerBase
     )
     {
         var result = await handler.Upsert(recipeId, request, cancellationToken);
-        return result.IsSuccess ? NoContent() : Problem(result.Error);
+        return result.IsSuccess ? NoContent() : Problem(result.Errors[0]?.Message);
     }
 
     [HttpDelete("{tagId}")]
@@ -33,6 +33,6 @@ public class RecipeTagsController : ControllerBase
     )
     {
         var result = await handler.Remove(recipeId, tagId, cancellationToken);
-        return result.IsSuccess ? NoContent() : Problem(result.Error);
+        return result.IsSuccess ? NoContent() : Problem(result.Errors[0]?.Message);
     }
 }

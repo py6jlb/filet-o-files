@@ -1,8 +1,8 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.DTOs.RecipeTag;
+using FluentResults;
 
-namespace FiletOFiles.Api.Features.UpsertRecipeTags;
+namespace FiletOFiles.Api.Features.RemoveRecipeTag.UpsertRecipeTags;
 
 public interface IUpsertRecipeTagsHandler
 {

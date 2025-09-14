@@ -1,11 +1,11 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Auth;
 using FiletOFiles.Api.DTOs.Users;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Settings;
+using FluentResults;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +51,7 @@ public sealed class AuthService
             || !await _userManager.CheckPasswordAsync(identityUser, request.Password)
         )
         {
-            return Result.Failure<AccessTokenDto>("Ошибка входа пользователя");
+            return Result.Fail(new Error("Ошибка входа пользователя").WithMetadata("code", 401));
         }
 
         var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email!);
@@ -68,7 +68,7 @@ public sealed class AuthService
         await _identityDb.RefreshTokens.AddAsync(refreshToken, cancellationToken);
         await _identityDb.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(accessTokens);
+        return Result.Ok(accessTokens);
     }
 
     public async Task<Result<AccessTokenDto>> Register(
@@ -76,6 +76,23 @@ public sealed class AuthService
         CancellationToken cancellationToken = default
     )
     {
+        bool emailIsTaken = await _userManager.FindByEmailAsync(request.Email) is not null;
+        if (emailIsTaken)
+        {
+            return Result.Fail(
+                new Error($"Email '{request.Email}' is already taken").WithMetadata("code", 409)
+            );
+        }
+
+        bool usernameIsTaken = await _userManager.FindByNameAsync(request.Name) is not null;
+
+        if (usernameIsTaken)
+        {
+            return Result.Fail(
+                new Error($"Username '{request.Name}' is already taken").WithMetadata("code", 409)
+            );
+        }
+
         using var transaction = await _identityDb.Database.BeginTransactionAsync(cancellationToken);
         _db.Database.SetDbConnection(_identityDb.Database.GetDbConnection());
         await _db.Database.UseTransactionAsync(transaction.GetDbTransaction(), cancellationToken);
@@ -85,7 +102,23 @@ public sealed class AuthService
         var identityResult = await _userManager.CreateAsync(identityUser, request.Password);
         if (!identityResult.Succeeded)
         {
-            return Result.Failure<AccessTokenDto>("Ошибка регистрации пользователя");
+            return Result.Fail<AccessTokenDto>(
+                new Error("Ошибка регистрации пользователя")
+                    .WithMetadata(
+                        "extensions",
+                        new Dictionary<string, object?>()
+                        {
+                            {
+                                "errors",
+                                identityResult.Errors.ToDictionary(
+                                    x => x.Code,
+                                    x => new[] { x.Description }
+                                )
+                            },
+                        }
+                    )
+                    .WithMetadata("code", 400)
+            );
         }
 
         var user = request.ToEntity();
@@ -109,7 +142,7 @@ public sealed class AuthService
         await _identityDb.SaveChangesAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
-        return Result.Success(accessTokens);
+        return Result.Ok(accessTokens);
     }
 
     public async Task<Result<AccessTokenDto>> Refresh(
@@ -121,14 +154,11 @@ public sealed class AuthService
             .RefreshTokens.Include(rt => rt.User)
             .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, cancellationToken);
 
-        if (refreshToken is null)
+        if (refreshToken is null || refreshToken.ExpiresAtUtc < DateTime.UtcNow)
         {
-            return Result.Failure<AccessTokenDto>("Пользователь не авторизован");
-        }
-
-        if (refreshToken.ExpiresAtUtc < DateTime.UtcNow)
-        {
-            return Result.Failure<AccessTokenDto>("Токен обновления просрочен");
+            return Result.Fail<AccessTokenDto>(
+                new Error("Пользователь не авторизован").WithMetadata("code", 401)
+            );
         }
 
         var tokenRequest = new TokenRequest(refreshToken.User.Id, refreshToken.User.Email!);
@@ -140,6 +170,6 @@ public sealed class AuthService
         );
 
         await _identityDb.SaveChangesAsync(cancellationToken);
-        return Result.Success(accessTokens);
+        return Result.Ok(accessTokens);
     }
 }

@@ -1,9 +1,9 @@
 using System;
-using CSharpFunctionalExtensions;
 using FiletOFiles.Api.Infrastructure.Database;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.RemoveRecipeTag;
+namespace FiletOFiles.Api.Features.RecipeTags.RemoveRecipeTag;
 
 public class RemoveRecipeTagHandler : IRemoveRecipeTagHandler
 {
@@ -29,11 +29,11 @@ public class RemoveRecipeTagHandler : IRemoveRecipeTagHandler
 
         if (recipeTag is null)
         {
-            return Result.Failure("Нет записи для удаления");
+            return Result.Fail("Нет записи для удаления");
         }
 
         _db.RecipeTag.Remove(recipeTag);
         await _db.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return Result.Ok();
     }
 }

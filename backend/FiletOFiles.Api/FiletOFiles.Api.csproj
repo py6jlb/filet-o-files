@@ -1,11 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
     <ItemGroup>
-      <Compile Include="Features/Tags/IGetTagsHandler.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="CSharpFunctionalExtensions" />
-        <PackageReference Include="CSharpFunctionalExtensions.HttpResults" />
         <PackageReference Include="EFCore.NamingConventions" />
+        <PackageReference Include="FluentResults" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
