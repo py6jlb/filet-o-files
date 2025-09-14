@@ -1,10 +1,11 @@
-using CSharpFunctionalExtensions;
-
 namespace FiletOFiles.Api.Domain.Entities;
 
-public class Tag : Entity<long>
+public sealed class Tag
 {
-    public string Name { get; set; }
-    public string Color { get; set; }
-    public List<Recipe> Recipes { get; set; } = [];
+    public string Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
+
+    public List<RecipeTag> RecipeTag { get; set; }
+    public List<Recipe> Recipes { get; set; }
 }

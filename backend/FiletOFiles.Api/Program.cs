@@ -1,34 +1,36 @@
+using FiletOFiles.Api.Extensions;
 using FiletOFiles.Api.Features;
-using FiletOFiles.Api.Infrastructure;
+using FiletOFiles.Api.Infrastructure.Database;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+//builder.AddOpenTelemetry();
+builder.AddDatabase();
+builder.AddApplicationServices();
+builder.AddAuthenticationServices();
 
-builder
-    .Services.AddIdentityApiEndpoints<IdentityUser>(options =>
-        options.SignIn.RequireConfirmedAccount = true
-    )
-    .AddEntityFrameworkStores<AppDbContext>();
+builder.AddErrorHandling();
 
-builder.Services.AddFeatures();
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
+
+app.MapFeatures();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+    await app.ApplyMigrations();
+    app.UseDeveloperExceptionPage();
 }
-app.MapIdentityApi<IdentityUser>();
 app.UseHttpsRedirection();
+app.UseExceptionHandler();
+app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
 
-app.Run();
+await app.RunAsync();
