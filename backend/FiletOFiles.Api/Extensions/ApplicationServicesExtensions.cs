@@ -62,9 +62,7 @@ public static class ApplicationServicesExtensions
                     .AllowRefreshTokenFlow()
                     .AddEncryptionKey(new SymmetricSecurityKey(Convert.FromBase64String(oidc.Key)));
 
-                var aspOpt = opt.UseAspNetCore()
-                    .EnableTokenEndpointPassthrough()
-                    .EnableAuthorizationEndpointPassthrough();
+                var aspOpt = opt.UseAspNetCore().EnableTokenEndpointPassthrough();
 
                 if (builder.Environment.IsDevelopment())
                 {
