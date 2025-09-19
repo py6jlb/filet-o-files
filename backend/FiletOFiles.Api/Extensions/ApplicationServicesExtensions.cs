@@ -22,8 +22,6 @@ public static class ApplicationServicesExtensions
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddOpenApi();
         builder.Services.AddTransient<SortMappingProvider>();
-        builder.Services.AddTransient<TokenProvider>();
-
         builder.Services.AddSingleton<
             ISortMappingDefinition,
             SortMappingDefinition<RecipeDto, Recipe>
@@ -32,6 +30,8 @@ public static class ApplicationServicesExtensions
         builder.Services.AddSingleton<ISortMappingDefinition, SortMappingDefinition<TagDto, Tag>>(
             _ => TagMappings.SortMapping
         );
+        var filestorage = builder.Configuration.GetSection("Filestorage").Get<Filestorage>()!;
+        builder.Services.AddSingleton(filestorage);
         builder.Services.AddHttpContextAccessor();
 
         return builder;
@@ -44,8 +44,6 @@ public static class ApplicationServicesExtensions
         builder
             .Services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<AppDbIdentityContext>();
-
-        builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("Jwt"));
 
         var oidc = builder.Configuration.GetSection("Oidc").Get<OpenIdOptions>()!;
 

@@ -29,6 +29,8 @@ public static class FileMappings
             IsTitle = dto.IsTitle,
             MimeType = dto.MimeType,
             RecipeId = dto.RecipeId,
+            Size = dto.Size,
+            Source = dto.Source,
         };
     }
 }

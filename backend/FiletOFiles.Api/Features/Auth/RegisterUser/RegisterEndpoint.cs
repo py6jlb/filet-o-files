@@ -1,8 +1,11 @@
 using System;
+using System.Security.Claims;
 using FiletOFiles.Api.DTOs.Auth;
 using FiletOFiles.Api.Helpers;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
 
 namespace FiletOFiles.Api.Features.Auth.RegisterUser;
 
@@ -29,8 +32,19 @@ public static class RegisterEndpoint
     )
     {
         var result = await service.Register(request, cancellationToken);
-        return result.IsSuccess
-            ? TypedResults.Ok(result.Value)
-            : ErrorHelper.GetProblem(result.Errors[0]);
+        if (result.IsSuccess)
+        {
+            result.Value.SetDestinations(AuthHelpers.GetDestinations);
+
+            return TypedResults.SignIn(
+                new ClaimsPrincipal(result.Value),
+                null,
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
+            );
+        }
+        else
+        {
+            return ErrorHelper.GetProblem(result.Errors[0]);
+        }
     }
 }

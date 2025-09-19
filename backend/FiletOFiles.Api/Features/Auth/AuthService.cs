@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Auth;
 using FiletOFiles.Api.DTOs.Users;
@@ -11,6 +12,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using OpenIddict.Abstractions;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace FiletOFiles.Api.Features.Auth;
 
@@ -20,58 +24,21 @@ public sealed class AuthService
     private readonly ILogger<AuthService> _logger;
     private readonly AppDbContext _db;
     private readonly AppDbIdentityContext _identityDb;
-    private readonly TokenProvider _tokenProvider;
-    private readonly JwtAuthOptions _jwtAuthOptions;
 
     public AuthService(
         ILogger<AuthService> logger,
         AppDbContext db,
         AppDbIdentityContext identityDb,
-        UserManager<IdentityUser> userManager,
-        TokenProvider tokenProvider,
-        IOptions<JwtAuthOptions> jwtAuthOptions
+        UserManager<IdentityUser> userManager
     )
     {
         _userManager = userManager;
         _db = db;
         _logger = logger;
         _identityDb = identityDb;
-        _tokenProvider = tokenProvider;
-        _jwtAuthOptions = jwtAuthOptions.Value;
     }
 
-    public async Task<Result<AccessTokenDto>> Login(
-        LoginUserDto request,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var identityUser = await _userManager.FindByEmailAsync(request.Email);
-        if (
-            identityUser is null
-            || !await _userManager.CheckPasswordAsync(identityUser, request.Password)
-        )
-        {
-            return Result.Fail(new Error("Ошибка входа пользователя").WithMetadata("code", 401));
-        }
-
-        var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email!);
-        var accessTokens = _tokenProvider.Create(tokenRequest);
-
-        var refreshToken = new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            Token = accessTokens.RefreshToken,
-            UserId = identityUser.Id,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
-        };
-
-        await _identityDb.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-        await _identityDb.SaveChangesAsync(cancellationToken);
-
-        return Result.Ok(accessTokens);
-    }
-
-    public async Task<Result<AccessTokenDto>> Register(
+    public async Task<Result<ClaimsIdentity>> Register(
         RegisterUserDto request,
         CancellationToken cancellationToken = default
     )
@@ -102,7 +69,7 @@ public sealed class AuthService
         var identityResult = await _userManager.CreateAsync(identityUser, request.Password);
         if (!identityResult.Succeeded)
         {
-            return Result.Fail<AccessTokenDto>(
+            return Result.Fail<ClaimsIdentity>(
                 new Error("Ошибка регистрации пользователя")
                     .WithMetadata(
                         "extensions",
@@ -126,50 +93,22 @@ public sealed class AuthService
 
         await _db.Users.AddAsync(user, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
-
-        var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email);
-        var accessTokens = _tokenProvider.Create(tokenRequest);
-
-        var refreshToken = new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            Token = accessTokens.RefreshToken,
-            UserId = identityUser.Id,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
-        };
-
-        await _identityDb.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-        await _identityDb.SaveChangesAsync(cancellationToken);
-
         await transaction.CommitAsync(cancellationToken);
-        return Result.Ok(accessTokens);
-    }
 
-    public async Task<Result<AccessTokenDto>> Refresh(
-        RefreshTokenDto request,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var refreshToken = await _identityDb
-            .RefreshTokens.Include(rt => rt.User)
-            .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, cancellationToken);
-
-        if (refreshToken is null || refreshToken.ExpiresAtUtc < DateTime.UtcNow)
-        {
-            return Result.Fail<AccessTokenDto>(
-                new Error("Пользователь не авторизован").WithMetadata("code", 401)
-            );
-        }
-
-        var tokenRequest = new TokenRequest(refreshToken.User.Id, refreshToken.User.Email!);
-        var accessTokens = _tokenProvider.Create(tokenRequest);
-
-        refreshToken.Token = accessTokens.RefreshToken;
-        refreshToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(
-            _jwtAuthOptions.RefreshTokenExpirationDays
+        var identity = new ClaimsIdentity(
+            authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+            nameType: Claims.Name,
+            roleType: Claims.Role
         );
 
-        await _identityDb.SaveChangesAsync(cancellationToken);
-        return Result.Ok(accessTokens);
+        identity
+            .SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(identityUser))
+            .SetClaim(Claims.Email, await _userManager.GetEmailAsync(identityUser))
+            .SetClaim(Claims.Name, await _userManager.GetUserNameAsync(identityUser))
+            .SetClaim(Claims.PreferredUsername, await _userManager.GetUserNameAsync(identityUser))
+            .SetClaims(Claims.Role, [.. await _userManager.GetRolesAsync(identityUser)]);
+
+        identity.SetScopes(new[] { Scopes.OpenId, Scopes.Email, Scopes.Profile, Scopes.Roles });
+        return Result.Ok(identity);
     }
 }
