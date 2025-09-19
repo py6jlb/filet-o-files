@@ -57,15 +57,26 @@ public static class ApplicationServicesExtensions
             })
             .AddServer(opt =>
             {
-                opt.SetAuthorizationEndpointUris("authorize")
-                    .SetIntrospectionEndpointUris("introspect")
-                    .SetTokenEndpointUris("token");
+                opt.SetAuthorizationEndpointUris("auth/authorize")
+                    .SetIntrospectionEndpointUris("auth/introspect")
+                    .SetTokenEndpointUris("auth/token");
 
-                opt.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();
+                opt.AllowAuthorizationCodeFlow()
+                    .AllowClientCredentialsFlow()
+                    .AllowRefreshTokenFlow();
 
                 opt.AddEncryptionKey(new SymmetricSecurityKey(Convert.FromBase64String(oidc.Key)));
 
-                opt.UseAspNetCore().EnableAuthorizationEndpointPassthrough();
+                opt.AddDevelopmentSigningCertificate();
+
+                var aspOpt = opt.UseAspNetCore()
+                    .EnableTokenEndpointPassthrough()
+                    .EnableAuthorizationEndpointPassthrough();
+
+                if (builder.Environment.IsDevelopment())
+                {
+                    aspOpt.DisableTransportSecurityRequirement();
+                }
             })
             .AddValidation(opt =>
             {
