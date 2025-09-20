@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using OpenIddict.Abstractions;
 
 namespace FiletOFiles.Api.Extensions;
 
@@ -25,6 +24,8 @@ public static class ApplicationServicesExtensions
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddOpenApi();
         builder.Services.AddTransient<SortMappingProvider>();
+        builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("Auth"));
+        builder.Services.AddTransient<TokenProvider>();
         builder.Services.AddSingleton<
             ISortMappingDefinition,
             SortMappingDefinition<RecipeDto, Recipe>
@@ -57,59 +58,22 @@ public static class ApplicationServicesExtensions
         var authOpt = builder.Configuration.GetSection("Auth").Get<AuthOptions>()!;
 
         builder
-            .Services.AddOpenIddict()
-            .AddCore(opt =>
+            .Services.AddAuthentication(options =>
             {
-                opt.UseEntityFrameworkCore().UseDbContext<OpenIdDbContext>();
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddServer(opt =>
+            .AddJwtBearer(options =>
             {
-                opt.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow().AllowPasswordFlow();
-                opt.SetAuthorizationEndpointUris("/auth/authorize");
-                opt.SetTokenEndpointUris("/auth/token");
-
-                opt.SetAccessTokenLifetime(TimeSpan.FromMinutes(authOpt.ExpirationInMinutes))
-                    .SetRefreshTokenLifetime(TimeSpan.FromDays(authOpt.RefreshTokenExpirationDays));
-
-                opt.RegisterScopes(
-                    OpenIddictConstants.Scopes.OpenId,
-                    OpenIddictConstants.Scopes.Profile,
-                    OpenIddictConstants.Scopes.Roles,
-                    OpenIddictConstants.Scopes.OfflineAccess
-                );
-
-                var aspOpt = opt.UseAspNetCore()
-                    .EnableTokenEndpointPassthrough()
-                    .EnableAuthorizationEndpointPassthrough();
-
-                if (builder.Environment.IsDevelopment())
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    opt.AddDevelopmentEncryptionCertificate().AddDevelopmentSigningCertificate();
-                    aspOpt.DisableTransportSecurityRequirement();
-                }
-                else
-                {
-                    opt.AddEncryptionKey(
-                        new SymmetricSecurityKey(Convert.FromBase64String(authOpt.Key))
-                    );
-                }
-                opt.DisableAccessTokenEncryption();
-            })
-            .AddValidation(opt =>
-            {
-                opt.UseLocalServer();
-                opt.UseAspNetCore();
+                    ValidIssuer = authOpt.Issuer,
+                    ValidAudience = authOpt.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(authOpt.Key)
+                    ),
+                };
             });
-
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = OpenIddictConstants.Schemes.Bearer;
-        });
-        builder.Services.AddCors(options =>
-            options.AddDefaultPolicy(policy =>
-                policy.AllowAnyHeader().AllowAnyMethod().WithOrigins(authOpt.RedirectUri)
-            )
-        );
 
         builder.Services.AddAuthorization();
         return builder;

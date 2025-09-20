@@ -17,7 +17,6 @@ builder.AddErrorHandling();
 builder.Services.AddEndpointsApiExplorer();
 
 WebApplication app = builder.Build();
-app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {

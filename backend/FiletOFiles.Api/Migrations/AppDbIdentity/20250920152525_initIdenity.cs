@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FiletOFiles.Api.Migrations.AppDbIdentity
 {
     /// <inheritdoc />
-    public partial class addIdentity : Migration
+    public partial class initIdenity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -156,6 +156,26 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "refresh_tokens",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    user_id = table.Column<string>(type: "TEXT", maxLength: 300, nullable: false),
+                    token = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: false),
+                    expires_at_utc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_refresh_tokens", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_refresh_tokens_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "asp_net_users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "ix_asp_net_role_claims_role_id",
                 table: "asp_net_role_claims",
@@ -192,6 +212,17 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                 table: "asp_net_users",
                 column: "normalized_user_name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_token",
+                table: "refresh_tokens",
+                column: "token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_user_id",
+                table: "refresh_tokens",
+                column: "user_id");
         }
 
         /// <inheritdoc />
@@ -211,6 +242,9 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
 
             migrationBuilder.DropTable(
                 name: "asp_net_user_tokens");
+
+            migrationBuilder.DropTable(
+                name: "refresh_tokens");
 
             migrationBuilder.DropTable(
                 name: "asp_net_roles");

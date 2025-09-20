@@ -4,10 +4,9 @@ namespace FiletOFiles.Api.Settings;
 
 public sealed record AuthOptions
 {
-    public string RedirectUri { get; init; }
-    public string Application { get; init; }
+    public string Issuer { get; init; }
+    public string Audience { get; init; }
     public string Key { get; init; }
-
     public int ExpirationInMinutes { get; init; }
     public int RefreshTokenExpirationDays { get; init; }
 
