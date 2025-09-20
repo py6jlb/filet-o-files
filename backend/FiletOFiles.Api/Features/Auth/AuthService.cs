@@ -54,7 +54,9 @@ public sealed class AuthService
             return Result.Fail(new Error("Ошибка входа пользователя").WithMetadata("code", 401));
         }
 
-        var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email!);
+        var roles = await _userManager.GetRolesAsync(identityUser);
+
+        var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email!, roles);
         var accessTokens = _tokenProvider.Create(tokenRequest);
 
         var refreshToken = new RefreshToken
@@ -73,6 +75,7 @@ public sealed class AuthService
 
     public async Task<Result<AccessTokenDto>> Register(
         RegisterUserDto request,
+        bool asAdmin = false,
         CancellationToken cancellationToken = default
     )
     {
@@ -121,13 +124,61 @@ public sealed class AuthService
             );
         }
 
+        var addToMemberRoleResult = await _userManager.AddToRoleAsync(identityUser, Roles.Member);
+        if (!addToMemberRoleResult.Succeeded)
+        {
+            return Result.Fail<AccessTokenDto>(
+                new Error("Невозможно зарегистрировать пользователя, попробуйте еще раз.")
+                    .WithMetadata(
+                        "extensions",
+                        new Dictionary<string, object?>()
+                        {
+                            {
+                                "errors",
+                                addToMemberRoleResult.Errors.ToDictionary(
+                                    x => x.Code,
+                                    x => new[] { x.Description }
+                                )
+                            },
+                        }
+                    )
+                    .WithMetadata("code", 400)
+            );
+        }
+
+        if (asAdmin)
+        {
+            var addToAdminRoleResult = await _userManager.AddToRoleAsync(identityUser, Roles.Admin);
+            if (!addToAdminRoleResult.Succeeded)
+            {
+                return Result.Fail<AccessTokenDto>(
+                    new Error("Невозможно зарегистрировать пользователя, попробуйте еще раз.")
+                        .WithMetadata(
+                            "extensions",
+                            new Dictionary<string, object?>()
+                            {
+                                {
+                                    "errors",
+                                    addToAdminRoleResult.Errors.ToDictionary(
+                                        x => x.Code,
+                                        x => new[] { x.Description }
+                                    )
+                                },
+                            }
+                        )
+                        .WithMetadata("code", 400)
+                );
+            }
+        }
+
         var user = request.ToEntity();
         user.IdentityId = identityUser.Id;
 
         await _db.Users.AddAsync(user, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
 
-        var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email);
+        IEnumerable<string> roles = asAdmin ? [Roles.Member, Roles.Admin] : [Roles.Member];
+        var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email, roles);
         var accessTokens = _tokenProvider.Create(tokenRequest);
 
         var refreshToken = new RefreshToken
@@ -160,8 +211,9 @@ public sealed class AuthService
                 new Error("Пользователь не авторизован").WithMetadata("code", 401)
             );
         }
+        var roles = await _userManager.GetRolesAsync(refreshToken.User);
 
-        var tokenRequest = new TokenRequest(refreshToken.User.Id, refreshToken.User.Email!);
+        var tokenRequest = new TokenRequest(refreshToken.User.Id, refreshToken.User.Email!, roles);
         var accessTokens = _tokenProvider.Create(tokenRequest);
 
         refreshToken.Token = accessTokens.RefreshToken;

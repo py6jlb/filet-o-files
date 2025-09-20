@@ -1,4 +1,5 @@
 using System;
+using FiletOFiles.Api.Helpers;
 using FiletOFiles.Api.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,7 @@ public static class DeleteFileEndpoint
     )
     {
         endpointRouteBuilder
-            .MapDelete("/", HandleAsync)
+            .MapDelete("/{fileId}", HandleAsync)
             .WithName(nameof(DeleteFileEndpoint))
             .WithDescription("Удалить файл")
             .Produces(StatusCodes.Status200OK)
@@ -21,10 +22,12 @@ public static class DeleteFileEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        [FromServices] AppDbContext db,
+        [FromServices] FilesService service,
+        string fileId,
         CancellationToken cancellationToken
     )
     {
-        return TypedResults.Ok();
+        var result = await service.DeleteFile(fileId, cancellationToken);
+        return result.IsSuccess ? TypedResults.Ok() : ErrorHelper.GetProblem(result.Errors[0]);
     }
 }

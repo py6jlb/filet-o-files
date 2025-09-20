@@ -1,5 +1,6 @@
 using FiletOFiles.Api.Extensions;
 using FiletOFiles.Api.Features;
+using FiletOFiles.Api.Helpers;
 using FiletOFiles.Api.Infrastructure.Database;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -21,7 +22,10 @@ WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(opt =>
+    {
+        opt.Layout = ScalarLayout.Modern;
+    });
     await app.ApplyMigrations();
     app.UseDeveloperExceptionPage();
 }

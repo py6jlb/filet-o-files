@@ -28,7 +28,7 @@ public static class RegisterEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var result = await service.Register(request, cancellationToken);
+        var result = await service.Register(request, false, cancellationToken);
         return result.IsSuccess
             ? TypedResults.Ok(result.Value)
             : ErrorHelper.GetProblem(result.Errors[0]);

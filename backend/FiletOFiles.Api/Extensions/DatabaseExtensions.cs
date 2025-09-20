@@ -35,7 +35,20 @@ public static class DatabaseExtensions
 
     public static async Task SeedOpenidData(this WebApplication app)
     {
-        using IServiceScope scope = app.Services.CreateScope();
+        await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+        if (!await roleManager.RoleExistsAsync(Roles.Admin))
+        {
+            await roleManager.CreateAsync(new IdentityRole(Roles.Admin));
+        }
+
+        if (!await roleManager.RoleExistsAsync(Roles.Member))
+        {
+            await roleManager.CreateAsync(new IdentityRole(Roles.Member));
+        }
+        app.Logger.LogInformation("Roles created successfully");
+
         var oidc = app.Configuration.GetSection("Auth").Get<AuthOptions>()!;
 
         var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
@@ -47,7 +60,7 @@ public static class DatabaseExtensions
             ConfirmationPassword = oidc.AdminPassword,
         };
 
-        var res = await authService.Register(request);
+        var res = await authService.Register(request, true);
         if (res.IsFailed)
         {
             var encoderSettings = new JsonSerializerOptions

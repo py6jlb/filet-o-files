@@ -2,6 +2,7 @@ using System;
 using System.Security.Cryptography;
 using FiletOFiles.Api;
 using FiletOFiles.Api.DTOs.Files;
+using FiletOFiles.Api.Helpers;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Settings;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,6 @@ public static class UploadFileEndpoint
     )
     {
         var result = await service.Upload(request, cancellationToken);
-        return TypedResults.Ok();
+        return result.IsSuccess ? TypedResults.Ok() : ErrorHelper.GetProblem(result.Errors[0]);
     }
 }

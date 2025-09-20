@@ -5,6 +5,7 @@ using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Settings;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace FiletOFiles.Api.Features.Files;
 
@@ -13,9 +14,9 @@ public sealed class FilesService
     private readonly AppDbContext _db;
     private readonly Filestorage _cfg;
 
-    public FilesService(AppDbContext db, Filestorage cfg)
+    public FilesService(AppDbContext db, IOptions<Filestorage> cfg)
     {
-        _cfg = cfg;
+        _cfg = cfg.Value;
         _db = db;
     }
 
@@ -70,6 +71,65 @@ public sealed class FilesService
         await _db.Files.AddAsync(newFile.ToEntity(), cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
 
+        return Result.Ok();
+    }
+
+    public async Task<Result<FileDto>> GetFileDescriptor(
+        string fileId,
+        CancellationToken cancellationToken
+    )
+    {
+        var fileDescr = await _db.Files.FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
+        if (fileDescr == null)
+        {
+            return Result.Fail<FileDto>(new Error("Файл не найден").WithMetadata("code", 404));
+        }
+
+        var result = fileDescr.ToDto();
+        return Result.Ok(result);
+    }
+
+    public Result<FileStream> GetFileStream(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return Result.Fail<FileStream>(new Error("Файл не найден").WithMetadata("code", 404));
+        }
+        var stream = File.OpenRead(path);
+        return Result.Ok(stream);
+    }
+
+    public async Task<Result> DeleteFile(string fileId, CancellationToken cancellationToken)
+    {
+        var fileDescr = await _db.Files.FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
+        if (fileDescr == null)
+        {
+            return Result.Fail(new Error("Файл не найден").WithMetadata("code", 404));
+        }
+
+        var path = Path.Combine(_cfg.Path, fileDescr.Source);
+        try
+        {
+            File.Delete(path);
+        }
+        catch (IOException ex)
+        {
+            return Result.Fail(
+                new Error($"Error deleting file: {ex.Message}").WithMetadata("code", 500)
+            );
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Result.Fail(new Error($"Access denied: {ex.Message}").WithMetadata("code", 500));
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(
+                new Error($"An unexpected error occurred: {ex.Message}").WithMetadata("code", 500)
+            );
+        }
+        _db.Files.Remove(fileDescr);
+        await _db.SaveChangesAsync(cancellationToken);
         return Result.Ok();
     }
 }

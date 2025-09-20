@@ -32,6 +32,7 @@ public sealed class TokenProvider
         [
             new Claim(JwtRegisteredClaimNames.Sub, tokenRequest.UserId),
             new Claim(JwtRegisteredClaimNames.Email, tokenRequest.Email),
+            .. tokenRequest.Roles.Select(role => new Claim(JwtCustomClaimNames.Role, role)),
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -51,7 +52,8 @@ public sealed class TokenProvider
 
     private string GenerateRefreshToken()
     {
+        byte[] ulidBytes = Encoding.UTF8.GetBytes(Ulid.NewUlid().ToString());
         byte[] randomBytes = RandomNumberGenerator.GetBytes(32);
-        return Convert.ToBase64String(randomBytes);
+        return Convert.ToBase64String([.. ulidBytes, .. randomBytes]);
     }
 }

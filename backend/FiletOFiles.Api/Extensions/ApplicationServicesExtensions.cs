@@ -5,6 +5,7 @@ using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Features.Auth;
 using FiletOFiles.Api.Features.Files;
+using FiletOFiles.Api.Helpers;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Services.Sorting;
@@ -23,7 +24,10 @@ public static class ApplicationServicesExtensions
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-        builder.Services.AddOpenApi();
+        builder.Services.AddOpenApi(opt =>
+        {
+            opt.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+        });
         builder.Services.AddTransient<SortMappingProvider>();
         builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("Auth"));
         builder.Services.AddTransient<TokenProvider>();
