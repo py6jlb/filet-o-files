@@ -3,6 +3,7 @@ using System.Text;
 using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.DTOs.Tags;
+using FiletOFiles.Api.Features.Auth;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Services.Sorting;
@@ -10,8 +11,10 @@ using FiletOFiles.Api.Settings;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using OpenIddict.Abstractions;
 
 namespace FiletOFiles.Api.Extensions;
 
@@ -32,6 +35,7 @@ public static class ApplicationServicesExtensions
         );
         var filestorage = builder.Configuration.GetSection("Filestorage").Get<Filestorage>()!;
         builder.Services.AddSingleton(filestorage);
+        builder.Services.AddScoped<AuthService>();
         builder.Services.AddHttpContextAccessor();
 
         return builder;
@@ -43,9 +47,14 @@ public static class ApplicationServicesExtensions
     {
         builder
             .Services.AddIdentity<IdentityUser, IdentityRole>()
-            .AddEntityFrameworkStores<AppDbIdentityContext>();
+            .AddEntityFrameworkStores<AppDbIdentityContext>()
+            .AddDefaultTokenProviders();
 
-        var oidc = builder.Configuration.GetSection("Oidc").Get<OpenIdOptions>()!;
+        builder
+            .Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/persistent"));
+
+        var authOpt = builder.Configuration.GetSection("Auth").Get<AuthOptions>()!;
 
         builder
             .Services.AddOpenIddict()
@@ -55,18 +64,36 @@ public static class ApplicationServicesExtensions
             })
             .AddServer(opt =>
             {
-                opt.SetTokenEndpointUris("auth/token")
-                    .AllowPasswordFlow()
-                    .AllowRefreshTokenFlow()
-                    .AddEncryptionKey(new SymmetricSecurityKey(Convert.FromBase64String(oidc.Key)));
+                opt.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow().AllowPasswordFlow();
+                opt.SetAuthorizationEndpointUris("/auth/authorize");
+                opt.SetTokenEndpointUris("/auth/token");
 
-                var aspOpt = opt.UseAspNetCore().EnableTokenEndpointPassthrough();
+                opt.SetAccessTokenLifetime(TimeSpan.FromMinutes(authOpt.ExpirationInMinutes))
+                    .SetRefreshTokenLifetime(TimeSpan.FromDays(authOpt.RefreshTokenExpirationDays));
+
+                opt.RegisterScopes(
+                    OpenIddictConstants.Scopes.OpenId,
+                    OpenIddictConstants.Scopes.Profile,
+                    OpenIddictConstants.Scopes.Roles,
+                    OpenIddictConstants.Scopes.OfflineAccess
+                );
+
+                var aspOpt = opt.UseAspNetCore()
+                    .EnableTokenEndpointPassthrough()
+                    .EnableAuthorizationEndpointPassthrough();
 
                 if (builder.Environment.IsDevelopment())
                 {
-                    opt.AddDevelopmentSigningCertificate();
+                    opt.AddDevelopmentEncryptionCertificate().AddDevelopmentSigningCertificate();
                     aspOpt.DisableTransportSecurityRequirement();
                 }
+                else
+                {
+                    opt.AddEncryptionKey(
+                        new SymmetricSecurityKey(Convert.FromBase64String(authOpt.Key))
+                    );
+                }
+                opt.DisableAccessTokenEncryption();
             })
             .AddValidation(opt =>
             {
@@ -74,13 +101,13 @@ public static class ApplicationServicesExtensions
                 opt.UseAspNetCore();
             });
 
-        builder
-            .Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie();
-
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = OpenIddictConstants.Schemes.Bearer;
+        });
         builder.Services.AddCors(options =>
             options.AddDefaultPolicy(policy =>
-                policy.AllowAnyHeader().AllowAnyMethod().WithOrigins(oidc.RedirectUri)
+                policy.AllowAnyHeader().AllowAnyMethod().WithOrigins(authOpt.RedirectUri)
             )
         );
 

@@ -1,4 +1,5 @@
 using System;
+using FiletOFiles.Api.Features.Auth.Authorize;
 using FiletOFiles.Api.Features.Auth.RegisterUser;
 using FiletOFiles.Api.Features.Auth.Token;
 
@@ -14,9 +15,8 @@ public static class AuthGroup
             .MapGroup("/auth")
             .WithOpenApi()
             .WithTags("Auth")
-            .RequireAuthorization()
-            .MapToken();
-        //.MapRegister();
+            .MapToken()
+            .MapAuthorize();
 
         return endpointRouteBuilder;
     }

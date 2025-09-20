@@ -1,4 +1,3 @@
-using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
@@ -97,16 +96,21 @@ public static class TokenEndpoint
                 .SetClaims(Claims.Role, [.. await userManager.GetRolesAsync(user)]);
 
             identity.SetScopes(
-                new[] { Scopes.OpenId, Scopes.Email, Scopes.Profile, Scopes.Roles }.Intersect(
-                    request.GetScopes()
-                )
+                new[]
+                {
+                    Scopes.OpenId,
+                    Scopes.Email,
+                    Scopes.Profile,
+                    Scopes.Roles,
+                    Scopes.OfflineAccess,
+                }.Intersect(request.GetScopes())
             );
 
-            identity.SetDestinations(AuthHelpers.GetDestinations);
+            identity.SetDestinations(claim => [Destinations.AccessToken]);
 
-            return TypedResults.SignIn(
+            return Results.SignIn(
                 new ClaimsPrincipal(identity),
-                null,
+                properties: null,
                 OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
             );
         }
@@ -167,7 +171,7 @@ public static class TokenEndpoint
                 .SetClaim(Claims.PreferredUsername, await userManager.GetUserNameAsync(user))
                 .SetClaims(Claims.Role, [.. await userManager.GetRolesAsync(user)]);
 
-            identity.SetDestinations(GetDestinations);
+            identity.SetDestinations(AuthHelpers.GetDestinations);
 
             return TypedResults.SignIn(
                 new ClaimsPrincipal(identity),

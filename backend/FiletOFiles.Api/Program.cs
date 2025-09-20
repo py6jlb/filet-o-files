@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 //builder.AddOpenTelemetry();
 builder.AddDatabase();
@@ -17,8 +17,7 @@ builder.AddErrorHandling();
 builder.Services.AddEndpointsApiExplorer();
 
 WebApplication app = builder.Build();
-
-app.MapFeatures();
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
@@ -27,9 +26,13 @@ if (app.Environment.IsDevelopment())
     await app.ApplyMigrations();
     app.UseDeveloperExceptionPage();
 }
-app.UseHttpsRedirection();
-app.UseExceptionHandler();
+await app.SeedOpenidData();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapFeatures();
+app.UseHttpsRedirection();
+app.UseExceptionHandler();
 
 await app.RunAsync();
