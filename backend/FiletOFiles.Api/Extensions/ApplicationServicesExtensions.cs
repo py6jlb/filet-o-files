@@ -4,6 +4,7 @@ using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Features.Auth;
+using FiletOFiles.Api.Features.Files;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Services.Sorting;
@@ -35,9 +36,16 @@ public static class ApplicationServicesExtensions
             _ => TagMappings.SortMapping
         );
         var filestorage = builder.Configuration.GetSection("Filestorage").Get<Filestorage>()!;
-        builder.Services.AddSingleton(filestorage);
+        Directory.CreateDirectory(filestorage.Path);
+
+        builder.Services.Configure<Filestorage>(builder.Configuration.GetSection("Filestorage"));
         builder.Services.AddScoped<AuthService>();
+        builder.Services.AddScoped<FilesService>();
         builder.Services.AddHttpContextAccessor();
+
+        builder
+            .Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/persistent"));
 
         return builder;
     }
@@ -50,10 +58,6 @@ public static class ApplicationServicesExtensions
             .Services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<AppDbIdentityContext>()
             .AddDefaultTokenProviders();
-
-        builder
-            .Services.AddDataProtection()
-            .PersistKeysToFileSystem(new DirectoryInfo("/persistent"));
 
         var authOpt = builder.Configuration.GetSection("Auth").Get<AuthOptions>()!;
 
