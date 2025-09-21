@@ -23,8 +23,15 @@ public static class ErrorHelper
         {
             return null;
         }
-        var extensions = (Dictionary<string, object?>?)err?.Metadata["extensions"];
-        return extensions;
+
+        if (err.Metadata.TryGetValue("extensions", out var extensions))
+        {
+            return (Dictionary<string, object?>?)extensions;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public static ProblemHttpResult GetProblem(IError err)

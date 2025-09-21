@@ -28,6 +28,7 @@ public sealed class TokenProvider
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtAuthOptions.Key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
         List<Claim> claims =
         [
             new Claim(JwtRegisteredClaimNames.Sub, tokenRequest.UserId),

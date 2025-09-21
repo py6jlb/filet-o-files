@@ -1,6 +1,8 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using FiletOFiles.Api.Domain.Entities;
+using FiletOFiles.Api.DTOs.Auth;
 using FiletOFiles.Api.DTOs.Recipes;
 using FiletOFiles.Api.DTOs.Tags;
 using FiletOFiles.Api.Features.Auth;
@@ -68,6 +70,7 @@ public static class ApplicationServicesExtensions
         builder
             .Services.AddAuthentication(options =>
             {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
@@ -80,6 +83,8 @@ public static class ApplicationServicesExtensions
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(authOpt.Key)
                     ),
+                    NameClaimType = JwtRegisteredClaimNames.Email,
+                    RoleClaimType = JwtCustomClaimNames.Role,
                 };
             });
 
