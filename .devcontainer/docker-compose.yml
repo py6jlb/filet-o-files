@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ../
+      dockerfile: .devcontainer/backend.Dockerfile
+    volumes:
+      - ../:/workspace:cached
+      - db:/workspace/backend/FiletOFiles.Api/db
+      - filestorage:/workspace/backend/FiletOFiles.Api/filestorage
+      - persistence:/workspace/persistence
+    # ports:
+    #   - "5074:5074"
+    #   - "7119:7119"
+    #   - "5173:5173"
+    command: sleep infinity
+
+  # frontend:
+  #   build:
+  #     context: ../
+  #     dockerfile: .devcontainer/frontend.Dockerfile
+  #   volumes:
+  #     - ../:/workspace
+  #   ports:
+  #     - "5173:5173"
+  #   command: sleep infinity
+volumes:
+  db:
+  persistence:
+  filestorage:

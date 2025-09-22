@@ -1,0 +1,16 @@
+{
+    "[csharp]": {
+        "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    },
+    "cSpell.words": [
+        "ASPNETCORE",
+        "csdevkit",
+        "devcontainers",
+        "dotnettools",
+        "Hmac",
+        "Iddict"
+    ],
+}

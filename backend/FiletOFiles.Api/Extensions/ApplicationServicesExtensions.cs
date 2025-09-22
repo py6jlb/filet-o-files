@@ -49,9 +49,10 @@ public static class ApplicationServicesExtensions
         builder.Services.AddScoped<FilesService>();
         builder.Services.AddHttpContextAccessor();
 
+        var persistence = builder.Configuration.GetSection("Persistence").Get<Persistence>()!;
         builder
             .Services.AddDataProtection()
-            .PersistKeysToFileSystem(new DirectoryInfo("/persistent"));
+            .PersistKeysToFileSystem(new DirectoryInfo(persistence.Path));
 
         return builder;
     }

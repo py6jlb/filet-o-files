@@ -1,22 +1,20 @@
 {
-  "name": "C# (.NET)",
-  "mounts": [
-    "source=dev-container-volume,target=/persistent,type=volume"
+  "name": "aspnet-vue3-fullstack",
+  "dockerComposeFile": [
+    "docker-compose.yml"
   ],
-  "build": {
-    "dockerfile": "./Dockerfile",
-    "context": "."
-  },
+  "service": "backend",
+  "workspaceFolder": "/workspace",
   "forwardPorts": [
-    5000,
-    5001
+    5074,
+    7119,
+    5173
   ],
   "portsAttributes": {
     "5001": {
       "protocol": "https"
     }
   },
-  "postCreateCommand": "chmod +x .devcontainer/scripts/post-create.sh && .devcontainer/scripts/post-create.sh",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -27,8 +25,13 @@
         "csharpier.csharpier-vscode",
         "humao.rest-client",
         "ms-dotnettools.dotnet-interactive-vscode",
-        "vscode-icons-team.vscode-icons"
+        "vscode-icons-team.vscode-icons",
+        "Vue.volar",
+        "dbaeumer.vscode-eslint",
+        "EditorConfig.EditorConfig",
+        "esbenp.prettier-vscode"
       ]
     }
-  }
+  },
+  "postCreateCommand": "chmod +x .devcontainer/scripts/post-create.sh && .devcontainer/scripts/post-create.sh"
 }
