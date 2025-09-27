@@ -90,6 +90,16 @@ public static class ApplicationServicesExtensions
             });
 
         builder.Services.AddAuthorization();
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(
+                "AllowAll",
+                policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                }
+            );
+        });
         return builder;
     }
 }

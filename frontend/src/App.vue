@@ -1,14 +1,18 @@
 <script setup>
 import { RouterView } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
 
-const loggedIn = false
+const authStore = useAuthStore()
+function logout() {
+  authStore.logout()
+}
 </script>
 
 <template>
   <div class="flex flex-col min-h-screen bg-base-200">
     <nav class="navbar bg-base-100 shadow-sm">
       <div class="navbar-start">
-        <div class="dropdown" v-if="loggedIn">
+        <div class="dropdown" v-if="authStore.user">
           <button tabindex="0" class="btn btn-ghost lg:hidden">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -30,29 +34,24 @@ const loggedIn = false
             class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
             <li><a href="#">Главная</a></li>
-            <li><a href="#">О сайте</a></li>
-            <li><a href="#">Контакты</a></li>
+            <li><a href="#">Планировщик</a></li>
           </ul>
         </div>
         <a class="btn btn-ghost text-xl" href="#">Filet-o-files</a>
       </div>
-      <div class="navbar-center hidden lg:flex" v-if="loggedIn">
+      <div class="navbar-center hidden lg:flex" v-if="authStore.user">
         <ul class="menu menu-horizontal px-1">
           <li><a href="#">Главная</a></li>
-          <li><a href="#">О сайте</a></li>
-          <li><a href="#">Контакты</a></li>
+          <li><a href="#">Планировщик</a></li>
         </ul>
       </div>
-      <div class="navbar-end" v-if="!loggedIn">
-        <a class="btn btn-primary" href="#">Войти</a>
-      </div>
-      <div class="navbar-end" v-else>
+      <div class="navbar-end" v-if="authStore.user">
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
             <div class="w-10 rounded-full">
               <img
                 alt="Tailwind CSS Navbar component"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                src="@/assets/avatar.svg"
               />
             </div>
           </div>
@@ -60,9 +59,9 @@ const loggedIn = false
             tabindex="0"
             class="menu dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
-            <li><a>Profile</a></li>
-            <li><a>Settings</a></li>
-            <li><a>Logout</a></li>
+            <li><a>Профиль</a></li>
+            <!-- <li><a>Настройки</a></li> -->
+            <li><a @click="logout">Выход</a></li>
           </ul>
         </div>
       </div>

@@ -30,12 +30,12 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 await app.SeedOpenidData();
-
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapFeatures();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseExceptionHandler();
 
 await app.RunAsync();
