@@ -64,6 +64,6 @@ public static class GetRecipesEndpoint
             cancellationToken
         );
 
-        return result.TotalCount == 0 ? TypedResults.NotFound() : TypedResults.Ok(result);
+        return TypedResults.Ok(result);
     }
 }

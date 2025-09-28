@@ -1,6 +1,7 @@
 <script setup>
-import { RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
+import MainMenu from './components/MainMenu.vue'
 
 const authStore = useAuthStore()
 function logout() {
@@ -31,35 +32,30 @@ function logout() {
           </button>
           <ul
             tabindex="0"
-            class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+            class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
-            <li><a href="#">Главная</a></li>
-            <li><a href="#">Планировщик</a></li>
+            <MainMenu />
           </ul>
         </div>
-        <a class="btn btn-ghost text-xl" href="#">Filet-o-files</a>
+        <RouterLink class="btn btn-ghost text-xl" to="/">Filet-o-files</RouterLink>
       </div>
       <div class="navbar-center hidden lg:flex" v-if="authStore.user">
         <ul class="menu menu-horizontal px-1">
-          <li><a href="#">Главная</a></li>
-          <li><a href="#">Планировщик</a></li>
+          <MainMenu />
         </ul>
       </div>
       <div class="navbar-end" v-if="authStore.user">
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
             <div class="w-10 rounded-full">
-              <img
-                alt="Tailwind CSS Navbar component"
-                src="@/assets/avatar.svg"
-              />
+              <img alt="avatar" src="@/assets/avatar.svg" />
             </div>
           </div>
           <ul
             tabindex="0"
             class="menu dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
-            <li><a>Профиль</a></li>
+            <li><RouterLink to="/profile">Профиль</RouterLink></li>
             <!-- <li><a>Настройки</a></li> -->
             <li><a @click="logout">Выход</a></li>
           </ul>
