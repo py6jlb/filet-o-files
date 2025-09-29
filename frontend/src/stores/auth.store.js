@@ -56,6 +56,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = localStorage.getItem('accessToken')
       this.refreshToken = localStorage.getItem('refreshToken')
       this.user = JSON.parse(localStorage.getItem('user'))
+      //console.log(this.accessToken, this.refreshToken, this.user)
       if (this.accessToken) this.scheduleRefresh()
     },
   },
