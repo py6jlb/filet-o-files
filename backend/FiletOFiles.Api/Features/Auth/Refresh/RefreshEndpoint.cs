@@ -13,6 +13,7 @@ public static class RefreshEndpoint
         endpointRouteBuilder
             .MapPost("/refresh", Handle)
             .WithName(nameof(RefreshEndpoint))
+            .AllowAnonymous()
             .WithDescription("Обновление токенов")
             .Produces<AccessTokenDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)

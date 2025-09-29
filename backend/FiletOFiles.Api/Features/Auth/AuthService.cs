@@ -1,4 +1,6 @@
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using FiletOFiles.Api.Domain.Entities;
 using FiletOFiles.Api.DTOs.Auth;
 using FiletOFiles.Api.DTOs.Users;
@@ -16,7 +18,7 @@ namespace FiletOFiles.Api.Features.Auth;
 
 public sealed class AuthService
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<AppIdentityUser> _userManager;
     private readonly ILogger<AuthService> _logger;
     private readonly AppDbContext _db;
     private readonly AppDbIdentityContext _identityDb;
@@ -27,7 +29,7 @@ public sealed class AuthService
         ILogger<AuthService> logger,
         AppDbContext db,
         AppDbIdentityContext identityDb,
-        UserManager<IdentityUser> userManager,
+        UserManager<AppIdentityUser> userManager,
         TokenProvider tokenProvider,
         IOptions<AuthOptions> jwtAuthOptions
     )
@@ -100,7 +102,7 @@ public sealed class AuthService
         _db.Database.SetDbConnection(_identityDb.Database.GetDbConnection());
         await _db.Database.UseTransactionAsync(transaction.GetDbTransaction(), cancellationToken);
 
-        var identityUser = new IdentityUser { Email = request.Email, UserName = request.Name };
+        var identityUser = new AppIdentityUser { Email = request.Email, UserName = request.Name };
 
         var identityResult = await _userManager.CreateAsync(identityUser, request.Password);
         if (!identityResult.Succeeded)
@@ -223,5 +225,151 @@ public sealed class AuthService
 
         await _identityDb.SaveChangesAsync(cancellationToken);
         return Result.Ok(accessTokens);
+    }
+
+    public async Task<Result<AccessTokenDto>> HandleTelegramCallback(
+        TelegramPayload payload,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!ValidateTelegramAuth(payload))
+        {
+            return Result.Fail<AccessTokenDto>(
+                new Error("Неверная подпись ответа телеграм").WithMetadata("code", 400)
+            );
+        }
+
+        using var transaction = await _identityDb.Database.BeginTransactionAsync(cancellationToken);
+        _db.Database.SetDbConnection(_identityDb.Database.GetDbConnection());
+        await _db.Database.UseTransactionAsync(transaction.GetDbTransaction(), cancellationToken);
+
+        var identityUser = await _userManager.FindByNameAsync(payload.username);
+
+        if (identityUser == null)
+        {
+            var request = new RegistrationRequest
+            {
+                Id = $"rr_{Ulid.NewUlid()}",
+                CreatedAtUtc = DateTime.UtcNow,
+                TelegramId = payload.id,
+                TelegramUserName = payload.username,
+            };
+            await _identityDb.RegistrationRequests.AddAsync(request, cancellationToken);
+
+            identityUser = new AppIdentityUser
+            {
+                UserName = payload.username,
+                TelegramId = payload.id,
+                IsApproved = false,
+            };
+            var identityResult = await _userManager.CreateAsync(identityUser);
+            if (!identityResult.Succeeded)
+            {
+                return Result.Fail<AccessTokenDto>(
+                    new Error("Ошибка регистрации пользователя")
+                        .WithMetadata(
+                            "extensions",
+                            new Dictionary<string, object?>()
+                            {
+                                {
+                                    "errors",
+                                    identityResult.Errors.ToDictionary(
+                                        x => x.Code,
+                                        x => new[] { x.Description }
+                                    )
+                                },
+                            }
+                        )
+                        .WithMetadata("code", 400)
+                );
+            }
+
+            var addToMemberRoleResult = await _userManager.AddToRoleAsync(
+                identityUser,
+                Roles.Member
+            );
+            if (!addToMemberRoleResult.Succeeded)
+            {
+                return Result.Fail<AccessTokenDto>(
+                    new Error("Невозможно зарегистрировать пользователя, попробуйте еще раз.")
+                        .WithMetadata(
+                            "extensions",
+                            new Dictionary<string, object?>()
+                            {
+                                {
+                                    "errors",
+                                    addToMemberRoleResult.Errors.ToDictionary(
+                                        x => x.Code,
+                                        x => new[] { x.Description }
+                                    )
+                                },
+                            }
+                        )
+                        .WithMetadata("code", 400)
+                );
+            }
+
+            var user = new User
+            {
+                Id = $"u_{Ulid.NewUlid()}",
+                Name = payload.username,
+                CreatedAtUtc = DateTime.UtcNow,
+                IdentityId = identityUser.Id,
+            };
+
+            await _db.Users.AddAsync(user, cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+            await _identityDb.SaveChangesAsync(cancellationToken);
+        }
+
+        if (!identityUser.IsApproved)
+        {
+            await transaction.CommitAsync(cancellationToken);
+            return Result
+                .Ok()
+                .WithReason(
+                    new Success("Ваша заявка ожидает подтверждения администратора.").WithMetadata(
+                        "code",
+                        202
+                    )
+                );
+        }
+
+        var roles = await _userManager.GetRolesAsync(identityUser);
+
+        var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email!, roles);
+        var accessTokens = _tokenProvider.Create(tokenRequest);
+
+        var refreshToken = new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            Token = accessTokens.RefreshToken,
+            UserId = identityUser.Id,
+            ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwtAuthOptions.RefreshTokenExpirationDays),
+        };
+
+        await _identityDb.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+        await _identityDb.SaveChangesAsync(cancellationToken);
+
+        return Result.Ok(accessTokens);
+    }
+
+    private bool ValidateTelegramAuth(TelegramPayload payload)
+    {
+        var key = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(_jwtAuthOptions.BotToken));
+        var dataCheckString = string.Join(
+            "\n",
+            payload
+                .GetType()
+                .GetProperties()
+                .Where(p => p.Name != "hash")
+                .Select(p => $"{p.Name.ToLower()}={p.GetValue(payload)?.ToString()}")
+                .OrderBy(s => s, StringComparer.Ordinal)
+        );
+        using var hmac = new HMACSHA256(key);
+        var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dataCheckString));
+
+        var computedHash = BitConverter.ToString(hash).Replace("-", "").ToLower();
+        return computedHash == payload.hash.ToLower();
     }
 }

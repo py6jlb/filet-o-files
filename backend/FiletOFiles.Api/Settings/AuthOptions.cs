@@ -12,4 +12,6 @@ public sealed record AuthOptions
 
     public string AdminEmail { get; init; }
     public string AdminPassword { get; init; }
+
+    public string BotToken { get; init; }
 }

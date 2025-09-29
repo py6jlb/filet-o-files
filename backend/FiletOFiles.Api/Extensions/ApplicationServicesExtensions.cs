@@ -62,7 +62,7 @@ public static class ApplicationServicesExtensions
     )
     {
         builder
-            .Services.AddIdentity<IdentityUser, IdentityRole>()
+            .Services.AddIdentity<AppIdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<AppDbIdentityContext>()
             .AddDefaultTokenProviders();
 

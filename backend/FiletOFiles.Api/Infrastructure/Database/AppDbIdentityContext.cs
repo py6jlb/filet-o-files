@@ -13,6 +13,7 @@ public sealed class AppDbIdentityContext : IdentityDbContext
         : base(options) { }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<RegistrationRequest> RegistrationRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -27,5 +28,6 @@ public sealed class AppDbIdentityContext : IdentityDbContext
         builder.Entity<IdentityUserToken<string>>().ToTable("asp_net_user_tokens");
 
         builder.ApplyConfiguration(new RefreshTokenConfigurations());
+        builder.ApplyConfiguration(new RegistrationRequestConfigurations());
     }
 }

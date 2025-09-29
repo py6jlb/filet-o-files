@@ -19,6 +19,7 @@ public static class LoginEndpoint
             .MapPost("/login", Handle)
             .WithName(nameof(LoginEndpoint))
             .WithDescription("Вход")
+            .AllowAnonymous()
             .Produces<AccessTokenDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status400BadRequest)

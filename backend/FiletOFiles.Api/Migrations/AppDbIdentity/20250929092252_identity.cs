@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FiletOFiles.Api.Migrations.AppDbIdentity
 {
     /// <inheritdoc />
-    public partial class initIdenity : Migration
+    public partial class identity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -47,7 +47,21 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_asp_net_users", x => x.id);
+                    table.PrimaryKey("PK_asp_net_users", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "registration_requests",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    telegram_id = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    telegram_user_name = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    created_at_utc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_registration_requests", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -67,6 +81,25 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                         name: "fk_asp_net_role_claims_asp_net_roles_role_id",
                         column: x => x.role_id,
                         principalTable: "asp_net_roles",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "app_identity_user",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "TEXT", nullable: false),
+                    is_approved = table.Column<bool>(type: "INTEGER", nullable: false),
+                    telegram_id = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_app_identity_user", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_app_identity_user_asp_net_users_id",
+                        column: x => x.id,
+                        principalTable: "asp_net_users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -171,7 +204,7 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                     table.ForeignKey(
                         name: "fk_refresh_tokens_users_user_id",
                         column: x => x.user_id,
-                        principalTable: "asp_net_users",
+                        principalTable: "app_identity_user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -247,7 +280,13 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                 name: "refresh_tokens");
 
             migrationBuilder.DropTable(
+                name: "registration_requests");
+
+            migrationBuilder.DropTable(
                 name: "asp_net_roles");
+
+            migrationBuilder.DropTable(
+                name: "app_identity_user");
 
             migrationBuilder.DropTable(
                 name: "asp_net_users");

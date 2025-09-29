@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FiletOFiles.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250920152510_initDb")]
-    partial class initDb
+    [Migration("20250929092243_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
