@@ -12,6 +12,7 @@
         "dotnettools",
         "Hmac",
         "Iddict",
-        "pinia"
+        "pinia",
+        "VITE"
     ],
 }

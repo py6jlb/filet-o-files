@@ -22,6 +22,23 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem('user', JSON.stringify(this.user))
       this.scheduleRefresh()
     },
+    async telegramLogin(user) {
+      const res = await axios.post('/auth/tg/callback', user)
+      if (res.status === 202) {
+        return 'Заявка на регистрацию на рассмотрении'
+      } else {
+        this.accessToken = res.data.accessToken
+        this.refreshToken = res.data.refreshToken
+        const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
+        this.user = payload
+
+        localStorage.setItem('accessToken', this.accessToken)
+        localStorage.setItem('refreshToken', this.refreshToken)
+        localStorage.setItem('user', JSON.stringify(this.user))
+        this.scheduleRefresh()
+        return undefined
+      }
+    },
     async logout() {
       this.clearRefresh()
       this.accessToken = null
