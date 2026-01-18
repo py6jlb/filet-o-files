@@ -30,4 +30,7 @@
         <PackageReference Include="System.Linq.Dynamic.Core" />
         <PackageReference Include="Ulid" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Features/Auth/ChangePassword/" />
+    </ItemGroup>
 </Project>

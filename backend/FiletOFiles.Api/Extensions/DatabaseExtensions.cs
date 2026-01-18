@@ -3,8 +3,9 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 using FiletOFiles.Api.DTOs.Auth;
-using FiletOFiles.Api.Features.Auth;
+using FiletOFiles.Api.DTOs.AuthManagement;
 using FiletOFiles.Api.Infrastructure.Database;
+using FiletOFiles.Api.Services;
 using FiletOFiles.Api.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -54,13 +55,13 @@ public static class DatabaseExtensions
         var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
         var request = new RegisterUserDto()
         {
-            Email = oidc.AdminEmail,
+            Email = oidc.AdminEmail ?? "admin@admin.ru",
             Name = "admin",
-            Password = oidc.AdminPassword,
-            ConfirmationPassword = oidc.AdminPassword,
+            Password = oidc.AdminPassword ?? "!Admin12345",
+            ConfirmationPassword = oidc.AdminPassword ?? "!Admin12345",
         };
 
-        var res = await authService.Register(request, true);
+        var res = await authService.AddIdentityUser(request, true, true);
         if (res.IsFailed)
         {
             var encoderSettings = new JsonSerializerOptions

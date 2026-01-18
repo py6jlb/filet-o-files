@@ -1,10 +1,7 @@
 using System;
-using FiletOFiles.Api.Features.Auth.Approve;
-using FiletOFiles.Api.Features.Auth.GetRequests;
 using FiletOFiles.Api.Features.Auth.Login;
 using FiletOFiles.Api.Features.Auth.Refresh;
-using FiletOFiles.Api.Features.Auth.Reject;
-using FiletOFiles.Api.Features.Auth.TelegramCallback;
+using FiletOFiles.Api.Features.Auth.Register;
 
 namespace FiletOFiles.Api.Features.Auth;
 
@@ -21,10 +18,7 @@ public static class AuthGroup
             .RequireAuthorization()
             .MapLogin()
             .MapRefresh()
-            .MapTelegramCallback()
-            .MapGetRequests()
-            .MapApprove()
-            .MapReject();
+            .MapRegister();
 
         return endpointRouteBuilder;
     }

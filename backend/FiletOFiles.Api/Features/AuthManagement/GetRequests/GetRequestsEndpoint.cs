@@ -1,10 +1,13 @@
 using System;
-using FiletOFiles.Api.DTOs.Auth;
+using FiletOFiles.Api.Domain.Entities;
+using FiletOFiles.Api.DTOs.AuthManagement;
+using FiletOFiles.Api.DTOs.Users;
 using FiletOFiles.Api.Infrastructure.Database;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace FiletOFiles.Api.Features.Auth.GetRequests;
+namespace FiletOFiles.Api.Features.AuthManagement.GetRequests;
 
 public static class GetRequestsEndpoint
 {
@@ -24,14 +27,26 @@ public static class GetRequestsEndpoint
     }
 
     public static async Task<IResult> HandleAsync(
-        [FromServices] AppDbIdentityContext identityDb,
+        [FromServices] UserManager<AppIdentityUser> userManager,
+        [FromServices] AppDbContext db,
         CancellationToken cancellationToken = default
     )
     {
-        var query = await identityDb
-            .RegistrationRequests.Select(r => r.ToRegistrationRequestDto())
+        var usersIdentityIds = await userManager
+            .Users.Where(x => x.IsApproved == false)
+            .Select(x => x.Id)
             .ToArrayAsync(cancellationToken);
 
-        return TypedResults.Ok(query);
+        if (usersIdentityIds.Length == 0)
+        {
+            return TypedResults.Ok(Array.Empty<UserDto>());
+        }
+
+        var users = await db
+            .Users.Where(u => usersIdentityIds.Contains(u.IdentityId))
+            .Select(UserMapping.ProjectToDto())
+            .ToArrayAsync(cancellationToken);
+
+        return TypedResults.Ok(users);
     }
 }

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using FiletOFiles.Api.DTOs.Auth;
+using FiletOFiles.Api.DTOs.AuthManagement;
 using FiletOFiles.Api.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;

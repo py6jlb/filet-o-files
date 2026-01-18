@@ -6,16 +6,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace FiletOFiles.Api.Features.Auth.Reject;
+namespace FiletOFiles.Api.Features.AuthManagement.Approve;
 
-public static class RejectEndpoint
+public static class ApproveEndpoint
 {
-    public static IEndpointRouteBuilder MapReject(this IEndpointRouteBuilder endpointRouteBuilder)
+    public static IEndpointRouteBuilder MapApprove(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapPost("/reject/{id}", HandleAsync)
-            .WithName(nameof(RejectEndpoint))
-            .WithDescription("Отклонение заявки на регистрацию")
+            .MapPost("/approve/{id}", HandleAsync)
+            .WithName(nameof(ApproveEndpoint))
+            .WithDescription("Подтверждение заявки на регистрацию")
             .Produces(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -30,16 +30,7 @@ public static class RejectEndpoint
         CancellationToken cancellationToken = default
     )
     {
-        var request = await identityDb
-            .RegistrationRequests.Where(x => x.Id == id)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (request == null)
-        {
-            return TypedResults.NotFound("Заявка с указанным id не найдена");
-        }
-
-        var identityUser = await userManager.FindByNameAsync(request.TelegramUserName);
+        var identityUser = await userManager.FindByIdAsync(id);
         if (identityUser == null)
         {
             return TypedResults.NotFound("Пользователь не найден");
@@ -48,7 +39,6 @@ public static class RejectEndpoint
         using var transaction = await identityDb.Database.BeginTransactionAsync(cancellationToken);
         identityUser.IsApproved = true;
         await userManager.UpdateAsync(identityUser);
-        identityDb.RegistrationRequests.Remove(request);
         await identityDb.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return TypedResults.NoContent();

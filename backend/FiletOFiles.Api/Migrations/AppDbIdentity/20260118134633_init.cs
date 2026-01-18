@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FiletOFiles.Api.Migrations.AppDbIdentity
 {
     /// <inheritdoc />
-    public partial class identity : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,20 +51,6 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                 });
 
             migrationBuilder.CreateTable(
-                name: "registration_requests",
-                columns: table => new
-                {
-                    id = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    telegram_id = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    telegram_user_name = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    created_at_utc = table.Column<DateTime>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_registration_requests", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "asp_net_role_claims",
                 columns: table => new
                 {
@@ -91,7 +77,7 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                 {
                     id = table.Column<string>(type: "TEXT", nullable: false),
                     is_approved = table.Column<bool>(type: "INTEGER", nullable: false),
-                    telegram_id = table.Column<string>(type: "TEXT", nullable: true)
+                    must_change_password = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -278,9 +264,6 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
 
             migrationBuilder.DropTable(
                 name: "refresh_tokens");
-
-            migrationBuilder.DropTable(
-                name: "registration_requests");
 
             migrationBuilder.DropTable(
                 name: "asp_net_roles");

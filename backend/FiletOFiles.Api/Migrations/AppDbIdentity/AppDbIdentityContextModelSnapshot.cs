@@ -53,35 +53,6 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
-            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.RegistrationRequest", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("created_at_utc");
-
-                    b.Property<string>("TelegramId")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("telegram_id");
-
-                    b.Property<string>("TelegramUserName")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("telegram_user_name");
-
-                    b.HasKey("Id")
-                        .HasName("pk_registration_requests");
-
-                    b.ToTable("registration_requests", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -331,9 +302,9 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                         .HasColumnType("INTEGER")
                         .HasColumnName("is_approved");
 
-                    b.Property<string>("TelegramId")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("telegram_id");
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("must_change_password");
 
                     b.ToTable("app_identity_user", (string)null);
                 });

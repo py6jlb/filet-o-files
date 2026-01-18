@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FiletOFiles.Api.Migrations.AppDbIdentity
 {
     [DbContext(typeof(AppDbIdentityContext))]
-    [Migration("20250929092252_identity")]
-    partial class identity
+    [Migration("20260118134633_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,35 +54,6 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                         .HasDatabaseName("ix_refresh_tokens_user_id");
 
                     b.ToTable("refresh_tokens", (string)null);
-                });
-
-            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.RegistrationRequest", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("created_at_utc");
-
-                    b.Property<string>("TelegramId")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("telegram_id");
-
-                    b.Property<string>("TelegramUserName")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("telegram_user_name");
-
-                    b.HasKey("Id")
-                        .HasName("pk_registration_requests");
-
-                    b.ToTable("registration_requests", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -334,9 +305,9 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                         .HasColumnType("INTEGER")
                         .HasColumnName("is_approved");
 
-                    b.Property<string>("TelegramId")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("telegram_id");
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("must_change_password");
 
                     b.ToTable("app_identity_user", (string)null);
                 });

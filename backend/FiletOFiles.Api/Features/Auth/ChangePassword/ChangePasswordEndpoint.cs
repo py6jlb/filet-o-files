@@ -1,5 +1,6 @@
 using System;
 using FiletOFiles.Api.DTOs.Auth;
+using FiletOFiles.Api.Extensions;
 using FiletOFiles.Api.Helpers;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Services;
@@ -9,34 +10,35 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace FiletOFiles.Api.Features.Auth.Login;
+namespace FiletOFiles.Api.Features.Auth.ChangePassword;
 
-public static class LoginEndpoint
+public static class ChangePasswordEndpoint
 {
-    public static IEndpointRouteBuilder MapLogin(this IEndpointRouteBuilder endpointRouteBuilder)
+    public static IEndpointRouteBuilder MapChangePassword(
+        this IEndpointRouteBuilder endpointRouteBuilder
+    )
     {
         endpointRouteBuilder
             .MapPost("/login", Handle)
-            .WithName(nameof(LoginEndpoint))
-            .WithDescription("Вход")
-            .AllowAnonymous()
+            .WithName(nameof(ChangePasswordEndpoint))
+            .WithDescription("Смена пароля")
             .Produces<AccessTokenDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
         return endpointRouteBuilder;
     }
 
     public static async Task<IResult> Handle(
+        HttpContext context,
         [FromServices] AuthService service,
-        [FromBody] LoginUserDto request,
+        [FromBody] ChangePasswordDto request,
         CancellationToken cancellationToken = default
     )
     {
-        var result = await service.Login(request, cancellationToken);
-        return result.IsSuccess
-            ? TypedResults.Ok(result.Value)
-            : ErrorHelper.GetProblem(result.Errors[0]);
+        string userId = context.GetUserId();
+        var result = await service.ChangePassword(userId, request);
+        return result.IsSuccess ? TypedResults.Ok() : ErrorHelper.GetProblem(result.Errors[0]);
     }
 }
