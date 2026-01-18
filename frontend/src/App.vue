@@ -10,14 +10,13 @@ function logout() {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-base-200">
-    <nav class="navbar bg-base-100 shadow-sm">
-      <div class="navbar-start">
+  <div>
+    <nav >
+      <div >
         <div class="dropdown" v-if="authStore.user">
-          <button tabindex="0" class="btn btn-ghost lg:hidden">
+          <button tabindex="0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -32,28 +31,26 @@ function logout() {
           </button>
           <ul
             tabindex="0"
-            class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
             <MainMenu />
           </ul>
         </div>
-        <RouterLink class="btn btn-ghost text-xl" to="/">Filet-o-files</RouterLink>
+        <RouterLink to="/">Filet-o-files</RouterLink>
       </div>
-      <div class="navbar-center hidden lg:flex" v-if="authStore.user">
-        <ul class="menu menu-horizontal px-1">
+      <div  v-if="authStore.user">
+        <ul >
           <MainMenu />
         </ul>
       </div>
-      <div class="navbar-end" v-if="authStore.user">
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-            <div class="w-10 rounded-full">
+      <div  v-if="authStore.user">
+        <div >
+          <div tabindex="0" role="button" >
+            <div >
               <img alt="avatar" src="@/assets/avatar.svg" />
             </div>
           </div>
           <ul
             tabindex="0"
-            class="menu dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
             <li><RouterLink to="/profile">Профиль</RouterLink></li>
             <!-- <li><a>Настройки</a></li> -->
@@ -63,12 +60,12 @@ function logout() {
       </div>
     </nav>
 
-    <main class="flex-1 container mx-auto py-6 px-4">
+    <main >
       <RouterView />
     </main>
 
-    <footer class="footer bg-base-100 p-4 text-base-content">
-      <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+    <footer>
+      <div>
         <div>Filet-o-files</div>
       </div>
     </footer>
