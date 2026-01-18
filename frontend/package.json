@@ -16,6 +16,7 @@
   "dependencies": {
     "axios": "^1.12.2",
     "pinia": "^3.0.3",
+    "vanilla-framework": "^4.39.0",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
@@ -29,6 +30,7 @@
     "eslint-plugin-vue": "~10.3.0",
     "globals": "^16.3.0",
     "prettier": "3.6.2",
+    "sass": "^1.97.2",
     "vite": "^7.0.6",
     "vite-plugin-vue-devtools": "^8.0.0"
   }
