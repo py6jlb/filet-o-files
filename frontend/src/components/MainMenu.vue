@@ -3,15 +3,16 @@
 </script>
 
 <template>
-  <header id="navigation" class="p-navigation is-dark">
-    <div class="p-navigation__row">
-      <div class="p-navigation__banner">
-        <div class="p-navigation__logo">
-          <a class="p-navigation__item" href="#">
-            <img class="p-navigation__image" src="https://assets.ubuntu.com/v1/3c7954dd-logo-canonical-white.svg" alt="Canonical" width="95">
-          </a>
-        </div>
-      </div>
-    </div>
-  </header>
+  <v-menu>
+    <template v-slot:activator="{ on }">
+      <v-app-bar-title v-on="on" class="app-bar-logo-link">
+        <v-img src="/images/logo_1.png" alt="Logo" width="40" height="40" class="ml-2 mr-2"></v-img>
+        <span class="logo_link_text">File-o-Files</span>
+      </v-app-bar-title>
+    </template>
+    <v-list>
+      <v-list-item :to="'/'"> Рецепты </v-list-item>
+      <v-list-item :to="'/scheduler'"> Планирование </v-list-item>
+    </v-list>
+  </v-menu>
 </template>

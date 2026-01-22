@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import RecipesView from '../views/RecipesView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import SchedulerView from '@/views/SchedulerView.vue'
 import { useAuthStore } from '../stores/auth.store'
 
 const router = createRouter({
@@ -10,6 +11,12 @@ const router = createRouter({
       path: '/',
       name: 'recipes',
       component: RecipesView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/scheduler',
+      name: 'scheduler',
+      component: SchedulerView,
       meta: { requiresAuth: true },
     },
     {
