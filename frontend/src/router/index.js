@@ -9,25 +9,25 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'recipes',
+      name: 'Рецепты',
       component: RecipesView,
       meta: { requiresAuth: true },
     },
     {
       path: '/scheduler',
-      name: 'scheduler',
+      name: 'Планирование',
       component: SchedulerView,
       meta: { requiresAuth: true },
     },
     {
       path: '/profile',
-      name: 'profile',
+      name: 'Профиль',
       component: ProfileView,
       meta: { requiresAuth: true },
     },
     {
       path: '/login',
-      name: 'login',
+      name: 'Вход',
       component: () => import('../views/LoginView.vue'),
     },
   ],

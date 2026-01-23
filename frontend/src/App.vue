@@ -1,41 +1,50 @@
 <script setup>
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
+import { computed } from 'vue'
 import MainMenu from './components/MainMenu.vue'
+import { ref } from 'vue'
+const route = useRoute()
+const drawer = ref(false)
+const reactiveRouteName = computed(() =>
+  route.name != null && route.name !== '' ? ` / ${route.name}` : '',
+)
 </script>
 
 <template>
   <v-app>
-    <v-app-bar>
+    <v-navigation-drawer v-model="drawer">
       <MainMenu />
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-list-item
+            lines="two"
+            prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
+            title="Jane Doe"
+            subtitle="jane.doe@example.com"
+          ></v-list-item>
+        </div>
+      </template>
+    </v-navigation-drawer>
+    <v-app-bar>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <div class="d-flex align-center">
+        <v-img src="/images/logo_1.png" alt="Logo" width="40" height="40" class="mr-2"></v-img>
+        Filet-o-Files{{ reactiveRouteName }}
+      </div>
     </v-app-bar>
-    <v-main class="d-flex justify-center">
+
+    <v-main>
       <v-container>
         <RouterView />
       </v-container>
     </v-main>
-    <v-footer
-      style="max-height: 48px"
-      class="d-flex align-center justify-center ga-2 flex-wrap flex-grow-1"
-      color="surface-light"
-    >
-      <div class="text-center">{{ new Date().getFullYear() }} — <strong>Filet-o-Files</strong></div>
-    </v-footer>
   </v-app>
 </template>
 
-<style scoped>
-.app-bar-logo-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-  margin-left: 8px;
+<script>
+export default {
+  data: () => ({ drawer: false }),
 }
+</script>
 
-.logo_link_text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-</style>
+<style scoped></style>
