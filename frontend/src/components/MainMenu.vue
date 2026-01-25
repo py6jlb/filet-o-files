@@ -1,10 +1,45 @@
+<template>
+  <v-navigation-drawer v-model="modelValue" absolute temporary>
+    <div class="d-flex">
+      <v-spacer /><v-btn
+        block
+        @click="handleClick"
+        variant="plain"
+        size="small"
+        prepend-icon="mdi-chevron-triple-left"
+        slim
+        rounded="0"
+      >
+        Свернуть</v-btn
+      >
+    </div>
+    <v-list>
+      <v-list-item :to="'/'"> <v-icon>mdi-chef-hat</v-icon> Рецепты </v-list-item>
+      <v-list-item :to="'/scheduler'">
+        <v-icon>mdi-calendar-month</v-icon> Планирование
+      </v-list-item>
+    </v-list>
+    <template v-slot:append>
+      <div class="pa-2">
+        <LoginInfo />
+      </div>
+    </template>
+  </v-navigation-drawer>
+</template>
+
 <script setup>
-//import { useAuthStore } from '@/stores/auth.store'
+import LoginInfo from './LoginInfo.vue'
+
+const modelValue = defineModel()
+
+const handleClick = () => {
+  modelValue.value = false
+}
 </script>
 
-<template>
-  <v-list>
-    <v-list-item :to="'/'"> <v-icon>mdi-chef-hat</v-icon> Рецепты </v-list-item>
-    <v-list-item :to="'/scheduler'"> <v-icon>mdi-calendar-month</v-icon> Планирование </v-list-item>
-  </v-list>
-</template>
+<style scoped>
+.slim-item {
+  min-height: 24px !important;
+  padding: 0 8px !important;
+}
+</style>

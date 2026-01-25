@@ -27,19 +27,16 @@ import '@fontsource/roboto/900-italic.css'
 
 import { useAuthStore } from "./stores/auth.store";
 
-const vuetify = createVuetify({
-  components,
-  directives,
-})
-
-
 const app = createApp(App)
-
 app.use(createPinia())
-app.use(router)
-app.use(vuetify)
 
 const auth = useAuthStore();
 auth.initializeAuth();
+
+app.use(router)
+app.use(createVuetify({
+  components,
+  directives,
+}))
 
 app.mount('#app')

@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import RecipesView from '../views/RecipesView.vue'
-import ProfileView from '../views/ProfileView.vue'
+import RecipesView from '@/views/RecipesView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 import SchedulerView from '@/views/SchedulerView.vue'
+import LoginView from '@/views/LoginView.vue'
 import { useAuthStore } from '../stores/auth.store'
 
 const router = createRouter({
@@ -9,26 +10,27 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'Рецепты',
+      name: 'recipes',
       component: RecipesView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, routeName: "Рецепты" },
     },
     {
       path: '/scheduler',
-      name: 'Планирование',
+      name: 'scheduler',
       component: SchedulerView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, routeName: "Планирование" },
     },
     {
       path: '/profile',
-      name: 'Профиль',
+      name: 'profile',
       component: ProfileView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, routeName: "Профиль" },
     },
     {
       path: '/login',
-      name: 'Вход',
-      component: () => import('../views/LoginView.vue'),
+      name: 'login',
+      component: LoginView,
+      meta: { requiresAuth: false, routeName: "Вход" },
     },
   ],
 })
