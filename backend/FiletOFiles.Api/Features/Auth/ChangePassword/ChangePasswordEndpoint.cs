@@ -19,7 +19,7 @@ public static class ChangePasswordEndpoint
     )
     {
         endpointRouteBuilder
-            .MapPost("/login", Handle)
+            .MapPost("/change-password", Handle)
             .WithName(nameof(ChangePasswordEndpoint))
             .WithDescription("Смена пароля")
             .Produces<AccessTokenDto>(StatusCodes.Status200OK)

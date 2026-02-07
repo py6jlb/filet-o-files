@@ -19,7 +19,6 @@ public static class GetRequestsEndpoint
             .MapGet("/requests", HandleAsync)
             .WithName(nameof(GetRequestsEndpoint))
             .WithDescription("Заявки на регистрацию")
-            .AllowAnonymous()
             .Produces(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status500InternalServerError);

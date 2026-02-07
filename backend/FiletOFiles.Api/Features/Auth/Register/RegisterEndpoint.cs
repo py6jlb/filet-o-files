@@ -16,7 +16,6 @@ public static class RegisterEndpoint
             .MapPost("/register", Handle)
             .WithName(nameof(RegisterEndpoint))
             .WithDescription("Регистрация")
-            .AllowAnonymous()
             .Produces<string>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError);

@@ -7,7 +7,7 @@
       </div>
 
       <template v-slot:prepend>
-        <v-btn icon="mdi-plus"></v-btn>
+        <v-btn icon="mdi-plus" to="/add_recipe"></v-btn>
         <v-divider class="mx-1" vertical></v-divider>
       </template>
     </v-toolbar>

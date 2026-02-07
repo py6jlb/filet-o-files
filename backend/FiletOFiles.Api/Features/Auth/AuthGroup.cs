@@ -15,7 +15,6 @@ public static class AuthGroup
             .MapGroup("/auth")
             .WithOpenApi()
             .WithTags("Auth")
-            .RequireAuthorization()
             .MapLogin()
             .MapRefresh()
             .MapRegister();

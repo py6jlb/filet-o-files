@@ -25,18 +25,36 @@ import '@fontsource/roboto/500-italic.css'
 import '@fontsource/roboto/700-italic.css'
 import '@fontsource/roboto/900-italic.css'
 
-import { useAuthStore } from "./stores/auth.store";
+import { useAuthStore } from './stores/auth.store'
 
 const app = createApp(App)
 app.use(createPinia())
 
-const auth = useAuthStore();
-auth.initializeAuth();
+const auth = useAuthStore()
+auth.initializeAuth()
 
 app.use(router)
-app.use(createVuetify({
-  components,
-  directives,
-}))
+app.use(
+  createVuetify({
+    components,
+    directives,
+    theme: {
+      defaultTheme: 'light',
+      themes: {
+        light: {
+          colors: {
+            primary: '#1976D2',
+            secondary: '#424242',
+            accent: '#82B1FF',
+            error: '#FF5252',
+            info: '#2196F3',
+            success: '#4CAF50',
+            warning: '#FFC107',
+          },
+        },
+      },
+    },
+  }),
+)
 
 app.mount('#app')

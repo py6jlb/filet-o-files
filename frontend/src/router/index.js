@@ -3,6 +3,7 @@ import RecipesView from '@/views/RecipesView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import SchedulerView from '@/views/SchedulerView.vue'
 import LoginView from '@/views/LoginView.vue'
+import AddRecipeView from '@/views/AddRecipeView.vue'
 import { useAuthStore } from '../stores/auth.store'
 
 const router = createRouter({
@@ -13,6 +14,12 @@ const router = createRouter({
       name: 'recipes',
       component: RecipesView,
       meta: { requiresAuth: true, routeName: "Рецепты" },
+    },
+    {
+      path: '/add_recipe',
+      name: 'add_recipe',
+      component: AddRecipeView,
+      meta: { requiresAuth: true, routeName: "Новый рецепт" },
     },
     {
       path: '/scheduler',

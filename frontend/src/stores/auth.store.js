@@ -4,9 +4,9 @@ import router from '../router/index'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null,
-    accessToken: localStorage.getItem('accessToken') || null,
-    refreshToken: localStorage.getItem('refreshToken') || null,
+    user: null,
+    accessToken: null,
+    refreshToken: null,
     refreshTimeout: null,
   }),
   actions: {
@@ -33,22 +33,26 @@ export const useAuthStore = defineStore('auth', {
       router.push('/login')
     },
     async refresh() {
-      const res = await axios.post('/auth/refresh', { refreshToken: this.refreshToken })
-      this.accessToken = res.data.accessToken
-      this.refreshToken = res.data.refreshToken
-      localStorage.setItem('accessToken', this.accessToken)
-      localStorage.setItem('refreshToken', this.refreshToken)
+      try {
+        const res = await axios.post('/auth/refresh', { refreshToken: this.refreshToken })
+        this.accessToken = res.data.accessToken
+        this.refreshToken = res.data.refreshToken
+        const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
+        this.user = payload
 
-      const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
-      this.user = payload
-      localStorage.setItem('user', JSON.stringify(this.user))
+        localStorage.setItem('accessToken', this.accessToken)
+        localStorage.setItem('refreshToken', this.refreshToken)
+        localStorage.setItem('user', JSON.stringify(this.user))
 
-      this.scheduleRefresh()
+        this.scheduleRefresh()
+      } catch (error) {
+        console.log(error)
+      }
     },
     scheduleRefresh() {
       this.clearRefresh()
       const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
-      const timeout = payload.exp * 1000 - Date.now() - 60000
+      const timeout = payload.exp * 1000 - Date.now() - 30000
       if (timeout > 0) {
         this.refreshTimeout = setTimeout(() => this.refresh(), timeout)
       }
