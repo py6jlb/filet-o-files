@@ -14,6 +14,62 @@
         </v-col>
       </v-row>
 
+      <!-- Поле для добавления нескольких файлов -->
+      <v-row>
+        <v-col cols="12">
+          <v-file-input
+            v-model="recipe.files"
+            label="Файлы (изображения и PDF)"
+            variant="outlined"
+            prepend-icon="mdi-paperclip"
+            multiple
+            accept="image/*,.pdf"
+            show-size
+            chips
+            hint="Можно выбрать несколько файлов"
+            persistent-hint
+            @update:model-value="handleFilesPreview"
+          >
+            <template v-slot:selection="{ fileNames }">
+              <template v-for="fileName in fileNames" :key="fileName">
+                <v-chip size="small" label class="mr-2">
+                  {{ fileName }}
+                </v-chip>
+              </template>
+            </template>
+          </v-file-input>
+
+          <!-- Превью изображений -->
+          <div v-if="filesPreview.length > 0" class="mt-3">
+            <div class="d-flex flex-wrap gap-2">
+              <div v-for="(preview, index) in filesPreview" :key="index" class="file-preview-item">
+                <v-img
+                  v-if="preview.type === 'image'"
+                  :src="preview.url"
+                  width="80"
+                  height="80"
+                  cover
+                  class="rounded-lg elevation-1"
+                ></v-img>
+                <div
+                  v-else
+                  class="pdf-preview rounded-lg elevation-1 d-flex align-center justify-center"
+                >
+                  <v-icon size="32" color="red">mdi-file-pdf-box</v-icon>
+                </div>
+                <v-btn
+                  icon="mdi-close"
+                  size="x-small"
+                  color="error"
+                  class="remove-file-btn"
+                  @click.stop="removeFile(index)"
+                ></v-btn>
+              </div>
+            </div>
+          </div>
+        </v-col>
+      </v-row>
+
       <v-row>
         <v-col cols="12">
           <v-textarea
@@ -41,34 +97,75 @@
         </v-col>
       </v-row>
 
+      <!-- Блок выбора тегов -->
       <v-row>
         <v-col cols="12">
-          <v-file-input
-            v-model="recipe.image"
-            label="Изображение рецепта"
+          <v-autocomplete
+            v-model="selectedTagInput"
+            :items="filteredTags"
+            item-title="name"
+            item-value="id"
+            label="Теги"
             variant="outlined"
-            prepend-icon="mdi-camera"
-            accept="image/*"
-            show-size
-            @change="handleImagePreview"
+            prepend-inner-icon="mdi-tag-multiple"
+            chips
+            closable-chips
+            multiple
+            return-object
+            @update:search="onTagSearch"
+            @update:model-value="onTagsSelected"
           >
-            <template v-slot:selection="{ fileNames }">
-              <template v-for="fileName in fileNames" :key="fileName">
-                <v-chip size="small" label class="mr-2">
-                  {{ fileName }}
-                </v-chip>
-              </template>
+            <template v-slot:chip="{ props, item }">
+              <v-chip v-bind="props" closable @click:close="removeTag(item.raw)">
+                {{ item.raw.name }}
+              </v-chip>
             </template>
-          </v-file-input>
+            <template v-slot:no-data>
+              <v-list-item>
+                <template v-slot:append>
+                  <v-btn
+                    color="primary"
+                    variant="text"
+                    size="small"
+                    @click="createNewTag"
+                    :disabled="!tagSearchQuery"
+                  >
+                    <v-icon left size="small">mdi-plus</v-icon>
+                    Создать "{{ tagSearchQuery }}"
+                  </v-btn>
+                </template>
+              </v-list-item>
+            </template>
+          </v-autocomplete>
+        </v-col>
+      </v-row>
 
-          <div v-if="imagePreview" class="text-center mt-3">
-            <v-img
-              :src="imagePreview"
-              max-width="200"
-              max-height="200"
-              class="mx-auto rounded-lg elevation-2"
-            ></v-img>
-          </div>
+      <!-- Дополнительная информация для выбранных тегов -->
+      <v-row v-if="recipeTags.length > 0">
+        <v-col cols="12">
+          <v-divider class="mb-4"></v-divider>
+          <div class="text-subtitle-1 mb-3">Дополнительная информация для тегов</div>
+
+          <v-card
+            v-for="tagInfo in recipeTags"
+            :key="tagInfo.id"
+            variant="outlined"
+            class="mb-3 pa-3"
+          >
+            <div class="d-flex align-center mb-2">
+              <v-icon color="primary" class="mr-2">mdi-tag</v-icon>
+              <span class="text-subtitle-2 font-weight-bold">{{ tagInfo.name }}</span>
+            </div>
+            <v-textarea
+              v-model="tagInfo.additionalInfo"
+              label="Дополнительная информация"
+              variant="outlined"
+              rows="2"
+              density="compact"
+              hint="Например, количество, время приготовления и т.д."
+              persistent-hint
+            ></v-textarea>
+          </v-card>
         </v-col>
       </v-row>
 
@@ -113,7 +210,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 
 // import { storeToRefs } from 'pinia'
 import { useTagsStore } from '../stores/tags.store'
@@ -124,15 +221,18 @@ const tagStore = useTagsStore()
 const form = ref()
 const formValid = ref(false)
 const submitting = ref(false)
-const imagePreview = ref('')
+const filesPreview = ref([])
+
+// Состояние для тегов
+const selectedTagInput = ref([])
+const tagSearchQuery = ref('')
+const recipeTags = ref([]) // Массив { id, name, additionalInfo }
 
 const recipe = reactive({
   title: '',
   description: '',
-  image: null,
+  files: [],
 })
-
-
 
 const snackbar = reactive({
   show: false,
@@ -145,16 +245,106 @@ const rules = {
   positiveNumber: (value) => !value || value > 0 || 'Должно быть больше 0',
 }
 
-const handleImagePreview = (event) => {
-  const file = event.target?.files?.[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      imagePreview.value = e.target.result
+// Вычисляемое свойство - отфильтрованные теги по поиску
+const filteredTags = computed(() => {
+  const tags = tagStore.tags || []
+  if (!tagSearchQuery.value) return tags
+
+  const query = tagSearchQuery.value.toLowerCase()
+  return tags.filter(tag =>
+    tag.name.toLowerCase().includes(query)
+  )
+})
+
+// Обработчик поиска тегов
+const onTagSearch = (value) => {
+  tagSearchQuery.value = value || ''
+}
+
+// Обработчик выбора тегов
+const onTagsSelected = (selected) => {
+  // Синхронизируем recipeTags с выбранными тегами
+  const existingIds = recipeTags.value.map(t => t.id)
+
+  // Добавляем новые теги
+  selected.forEach(tag => {
+    if (!existingIds.includes(tag.id)) {
+      recipeTags.value.push({
+        id: tag.id,
+        name: tag.name,
+        additionalInfo: ''
+      })
     }
-    reader.readAsDataURL(file)
-  } else {
-    imagePreview.value = ''
+  })
+    // Удаляем теги, которые были убраны
+  const selectedIds = selected.map(t => t.id)
+  recipeTags.value = recipeTags.value.filter(t => selectedIds.includes(t.id))
+}
+
+// Удаление тега
+const removeTag = (tag) => {
+  selectedTagInput.value = selectedTagInput.value.filter(t => t.id !== tag.id)
+  recipeTags.value = recipeTags.value.filter(t => t.id !== tag.id)
+}
+
+// Создание нового тега
+const createNewTag = async () => {
+  if (!tagSearchQuery.value) return
+
+  try {
+    // Предполагаем, что в store есть метод createTag
+    const newTag = await tagStore.createTag({ name: tagSearchQuery.value })
+
+    // Добавляем новый тег в список выбранных
+    selectedTagInput.value = [...selectedTagInput.value, newTag]
+    recipeTags.value.push({
+      id: newTag.id,
+      name: newTag.name,
+      additionalInfo: ''
+    })
+
+    tagSearchQuery.value = ''
+    showMessage('Тег успешно создан!', 'success')
+  } catch (error) {
+    console.error('Ошибка создания тега:', error)
+    showMessage('Ошибка при создании тега', 'error')
+  }
+}
+
+const handleFilesPreview = (files) => {
+  filesPreview.value = []
+
+  if (!files || files.length === 0) return
+
+  files.forEach((file) => {
+    const isImage = file.type.startsWith('image/')
+
+    if (isImage) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        filesPreview.value.push({
+          type: 'image',
+          url: e.target.result,
+          file: file,
+        })
+      }
+      reader.readAsDataURL(file)
+    } else {
+      // Для PDF просто добавляем иконку
+      filesPreview.value.push({
+        type: 'pdf',
+        url: null,
+        file: file,
+      })
+    }
+  })
+}
+
+const removeFile = (index) => {
+  recipe.files.splice(index, 1)
+  filesPreview.value.splice(index, 1)
+  if (recipe.files.length === 0) {
+    recipe.files = []
   }
 }
 
@@ -162,9 +352,11 @@ const resetForm = () => {
   Object.assign(recipe, {
     title: '',
     description: '',
-    image: null,
+    files: [],
   })
-  imagePreview.value = ''
+  filesPreview.value = []
+    selectedTagInput.value = []
+  recipeTags.value = []
   form.value?.reset()
 }
 
@@ -178,17 +370,30 @@ const submitForm = async () => {
 
     // Добавляем основные поля
     Object.keys(recipe).forEach((key) => {
-      if (key !== 'image' && recipe[key] !== null && recipe[key] !== '') {
+      if (key !== 'files' && recipe[key] !== null && recipe[key] !== '') {
         formData.append(key, recipe[key])
       }
     })
 
-    // Добавляем файл
-    if (recipe.image) {
-      formData.append('image', recipe.image)
+    // Добавляем дополнительные файлы
+    if (recipe.files && recipe.files.length > 0) {
+      recipe.files.forEach((file, i) => {
+        if (i === 0) {
+          formData.append('image', file)
+        } else {
+          formData.append('files', file)
+        }
+      })
     }
 
-   // await apiService.createRecipe(formData)
+    // Добавляем теги с дополнительной информацией
+    // Отправляем как JSON строку
+    const tagsData = recipeTags.value.map(tag => ({
+      id: tag.id,
+      additionalInfo: tag.additionalInfo
+    }))
+    formData.append('tags', JSON.stringify(tagsData))
+
 
     showMessage('Рецепт успешно сохранен!', 'success')
     resetForm()

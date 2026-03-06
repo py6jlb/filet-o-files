@@ -1,72 +1,151 @@
 import { defineStore } from 'pinia'
 import axios from '../utils/api'
+import tokenService from '../utils/token.service'
 import router from '../router/index'
+
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
+    )
+    return JSON.parse(jsonPayload)
+  } catch {
+    return null
+  }
+}
+
+function getTokenExpiryTime(accessToken) {
+  const payload = parseJwt(accessToken)
+  if (!payload?.exp) return 0
+  return payload.exp * 1000 - Date.now()
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
-    accessToken: null,
-    refreshToken: null,
     refreshTimeout: null,
+    isInitialized: false,
   }),
+  getters: {
+    isAuthenticated: (state) => !!state.user && !!tokenService.accessToken,
+  },
   actions: {
     async login(username, password) {
-      const res = await axios.post('/auth/login', { email: username, password })
-      this.accessToken = res.data.accessToken
-      this.refreshToken = res.data.refreshToken
-      const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
-      this.user = payload
-
-      localStorage.setItem('accessToken', this.accessToken)
-      localStorage.setItem('refreshToken', this.refreshToken)
-      localStorage.setItem('user', JSON.stringify(this.user))
-      this.scheduleRefresh()
-    },
-    async logout() {
-      this.clearRefresh()
-      this.accessToken = null
-      this.refreshToken = null
-      this.user = null
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('user')
-      router.push('/login')
-    },
-    async refresh() {
       try {
-        const res = await axios.post('/auth/refresh', { refreshToken: this.refreshToken })
-        this.accessToken = res.data.accessToken
-        this.refreshToken = res.data.refreshToken
-        const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
-        this.user = payload
-
-        localStorage.setItem('accessToken', this.accessToken)
-        localStorage.setItem('refreshToken', this.refreshToken)
-        localStorage.setItem('user', JSON.stringify(this.user))
-
+        const res = await axios.post('/auth/login', { email: username, password })
+        this.setTokens(res.data.accessToken, res.data.refreshToken)
         this.scheduleRefresh()
       } catch (error) {
-        console.log(error)
+        this.clearAuth()
+        throw error
       }
     },
+
+    async logout() {
+      try {
+        this.clearAuth()
+      } catch {
+        // Игнорируем ошибки при logout
+      } finally {
+        router.push('/login')
+      }
+    },
+
+    async refresh() {
+      try {
+        const res = await axios.post('/auth/refresh', {
+          refreshToken: tokenService.refreshToken,
+        })
+        this.setTokens(res.data.accessToken, res.data.refreshToken)
+        this.scheduleRefresh()
+        return true
+      } catch (error) {
+        console.error('Token refresh failed:', error)
+        this.clearAuth()
+        router.push('/login')
+        return false
+      }
+    },
+
+    setTokens(accessToken, refreshToken) {
+      // Синхронизируем с tokenService
+      tokenService.accessToken = accessToken
+      tokenService.refreshToken = refreshToken
+
+      this.user = parseJwt(accessToken)
+
+      localStorage.setItem(
+        'auth',
+        JSON.stringify({
+          accessToken,
+          refreshToken,
+          user: this.user,
+        }),
+      )
+    },
+
     scheduleRefresh() {
       this.clearRefresh()
-      const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
-      const timeout = payload.exp * 1000 - Date.now() - 30000
+
+      const timeUntilExpiry = getTokenExpiryTime(tokenService.accessToken)
+      // Обновляем за 30 секунд до истечения
+      const timeout = timeUntilExpiry - 30000
+
       if (timeout > 0) {
         this.refreshTimeout = setTimeout(() => this.refresh(), timeout)
+      } else {
+        // Токен уже истёк или истекает очень скоро
+        this.refresh()
       }
     },
+
     clearRefresh() {
-      if (this.refreshTimeout) clearTimeout(this.refreshTimeout)
-      this.refreshTimeout = null
+      if (this.refreshTimeout) {
+        clearTimeout(this.refreshTimeout)
+        this.refreshTimeout = null
+      }
     },
+
+    clearAuth() {
+      this.clearRefresh()
+      tokenService.clear()
+      this.user = null
+      localStorage.removeItem('auth')
+    },
+
     initializeAuth() {
-      this.accessToken = localStorage.getItem('accessToken')
-      this.refreshToken = localStorage.getItem('refreshToken')
-      this.user = JSON.parse(localStorage.getItem('user'))
-      //console.log(this.accessToken, this.refreshToken, this.user)
-      if (this.accessToken) this.scheduleRefresh()
+      tokenService.setFromStorage()
+      const accessToken = tokenService.accessToken
+      const refreshToken = tokenService.refreshToken
+
+      if (!accessToken || !refreshToken) {
+        this.isInitialized = true
+        return
+      }
+
+      try {
+        const expiryTime = getTokenExpiryTime(accessToken)
+
+        if (expiryTime <= 0) {
+          this.user = parseJwt(accessToken)
+          this.refresh()
+          this.isInitialized = true
+          return
+        }
+
+        this.setTokens(accessToken, refreshToken)
+        this.scheduleRefresh()
+      } catch (error) {
+        console.error('Failed to initialize auth:', error)
+        this.clearAuth()
+      } finally {
+        this.isInitialized = true
+      }
     },
   },
 })
