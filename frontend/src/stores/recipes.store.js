@@ -21,5 +21,52 @@ export const useRecipesStore = defineStore('recipes', {
         this.loading = false
       }
     },
+
+    async createRecipe(recipeData) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await axios.post('/recipes', recipeData)
+        return res.data
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при создании рецепта'
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async uploadFile(recipeId, file, isTitle = false) {
+      const formData = new FormData()
+      formData.append('RecipeId', recipeId)
+      formData.append('File', file)
+      formData.append('IsTitle', isTitle.toString())
+
+      try {
+        await axios.post('/files', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при загрузке файла'
+        throw e
+      }
+    },
+
+    async updateRecipeTags(recipeId, tags) {
+      // Теги обновляются по одному
+      for (const tag of tags) {
+        try {
+          await axios.put(`/recipes/${recipeId}/tags`, {
+            TagId: tag.id,
+            AdditionalData: tag.additionalInfo,
+          })
+        } catch (e) {
+          this.error = e.response?.data?.message || 'Ошибка при обновлении тегов'
+          throw e
+        }
+      }
+    },
   },
 })

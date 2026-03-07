@@ -4,6 +4,7 @@ import axios from '../utils/api'
 export const useTagsStore = defineStore('tags', {
   state: () => ({
     tags: null,
+    searchResults: null,
     loading: false,
     error: null,
   }),
@@ -17,6 +18,43 @@ export const useTagsStore = defineStore('tags', {
       } catch (e) {
         this.error = e.response?.data?.message || 'Ошибка при получении тегов'
         this.tags = null
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async searchTags(query) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await axios.get('/tags', { params: { q: query } })
+        this.searchResults = res.data
+        return res.data
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при поиске тегов'
+        this.searchResults = null
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async createTag(tagData) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await axios.post('/tags', tagData)
+        // Добавляем новый тег в локальные массивы
+        if (this.tags && this.tags.items) {
+          this.tags.items.push(res.data)
+        }
+        if (this.searchResults && this.searchResults.items) {
+          this.searchResults.items.push(res.data)
+        }
+        return res.data
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при создании тега'
+        throw e
       } finally {
         this.loading = false
       }

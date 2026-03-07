@@ -102,7 +102,7 @@
         <v-col cols="12">
           <v-autocomplete
             v-model="selectedTagInput"
-            :items="filteredTags"
+            :items="tagSearchResults"
             item-title="name"
             item-value="id"
             label="Теги"
@@ -112,8 +112,11 @@
             closable-chips
             multiple
             return-object
+            :loading="tagsLoading"
             @update:search="onTagSearch"
             @update:model-value="onTagsSelected"
+            @update:opened="onMenuOpen"
+            cache-items
           >
             <template v-slot:chip="{ props, item }">
               <v-chip v-bind="props" closable @click:close="removeTag(item.raw)">
@@ -210,23 +213,26 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive } from 'vue'
 
-// import { storeToRefs } from 'pinia'
 import { useTagsStore } from '../stores/tags.store'
+import { useRecipesStore } from '../stores/recipes.store'
+import { debounce } from '../utils/debounce'
 
 const tagStore = useTagsStore()
-// const { tags, loading: tagsLoading, error: tagsError } = storeToRefs(tagStore)
+const recipesStore = useRecipesStore()
 
 const form = ref()
 const formValid = ref(false)
 const submitting = ref(false)
 const filesPreview = ref([])
+const tagsLoading = ref(false)
 
 // Состояние для тегов
 const selectedTagInput = ref([])
 const tagSearchQuery = ref('')
 const recipeTags = ref([]) // Массив { id, name, additionalInfo }
+const tagSearchResults = ref([]) // Результаты поиска с сервера
 
 const recipe = reactive({
   title: '',
@@ -245,20 +251,49 @@ const rules = {
   positiveNumber: (value) => !value || value > 0 || 'Должно быть больше 0',
 }
 
-// Вычисляемое свойство - отфильтрованные теги по поиску
-const filteredTags = computed(() => {
-  const tags = tagStore.tags || []
-  if (!tagSearchQuery.value) return tags
+// Debounced поиск тегов (задержка 300мс)
+const searchTagsDebounced = debounce(async (query) => {
+  if (!query || query.length < 1) {
+    tagSearchResults.value = []
+    return
+  }
 
-  const query = tagSearchQuery.value.toLowerCase()
-  return tags.filter(tag =>
-    tag.name.toLowerCase().includes(query)
-  )
-})
+  tagsLoading.value = true
+  try {
+    const result = await tagStore.searchTags(query)
+    // API возвращает { items: [...], totalCount, page, pageSize }
+    tagSearchResults.value = result.items || result || []
+  } catch (error) {
+    console.error('Ошибка поиска тегов:', error)
+    tagSearchResults.value = []
+  } finally {
+    tagsLoading.value = false
+  }
+}, 300)
 
-// Обработчик поиска тегов
+// Обработчик поиска тегов - вызывается при вводе текста
 const onTagSearch = (value) => {
   tagSearchQuery.value = value || ''
+  searchTagsDebounced(value || '')
+}
+
+// Обработчик открытия меню - загружаем популярные теги или пустой список
+const onMenuOpen = async () => {
+  // Если есть выбранные теги, показываем только их
+  if (selectedTagInput.value.length > 0) {
+    tagSearchResults.value = selectedTagInput.value
+  } else if (tagSearchResults.value.length === 0 && !tagSearchQuery.value) {
+    // При открытии без запроса - загружаем все теги (первые 20)
+    tagsLoading.value = true
+    try {
+      const result = await tagStore.searchTags('')
+      tagSearchResults.value = result.items || result || []
+    } catch (error) {
+      console.error('Ошибка загрузки тегов:', error)
+    } finally {
+      tagsLoading.value = false
+    }
+  }
 }
 
 // Обработчик выбора тегов
@@ -292,7 +327,6 @@ const createNewTag = async () => {
   if (!tagSearchQuery.value) return
 
   try {
-    // Предполагаем, что в store есть метод createTag
     const newTag = await tagStore.createTag({ name: tagSearchQuery.value })
 
     // Добавляем новый тег в список выбранных
@@ -302,6 +336,9 @@ const createNewTag = async () => {
       name: newTag.name,
       additionalInfo: ''
     })
+
+    // Добавляем в результаты поиска
+    tagSearchResults.value = [...tagSearchResults.value, newTag]
 
     tagSearchQuery.value = ''
     showMessage('Тег успешно создан!', 'success')
@@ -366,34 +403,24 @@ const submitForm = async () => {
   submitting.value = true
 
   try {
-    const formData = new FormData()
-
-    // Добавляем основные поля
-    Object.keys(recipe).forEach((key) => {
-      if (key !== 'files' && recipe[key] !== null && recipe[key] !== '') {
-        formData.append(key, recipe[key])
-      }
+    // 1. Создаём рецепт
+    const newRecipe = await recipesStore.createRecipe({
+      title: recipe.title,
+      descriptions: recipe.description,
     })
 
-    // Добавляем дополнительные файлы
+    // 2. Загружаем файлы (если есть)
     if (recipe.files && recipe.files.length > 0) {
-      recipe.files.forEach((file, i) => {
-        if (i === 0) {
-          formData.append('image', file)
-        } else {
-          formData.append('files', file)
-        }
-      })
+      for (let i = 0; i < recipe.files.length; i++) {
+        const isTitle = i === 0 // Первый файл - главное изображение
+        await recipesStore.uploadFile(newRecipe.id, recipe.files[i], isTitle)
+      }
     }
 
-    // Добавляем теги с дополнительной информацией
-    // Отправляем как JSON строку
-    const tagsData = recipeTags.value.map(tag => ({
-      id: tag.id,
-      additionalInfo: tag.additionalInfo
-    }))
-    formData.append('tags', JSON.stringify(tagsData))
-
+    // 3. Обновляем теги с дополнительной информацией
+    if (recipeTags.value.length > 0) {
+      await recipesStore.updateRecipeTags(newRecipe.id, recipeTags.value)
+    }
 
     showMessage('Рецепт успешно сохранен!', 'success')
     resetForm()
@@ -410,11 +437,6 @@ const showMessage = (text, color = 'success') => {
   snackbar.color = color
   snackbar.show = true
 }
-
-// Инициализация
-onMounted(() => {
-  tagStore.fetchTags()
-})
 </script>
 
 <style scoped>
