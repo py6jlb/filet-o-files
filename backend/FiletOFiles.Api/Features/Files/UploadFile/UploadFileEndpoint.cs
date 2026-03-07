@@ -5,6 +5,8 @@ using FiletOFiles.Api.DTOs.Files;
 using FiletOFiles.Api.Helpers;
 using FiletOFiles.Api.Infrastructure.Database;
 using FiletOFiles.Api.Settings;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -19,6 +21,7 @@ public static class UploadFileEndpoint
     {
         endpointRouteBuilder
             .MapPost("/", HandleAsync)
+            .DisableAntiforgery()
             .WithName(nameof(UploadFileEndpoint))
             .WithDescription("Загрузить файл")
             .Produces(StatusCodes.Status200OK)
@@ -30,7 +33,7 @@ public static class UploadFileEndpoint
 
     public static async Task<IResult> HandleAsync(
         [FromServices] FilesService service,
-        [FromBody] DTOs.Files.UploadFile request,
+        [FromForm] DTOs.Files.UploadFile request,
         CancellationToken cancellationToken
     )
     {

@@ -1,5 +1,6 @@
 using FiletOFiles.Api.Features.Auth;
 using FiletOFiles.Api.Features.AuthManagement;
+using FiletOFiles.Api.Features.Files;
 using FiletOFiles.Api.Features.Recipes;
 using FiletOFiles.Api.Features.Tags;
 using FiletOFiles.Api.Features.Users;
@@ -15,6 +16,7 @@ public static class FeatureStartupExtensions
         app.MapUsersGroup();
         app.MapRecipesGroup();
         app.MapTagsGroup();
+        app.MapFilesGroup();
         return app;
     }
 }

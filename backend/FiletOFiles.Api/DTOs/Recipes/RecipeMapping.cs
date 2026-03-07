@@ -26,14 +26,17 @@ internal static class RecipeMapping
         var recipeTagsDict =
             recipe.RecipeTags?.ToDictionary(rt => rt.TagId, rt => rt.AdditionalData) ?? [];
 
+        var tags = recipe.Tags?.Select(t => t.ToDto(recipeTagsDict.GetValueOrDefault(t.Id))) ?? [];
+        var files = recipe.Files?.Select(x => x.ToDto()) ?? [];
+
         return new RecipeDto
         {
             Id = recipe.Id,
             Title = recipe.Title,
             Descriptions = recipe.Descriptions,
             Created = recipe.Created,
-            Tags = recipe.Tags.Select(t => t.ToDto(recipeTagsDict.GetValueOrDefault(t.Id))) ?? [],
-            Files = recipe.Files.Select(x => x.ToDto()) ?? [],
+            Tags = tags,
+            Files = files,
         };
     }
 

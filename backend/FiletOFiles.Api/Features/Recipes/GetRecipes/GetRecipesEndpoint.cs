@@ -52,6 +52,7 @@ public static class GetRecipesEndpoint
         IQueryable<Recipe> recipesQuery = db
             .Recipes.Include(r => r.Tags)
             .Include(r => r.RecipeTags)
+            .Include(r => r.Files)
             .AsQueryable();
 
         // Фильтрация по названию/описанию

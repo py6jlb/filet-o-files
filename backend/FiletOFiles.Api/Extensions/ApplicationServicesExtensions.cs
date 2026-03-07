@@ -48,6 +48,7 @@ public static class ApplicationServicesExtensions
         builder.Services.AddScoped<AuthService>();
         builder.Services.AddScoped<FilesService>();
         builder.Services.AddHttpContextAccessor();
+        builder.Services.AddAntiforgery();
 
         var persistence = builder.Configuration.GetSection("Persistence").Get<Persistence>()!;
         builder

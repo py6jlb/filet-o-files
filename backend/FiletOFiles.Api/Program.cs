@@ -35,6 +35,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapFeatures();
+
 //app.UseHttpsRedirection();
 app.UseExceptionHandler();
 

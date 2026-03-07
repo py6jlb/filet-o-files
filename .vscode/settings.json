@@ -6,6 +6,7 @@
         "editor.defaultFormatter": "csharpier.csharpier-vscode"
     },
     "cSpell.words": [
+        "Antiforgery",
         "ASPNETCORE",
         "Buefy",
         "csdevkit",

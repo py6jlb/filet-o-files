@@ -95,6 +95,10 @@
                     :key="tag.id"
                     size="x-small"
                     class="mr-1 mb-1"
+                    :style="{
+                      backgroundColor: tag.color || '#757575',
+                      color: getContrastColor(tag.color),
+                    }"
                   >
                     {{ tag.name }}
                   </v-chip>
@@ -124,6 +128,7 @@ import { storeToRefs } from 'pinia'
 import { useRecipesStore } from '../stores/recipes.store'
 import { useTagsStore } from '../stores/tags.store'
 import { debounce } from '../utils/debounce'
+import { getContrastColor } from '../utils/colors'
 
 const recipesStore = useRecipesStore()
 const tagsStore = useTagsStore()
@@ -182,19 +187,21 @@ const onMenuOpen = async () => {
 // Поиск
 const doSearch = () => {
   currentPage.value = 1
-  const tags = selectedTags.value.map(t => t.id)
+  const tags = selectedTags.value.map((t) => t.id)
   recipesStore.fetchRecipes(searchQuery.value, tags, 1)
 }
 
 // Смена страницы
 const onPageChange = (page) => {
-  const tags = selectedTags.value.map(t => t.id)
+  const tags = selectedTags.value.map((t) => t.id)
   recipesStore.fetchRecipes(searchQuery.value, tags, page)
 }
 
 // Получение URL файла
 const getFileUrl = (fileId) => {
-  return `${import.meta.env.VITE_API_BASE_URL}/files/${fileId}`
+  const url = `${import.meta.env.VITE_API_BASE_URL}/files/${fileId}`
+  console.log(url)
+  return url
 }
 
 onMounted(() => {

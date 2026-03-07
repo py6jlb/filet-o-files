@@ -44,7 +44,8 @@ public sealed class FilesService
         }
 
         var path = Path.Combine(_cfg.Path, recipe.Id);
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var dirName = Path.GetDirectoryName(path);
+        var dirInfo = Directory.CreateDirectory(path);
         var filePath = Path.Combine(path, sha1Hash);
         if (File.Exists(filePath))
         {
@@ -62,7 +63,7 @@ public sealed class FilesService
         var newFile = new FileDto()
         {
             FileName = request.File.FileName,
-            Source = path,
+            Source = filePath,
             MimeType = MimeTypes.GetMimeType(request.File.FileName),
             IsTitle = request.IsTitle,
             RecipeId = recipe.Id,

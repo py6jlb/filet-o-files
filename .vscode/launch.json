@@ -1,5 +1,12 @@
 {
     "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Запустить оба проекта",
+            "configurations": [".NET FiletOFiles.Api (web)", "Vite"],
+            "stopAll": true
+        }
+    ],
     "configurations": [
         {
             "name": "C#: FiletOFiles.Api Debug",

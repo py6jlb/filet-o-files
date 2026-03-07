@@ -13,6 +13,7 @@ public static class GetFileEndpoint
             .MapGet("/{fileId}", HandleAsync)
             .WithName(nameof(GetFileEndpoint))
             .WithDescription("Получить файл")
+            .AllowAnonymous()
             .Produces(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError);

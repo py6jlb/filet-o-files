@@ -119,7 +119,12 @@
             cache-items
           >
             <template v-slot:chip="{ props, item }">
-              <v-chip v-bind="props" closable @click:close="removeTag(item.raw)">
+              <v-chip
+                v-bind="props"
+                closable
+                @click:close="removeTag(item.raw)"
+                :style="{ backgroundColor: item.raw.color || '#757575', color: getContrastColor(item.raw.color) }"
+              >
                 {{ item.raw.name }}
               </v-chip>
             </template>
@@ -156,8 +161,14 @@
             class="mb-3 pa-3"
           >
             <div class="d-flex align-center mb-2">
-              <v-icon color="primary" class="mr-2">mdi-tag</v-icon>
-              <span class="text-subtitle-2 font-weight-bold">{{ tagInfo.name }}</span>
+              <v-chip
+                size="small"
+                class="mr-2"
+                :style="{ backgroundColor: tagInfo.color || '#757575', color: getContrastColor(tagInfo.color) }"
+              >
+                <v-icon size="small" class="mr-1">mdi-tag</v-icon>
+                {{ tagInfo.name }}
+              </v-chip>
             </div>
             <v-textarea
               v-model="tagInfo.additionalInfo"
@@ -218,6 +229,7 @@ import { ref, reactive } from 'vue'
 import { useTagsStore } from '../stores/tags.store'
 import { useRecipesStore } from '../stores/recipes.store'
 import { debounce } from '../utils/debounce'
+import { getContrastColor } from '../utils/colors'
 
 const tagStore = useTagsStore()
 const recipesStore = useRecipesStore()
@@ -307,6 +319,7 @@ const onTagsSelected = (selected) => {
       recipeTags.value.push({
         id: tag.id,
         name: tag.name,
+        color: tag.color,
         additionalInfo: ''
       })
     }
@@ -334,6 +347,7 @@ const createNewTag = async () => {
     recipeTags.value.push({
       id: newTag.id,
       name: newTag.name,
+      color: newTag.color,
       additionalInfo: ''
     })
 
