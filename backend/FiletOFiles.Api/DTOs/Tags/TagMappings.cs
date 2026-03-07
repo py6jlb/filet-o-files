@@ -26,6 +26,17 @@ public static class TagMappings
         };
     }
 
+    public static TagDto ToDto(this Tag tag, string? additionalData)
+    {
+        return new TagDto
+        {
+            Id = tag.Id,
+            Color = tag.Color,
+            Name = tag.Name,
+            AdditionalData = additionalData,
+        };
+    }
+
     public static void UpdateFromDto(this Tag tag, UpdateTagDto dto)
     {
         tag.Name = dto.Name;

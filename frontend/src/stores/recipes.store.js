@@ -8,11 +8,23 @@ export const useRecipesStore = defineStore('recipes', {
     error: null,
   }),
   actions: {
-    async fetchRecipes() {
+    async fetchRecipes(searchQuery = '', tags = [], page = 1, pageSize = 10) {
       this.loading = true
       this.error = null
       try {
-        const res = await axios.get('/recipes?page=1&pageSize=10')
+        const params = new URLSearchParams()
+        params.append('page', page)
+        params.append('pageSize', pageSize)
+
+        if (searchQuery) {
+          params.append('q', searchQuery)
+        }
+
+        if (tags && tags.length > 0) {
+          params.append('tags', tags.join(','))
+        }
+
+        const res = await axios.get(`/recipes?${params.toString()}`)
         this.recipes = res.data
       } catch (e) {
         this.error = e.response?.data?.message || 'Ошибка при получении рецептов'
