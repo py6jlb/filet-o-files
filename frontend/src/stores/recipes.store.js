@@ -80,5 +80,47 @@ export const useRecipesStore = defineStore('recipes', {
         }
       }
     },
+
+    async fetchRecipe(id) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await axios.get(`/recipes/${id}`)
+        return res.data
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при получении рецепта'
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async deleteRecipe(id) {
+      this.loading = true
+      this.error = null
+      try {
+        await axios.delete(`/recipes/${id}`)
+        return true
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при удалении рецепта'
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateRecipe(id, recipeData) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await axios.post(`/recipes/${id}`, recipeData)
+        return res.data
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при обновлении рецепта'
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
   },
 })

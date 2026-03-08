@@ -69,7 +69,11 @@
         <div v-else>
           <v-row>
             <v-col v-for="recipe in recipes.items" :key="recipe.id" cols="12" sm="6" md="4">
-              <v-card variant="outlined" class="h-100">
+              <v-card
+                variant="outlined"
+                class="h-100 cursor-pointer"
+                @click="goToRecipe(recipe.id)"
+              >
                 <v-img
                   v-if="recipe.files?.length > 0"
                   :src="getFileUrl(recipe.files[0].id)"
@@ -124,12 +128,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useRecipesStore } from '../stores/recipes.store'
 import { useTagsStore } from '../stores/tags.store'
 import { debounce } from '../utils/debounce'
 import { getContrastColor } from '../utils/colors'
 
+const router = useRouter()
 const recipesStore = useRecipesStore()
 const tagsStore = useTagsStore()
 const { recipes, loading, error } = storeToRefs(recipesStore)
@@ -204,7 +210,17 @@ const getFileUrl = (fileId) => {
   return url
 }
 
+const goToRecipe = (id) => {
+  router.push(`/recipe/${id}`)
+}
+
 onMounted(() => {
   recipesStore.fetchRecipes()
 })
 </script>
+
+<style scoped>
+.cursor-pointer {
+  cursor: pointer;
+}
+</style>

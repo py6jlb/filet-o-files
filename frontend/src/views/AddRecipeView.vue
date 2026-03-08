@@ -74,25 +74,10 @@
         <v-col cols="12">
           <v-textarea
             v-model="recipe.description"
-            label="Описание"
-            variant="outlined"
-            prepend-inner-icon="mdi-text"
-            rows="3"
-          ></v-textarea>
-        </v-col>
-      </v-row>
-
-      <v-row>
-        <v-col cols="12">
-          <v-textarea
-            v-model="recipe.instructions"
-            label="Инструкции приготовления *"
-            :rules="[rules.required]"
+            label="Инструкции приготовления"
             variant="outlined"
             prepend-inner-icon="mdi-chef-hat"
             rows="8"
-            hint="Опишите пошагово процесс приготовления"
-            persistent-hint
           ></v-textarea>
         </v-col>
       </v-row>
@@ -123,7 +108,10 @@
                 v-bind="props"
                 closable
                 @click:close="removeTag(item.raw)"
-                :style="{ backgroundColor: item.raw.color || '#757575', color: getContrastColor(item.raw.color) }"
+                :style="{
+                  backgroundColor: item.raw.color || '#757575',
+                  color: getContrastColor(item.raw.color),
+                }"
               >
                 {{ item.raw.name }}
               </v-chip>
@@ -164,7 +152,10 @@
               <v-chip
                 size="small"
                 class="mr-2"
-                :style="{ backgroundColor: tagInfo.color || '#757575', color: getContrastColor(tagInfo.color) }"
+                :style="{
+                  backgroundColor: tagInfo.color || '#757575',
+                  color: getContrastColor(tagInfo.color),
+                }"
               >
                 <v-icon size="small" class="mr-1">mdi-tag</v-icon>
                 {{ tagInfo.name }}
@@ -311,28 +302,28 @@ const onMenuOpen = async () => {
 // Обработчик выбора тегов
 const onTagsSelected = (selected) => {
   // Синхронизируем recipeTags с выбранными тегами
-  const existingIds = recipeTags.value.map(t => t.id)
+  const existingIds = recipeTags.value.map((t) => t.id)
 
   // Добавляем новые теги
-  selected.forEach(tag => {
+  selected.forEach((tag) => {
     if (!existingIds.includes(tag.id)) {
       recipeTags.value.push({
         id: tag.id,
         name: tag.name,
         color: tag.color,
-        additionalInfo: ''
+        additionalInfo: '',
       })
     }
   })
-    // Удаляем теги, которые были убраны
-  const selectedIds = selected.map(t => t.id)
-  recipeTags.value = recipeTags.value.filter(t => selectedIds.includes(t.id))
+  // Удаляем теги, которые были убраны
+  const selectedIds = selected.map((t) => t.id)
+  recipeTags.value = recipeTags.value.filter((t) => selectedIds.includes(t.id))
 }
 
 // Удаление тега
 const removeTag = (tag) => {
-  selectedTagInput.value = selectedTagInput.value.filter(t => t.id !== tag.id)
-  recipeTags.value = recipeTags.value.filter(t => t.id !== tag.id)
+  selectedTagInput.value = selectedTagInput.value.filter((t) => t.id !== tag.id)
+  recipeTags.value = recipeTags.value.filter((t) => t.id !== tag.id)
 }
 
 // Создание нового тега
@@ -348,7 +339,7 @@ const createNewTag = async () => {
       id: newTag.id,
       name: newTag.name,
       color: newTag.color,
-      additionalInfo: ''
+      additionalInfo: '',
     })
 
     // Добавляем в результаты поиска
@@ -406,7 +397,7 @@ const resetForm = () => {
     files: [],
   })
   filesPreview.value = []
-    selectedTagInput.value = []
+  selectedTagInput.value = []
   recipeTags.value = []
   form.value?.reset()
 }
