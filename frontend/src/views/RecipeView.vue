@@ -84,10 +84,10 @@
           </div>
         </v-card-text>
 
-        <!-- Описание -->
+        <!-- Описание (рендерится как Markdown) -->
         <v-card-text v-if="recipe.descriptions">
           <div class="text-subtitle-1 text-grey-darken-1 mb-2">Описание</div>
-          <p class="text-body-1">{{ recipe.descriptions }}</p>
+          <div class="markdown-content" v-html="renderedDescription"></div>
         </v-card-text>
 
         <!-- Дата создания -->
@@ -174,9 +174,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipesStore } from '../stores/recipes.store'
+import { marked } from 'marked'
 import { getContrastColor } from '../utils/colors'
 
 const route = useRoute()
@@ -196,6 +197,12 @@ const snackbar = reactive({
   show: false,
   text: '',
   color: 'success',
+})
+
+// Рендеринг markdown
+const renderedDescription = computed(() => {
+  if (!recipe.value?.descriptions) return ''
+  return marked.parse(recipe.value.descriptions)
 })
 
 const getFileUrl = (fileId) => {
@@ -269,5 +276,113 @@ onMounted(() => {
 <style scoped>
 .cursor-pointer {
   cursor: pointer;
+}
+
+/* Стили для markdown контента */
+:deep(.markdown-content h1) {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+:deep(.markdown-content h2) {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.25rem;
+}
+
+:deep(.markdown-content h3) {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+:deep(.markdown-content p) {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+:deep(.markdown-content ul),
+:deep(.markdown-content ol) {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+:deep(.markdown-content li) {
+  margin-bottom: 0.25rem;
+}
+
+:deep(.markdown-content code) {
+  background: #f0f0f0;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.9em;
+}
+
+:deep(.markdown-content pre) {
+  background: #2d2d2d;
+  color: #f8f8f2;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+:deep(.markdown-content pre code) {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+:deep(.markdown-content blockquote) {
+  border-left: 4px solid #e0e0e0;
+  padding-left: 1rem;
+  margin-left: 0;
+  color: #666;
+  font-style: italic;
+}
+
+:deep(.markdown-content a) {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+:deep(.markdown-content a:hover) {
+  text-decoration: underline;
+}
+
+:deep(.markdown-content img) {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+:deep(.markdown-content table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+:deep(.markdown-content th),
+:deep(.markdown-content td) {
+  border: 1px solid #e0e0e0;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+:deep(.markdown-content th) {
+  background: #f5f5f5;
+}
+
+:deep(.markdown-content hr) {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 1.5rem 0;
 }
 </style>

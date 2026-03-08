@@ -72,13 +72,11 @@
 
       <v-row>
         <v-col cols="12">
-          <v-textarea
+          <MarkdownEditor
             v-model="recipe.description"
             label="Инструкции приготовления"
-            variant="outlined"
-            prepend-inner-icon="mdi-chef-hat"
-            rows="8"
-          ></v-textarea>
+            placeholder="Опишите процесс приготовления в формате Markdown..."
+          ></MarkdownEditor>
         </v-col>
       </v-row>
 
@@ -219,6 +217,7 @@ import { ref, reactive } from 'vue'
 
 import { useTagsStore } from '../stores/tags.store'
 import { useRecipesStore } from '../stores/recipes.store'
+import MarkdownEditor from '../components/MarkdownEditor.vue'
 import { debounce } from '../utils/debounce'
 import { getContrastColor } from '../utils/colors'
 
