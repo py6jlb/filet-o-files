@@ -1,19 +1,19 @@
 <template>
   <div class="markdown-editor">
     <!-- Вкладки -->
-    <v-tabs v-model="activeTab" color="primary" class="mb-2">
-      <v-tab value="write">
+    <v-tabs v-model="activeTab" color="primary" density="compact" class="mb-1">
+      <v-tab value="write" size="small">
         <v-icon size="small" class="mr-1">mdi-pencil</v-icon>
-        Редактировать
+        Редакт.
       </v-tab>
-      <v-tab value="preview">
+      <v-tab value="preview" size="small">
         <v-icon size="small" class="mr-1">mdi-eye</v-icon>
         Просмотр
       </v-tab>
     </v-tabs>
 
     <!-- Панель инструментов -->
-    <div class="toolbar mb-2">
+    <div class="toolbar mb-1">
       <v-btn-group variant="text" density="compact">
         <v-btn size="small" @click="toggleBold" title="Жирный (Ctrl+B)">
           <v-icon>mdi-format-bold</v-icon>
@@ -81,7 +81,7 @@
 
       <div
         v-show="activeTab === 'preview'"
-        class="markdown-preview pa-4 rounded border"
+        class="markdown-preview pa-2 rounded border"
         v-html="renderedContent"
       ></div>
     </div>
@@ -112,7 +112,7 @@ const props = defineProps({
   },
   height: {
     type: String,
-    default: '300px'
+    default: '250px'
   }
 })
 
@@ -421,11 +421,11 @@ const insertHorizontalRule = () => {
 
 <style scoped>
 .markdown-editor { display: flex; flex-direction: column; }
-.toolbar { border-bottom: 1px solid rgba(0,0,0,0.12); padding-bottom: 8px; }
-.editor-content { flex: 1; min-height: 200px; }
+.toolbar { border-bottom: 1px solid rgba(0,0,0,0.12); padding-bottom: 4px; }
+.editor-content { flex: 1; }
 .codemirror-wrapper { border: 1px solid rgba(0,0,0,0.38); border-radius: 4px; overflow: hidden; }
 .codemirror-wrapper :deep(.cm-editor) { height: 100%; }
-.markdown-preview { min-height: 200px; background: #fafafa; }
+.markdown-preview { background: #fafafa; }
 
 :deep(.markdown-preview h1) { font-size: 2rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem; }
 :deep(.markdown-preview h2) { font-size: 1.5rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.25rem; }
