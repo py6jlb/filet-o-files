@@ -111,7 +111,11 @@ public sealed class FilesService
         var path = Path.Combine(_cfg.Path, fileDescr.Source);
         try
         {
-            File.Delete(path);
+            var attr = File.GetAttributes(path);
+            if (!attr.HasFlag(FileAttributes.Directory))
+            {
+                File.Delete(path);
+            }
         }
         catch (IOException ex)
         {

@@ -15,7 +15,7 @@
       </v-row>
 
       <!-- Кнопка добавления файлов -->
-      <v-row>
+      <v-row class="mt-0">
         <v-col cols="12">
           <input
             ref="fileInput"
@@ -30,7 +30,7 @@
           </v-btn>
 
           <!-- Превью изображений -->
-          <div v-if="filesPreview.length > 0" class="mt-3 files-preview-container">
+          <div v-if="filesPreview.length > 0" class="mt-1 files-preview-container">
             <div class="d-flex flex-wrap gap-2">
               <div v-for="(preview, index) in filesPreview" :key="index" class="file-preview-item">
                 <v-img
@@ -60,7 +60,7 @@
         </v-col>
       </v-row>
 
-      <v-row>
+      <v-row class="mt-0">
         <v-col cols="12">
           <MarkdownEditor
             v-model="recipe.description"
@@ -71,87 +71,59 @@
       </v-row>
 
       <!-- Блок выбора тегов -->
-      <v-row>
+      <v-row class="mt-0">
         <v-col cols="12">
-          <v-autocomplete
-            v-model="selectedTagInput"
-            :items="tagSearchResults"
-            item-title="name"
-            item-value="id"
-            label="Теги"
-            variant="outlined"
-            prepend-inner-icon="mdi-tag-multiple"
-            chips
-            closable-chips
-            multiple
-            return-object
-            density="compact"
-            :loading="tagsLoading"
-            @update:search="onTagSearch"
-            @update:model-value="onTagsSelected"
-            @update:opened="onMenuOpen"
-            cache-items
-          >
-            <template v-slot:chip="{ props, item }">
-              <v-chip
-                v-bind="props"
-                closable
-                @click:close="removeTag(item.raw)"
-                size="small"
-                :style="{
-                  backgroundColor: item.raw.color || '#757575',
-                  color: getContrastColor(item.raw.color),
-                }"
-              >
-                {{ item.raw.name }}
-              </v-chip>
-            </template>
-            <template v-slot:no-data>
-              <v-list-item>
-                <template v-slot:append>
-                  <v-btn
-                    color="primary"
-                    variant="text"
-                    size="small"
-                    @click="createNewTag"
-                    :disabled="!tagSearchQuery"
-                  >
-                    <v-icon left size="small">mdi-plus</v-icon>
-                    Создать "{{ tagSearchQuery }}"
-                  </v-btn>
-                </template>
-              </v-list-item>
-            </template>
-          </v-autocomplete>
+          <v-btn variant="outlined" prepend-icon="mdi-tag-plus" @click="openTagDialog">
+            Добавить тег
+          </v-btn>
         </v-col>
       </v-row>
 
-      <!-- Дополнительная информация для выбранных тегов -->
+      <!-- Таблица тегов -->
       <v-row v-if="recipeTags.length > 0" class="mt-0">
         <v-col cols="12">
-          <div class="d-flex flex-wrap align-center ga-2">
-            <div v-for="tagInfo in recipeTags" :key="tagInfo.id" class="d-flex align-center">
-              <v-chip
-                size="small"
-                :style="{
-                  backgroundColor: tagInfo.color || '#757575',
-                  color: getContrastColor(tagInfo.color),
-                }"
-              >
-                {{ tagInfo.name }}
-              </v-chip>
-              <v-text-field
-                v-model="tagInfo.additionalInfo"
-                density="compact"
-                variant="outlined"
-                placeholder="Инфо"
-                class="ml-2 tag-info-input"
-                hide-details
-              ></v-text-field>
-            </div>
-          </div>
+          <v-table density="compact" class="tags-table">
+            <tbody>
+              <tr v-for="tagInfo in recipeTags" :key="tagInfo.id">
+                <td class="tag-cell">
+                  <v-chip
+                    size="small"
+                    :style="{
+                      backgroundColor: tagInfo.color || '#757575',
+                      color: getContrastColor(tagInfo.color),
+                    }"
+                  >
+                    {{ tagInfo.name }}
+                  </v-chip>
+                </td>
+                <td class="info-cell">
+                  <v-textarea
+                    v-model="tagInfo.additionalInfo"
+                    density="compact"
+                    variant="outlined"
+                    placeholder="Доп. информация"
+                    rows="1"
+                    auto-grow
+                    hide-details
+                  ></v-textarea>
+                </td>
+                <td class="action-cell">
+                  <v-btn
+                    icon="mdi-delete"
+                    size="small"
+                    variant="text"
+                    color="error"
+                    @click="removeTag(tagInfo)"
+                  ></v-btn>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
         </v-col>
       </v-row>
+
+      <!-- Диалог выбора тега -->
+      <TagSelectDialog v-model="tagDialog" @select="addTag" />
 
       <!-- Кнопки действий -->
       <v-row class="mt-6">
@@ -196,27 +168,22 @@
 <script setup>
 import { ref, reactive } from 'vue'
 
-import { useTagsStore } from '../stores/tags.store'
 import { useRecipesStore } from '../stores/recipes.store'
 import MarkdownEditor from '../components/MarkdownEditor.vue'
-import { debounce } from '../utils/debounce'
+import TagSelectDialog from '../components/TagSelectDialog.vue'
 import { getContrastColor } from '../utils/colors'
 
-const tagStore = useTagsStore()
 const recipesStore = useRecipesStore()
 
 const form = ref()
 const formValid = ref(false)
 const submitting = ref(false)
 const filesPreview = ref([])
-const tagsLoading = ref(false)
 const fileInput = ref(null)
 
 // Состояние для тегов
-const selectedTagInput = ref([])
-const tagSearchQuery = ref('')
+const tagDialog = ref(false)
 const recipeTags = ref([]) // Массив { id, name, additionalInfo }
-const tagSearchResults = ref([]) // Результаты поиска с сервера
 
 const recipe = reactive({
   title: '',
@@ -235,103 +202,27 @@ const rules = {
   positiveNumber: (value) => !value || value > 0 || 'Должно быть больше 0',
 }
 
-// Debounced поиск тегов (задержка 300мс)
-const searchTagsDebounced = debounce(async (query) => {
-  if (!query || query.length < 1) {
-    tagSearchResults.value = []
-    return
-  }
-
-  tagsLoading.value = true
-  try {
-    const result = await tagStore.searchTags(query)
-    // API возвращает { items: [...], totalCount, page, pageSize }
-    tagSearchResults.value = result.items || result || []
-  } catch (error) {
-    console.error('Ошибка поиска тегов:', error)
-    tagSearchResults.value = []
-  } finally {
-    tagsLoading.value = false
-  }
-}, 300)
-
-// Обработчик поиска тегов - вызывается при вводе текста
-const onTagSearch = (value) => {
-  tagSearchQuery.value = value || ''
-  searchTagsDebounced(value || '')
+// Открытие диалога
+const openTagDialog = () => {
+  tagDialog.value = true
 }
 
-// Обработчик открытия меню - загружаем популярные теги или пустой список
-const onMenuOpen = async () => {
-  // Если есть выбранные теги, показываем только их
-  if (selectedTagInput.value.length > 0) {
-    tagSearchResults.value = selectedTagInput.value
-  } else if (tagSearchResults.value.length === 0 && !tagSearchQuery.value) {
-    // При открытии без запроса - загружаем все теги (первые 20)
-    tagsLoading.value = true
-    try {
-      const result = await tagStore.searchTags('')
-      tagSearchResults.value = result.items || result || []
-    } catch (error) {
-      console.error('Ошибка загрузки тегов:', error)
-    } finally {
-      tagsLoading.value = false
-    }
-  }
-}
-
-// Обработчик выбора тегов
-const onTagsSelected = (selected) => {
-  // Синхронизируем recipeTags с выбранными тегами
+// Добавление тега
+const addTag = (tag) => {
   const existingIds = recipeTags.value.map((t) => t.id)
-
-  // Добавляем новые теги
-  selected.forEach((tag) => {
-    if (!existingIds.includes(tag.id)) {
-      recipeTags.value.push({
-        id: tag.id,
-        name: tag.name,
-        color: tag.color,
-        additionalInfo: '',
-      })
-    }
-  })
-  // Удаляем теги, которые были убраны
-  const selectedIds = selected.map((t) => t.id)
-  recipeTags.value = recipeTags.value.filter((t) => selectedIds.includes(t.id))
+  if (!existingIds.includes(tag.id)) {
+    recipeTags.value.push({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color,
+      additionalInfo: '',
+    })
+  }
 }
 
 // Удаление тега
 const removeTag = (tag) => {
-  selectedTagInput.value = selectedTagInput.value.filter((t) => t.id !== tag.id)
   recipeTags.value = recipeTags.value.filter((t) => t.id !== tag.id)
-}
-
-// Создание нового тега
-const createNewTag = async () => {
-  if (!tagSearchQuery.value) return
-
-  try {
-    const newTag = await tagStore.createTag({ name: tagSearchQuery.value })
-
-    // Добавляем новый тег в список выбранных
-    selectedTagInput.value = [...selectedTagInput.value, newTag]
-    recipeTags.value.push({
-      id: newTag.id,
-      name: newTag.name,
-      color: newTag.color,
-      additionalInfo: '',
-    })
-
-    // Добавляем в результаты поиска
-    tagSearchResults.value = [...tagSearchResults.value, newTag]
-
-    tagSearchQuery.value = ''
-    showMessage('Тег успешно создан!', 'success')
-  } catch (error) {
-    console.error('Ошибка создания тега:', error)
-    showMessage('Ошибка при создании тега', 'error')
-  }
 }
 
 const triggerFileSelect = () => {
@@ -389,7 +280,6 @@ const resetForm = () => {
     files: [],
   })
   filesPreview.value = []
-  selectedTagInput.value = []
   recipeTags.value = []
   form.value?.reset()
 }
@@ -471,5 +361,24 @@ const showMessage = (text, color = 'success') => {
 .remove-file-btn {
   top: -15px;
   left: 64px;
+}
+
+.tags-table {
+  width: 100%;
+}
+
+.tags-table .tag-cell {
+  width: 120px;
+  vertical-align: middle;
+}
+
+.tags-table .info-cell {
+  vertical-align: middle;
+}
+
+.tags-table .action-cell {
+  width: 50px;
+  vertical-align: middle;
+  text-align: center;
 }
 </style>
