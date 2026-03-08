@@ -14,33 +14,23 @@
         </v-col>
       </v-row>
 
-      <!-- Поле для добавления нескольких файлов -->
+      <!-- Кнопка добавления файлов -->
       <v-row>
         <v-col cols="12">
-          <v-file-input
-            v-model="recipe.files"
-            label="Файлы (изображения и PDF)"
-            variant="outlined"
-            prepend-icon="mdi-paperclip"
+          <input
+            ref="fileInput"
+            type="file"
             multiple
             accept="image/*,.pdf"
-            show-size
-            chips
-            hint="Можно выбрать несколько файлов"
-            persistent-hint
-            @update:model-value="handleFilesPreview"
-          >
-            <template v-slot:selection="{ fileNames }">
-              <template v-for="fileName in fileNames" :key="fileName">
-                <v-chip size="small" label class="mr-2">
-                  {{ fileName }}
-                </v-chip>
-              </template>
-            </template>
-          </v-file-input>
+            style="display: none"
+            @change="handleFileSelect"
+          />
+          <v-btn variant="outlined" prepend-icon="mdi-paperclip" @click="triggerFileSelect">
+            Добавить файлы
+          </v-btn>
 
           <!-- Превью изображений -->
-          <div v-if="filesPreview.length > 0" class="mt-3">
+          <div v-if="filesPreview.length > 0" class="mt-3 files-preview-container">
             <div class="d-flex flex-wrap gap-2">
               <div v-for="(preview, index) in filesPreview" :key="index" class="file-preview-item">
                 <v-img
@@ -95,6 +85,7 @@
             closable-chips
             multiple
             return-object
+            density="compact"
             :loading="tagsLoading"
             @update:search="onTagSearch"
             @update:model-value="onTagsSelected"
@@ -106,6 +97,7 @@
                 v-bind="props"
                 closable
                 @click:close="removeTag(item.raw)"
+                size="small"
                 :style="{
                   backgroundColor: item.raw.color || '#757575',
                   color: getContrastColor(item.raw.color),
@@ -135,40 +127,29 @@
       </v-row>
 
       <!-- Дополнительная информация для выбранных тегов -->
-      <v-row v-if="recipeTags.length > 0">
+      <v-row v-if="recipeTags.length > 0" class="mt-0">
         <v-col cols="12">
-          <v-divider class="mb-4"></v-divider>
-          <div class="text-subtitle-1 mb-3">Дополнительная информация для тегов</div>
-
-          <v-card
-            v-for="tagInfo in recipeTags"
-            :key="tagInfo.id"
-            variant="outlined"
-            class="mb-3 pa-3"
-          >
-            <div class="d-flex align-center mb-2">
+          <div class="d-flex flex-wrap align-center ga-2">
+            <div v-for="tagInfo in recipeTags" :key="tagInfo.id" class="d-flex align-center">
               <v-chip
                 size="small"
-                class="mr-2"
                 :style="{
                   backgroundColor: tagInfo.color || '#757575',
                   color: getContrastColor(tagInfo.color),
                 }"
               >
-                <v-icon size="small" class="mr-1">mdi-tag</v-icon>
                 {{ tagInfo.name }}
               </v-chip>
+              <v-text-field
+                v-model="tagInfo.additionalInfo"
+                density="compact"
+                variant="outlined"
+                placeholder="Инфо"
+                class="ml-2 tag-info-input"
+                hide-details
+              ></v-text-field>
             </div>
-            <v-textarea
-              v-model="tagInfo.additionalInfo"
-              label="Дополнительная информация"
-              variant="outlined"
-              rows="2"
-              density="compact"
-              hint="Например, количество, время приготовления и т.д."
-              persistent-hint
-            ></v-textarea>
-          </v-card>
+          </div>
         </v-col>
       </v-row>
 
@@ -229,6 +210,7 @@ const formValid = ref(false)
 const submitting = ref(false)
 const filesPreview = ref([])
 const tagsLoading = ref(false)
+const fileInput = ref(null)
 
 // Состояние для тегов
 const selectedTagInput = ref([])
@@ -352,12 +334,18 @@ const createNewTag = async () => {
   }
 }
 
-const handleFilesPreview = (files) => {
-  filesPreview.value = []
+const triggerFileSelect = () => {
+  fileInput.value?.click()
+}
 
+const handleFileSelect = (event) => {
+  const files = event.target.files
   if (!files || files.length === 0) return
 
-  files.forEach((file) => {
+  // Добавляем новые файлы к существующим
+  const newFiles = Array.from(files)
+
+  newFiles.forEach((file) => {
     const isImage = file.type.startsWith('image/')
 
     if (isImage) {
@@ -371,7 +359,6 @@ const handleFilesPreview = (files) => {
       }
       reader.readAsDataURL(file)
     } else {
-      // Для PDF просто добавляем иконку
       filesPreview.value.push({
         type: 'pdf',
         url: null,
@@ -379,6 +366,12 @@ const handleFilesPreview = (files) => {
       })
     }
   })
+
+  // Добавляем в recipe.files
+  recipe.files = [...recipe.files, ...newFiles]
+
+  // Очищаем input для возможности повторного выбора того же файла
+  event.target.value = ''
 }
 
 const removeFile = (index) => {
@@ -455,5 +448,28 @@ const showMessage = (text, color = 'success') => {
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
+}
+
+.tag-info-input {
+  min-width: 200px;
+}
+
+.tag-info-input :deep(.v-field) {
+  font-size: 12px;
+}
+
+.file-preview-item {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.files-preview-container {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.remove-file-btn {
+  top: -15px;
+  left: 64px;
 }
 </style>
