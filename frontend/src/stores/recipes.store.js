@@ -122,5 +122,56 @@ export const useRecipesStore = defineStore('recipes', {
         this.loading = false
       }
     },
+
+    async deleteFile(fileId) {
+      try {
+        await axios.delete(`/files/${fileId}`)
+        return true
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при удалении файла'
+        throw e
+      }
+    },
+
+    async removeRecipeTag(recipeId, tagId) {
+      try {
+        await axios.delete(`/recipes/${recipeId}/tags/${tagId}`)
+        return true
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при удалении тега'
+        throw e
+      }
+    },
+
+    async deleteRecipeWithDependencies(recipe) {
+      this.loading = true
+      this.error = null
+
+      try {
+        // 1. Удаляем все файлы рецепта
+        if (recipe.files && recipe.files.length > 0) {
+          for (const file of recipe.files) {
+            await this.deleteFile(file.id)
+          }
+        }
+
+        // 2. Удаляем связи с тегами
+        if (recipe.tags && recipe.tags.length > 0) {
+          for (const tag of recipe.tags) {
+            await this.removeRecipeTag(recipe.id, tag.id)
+          }
+        }
+
+        // 3. Удаляем сам рецепт
+        await this.deleteRecipe(recipe.id)
+
+        return true
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Ошибка при удалении рецепта'
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
   },
 })

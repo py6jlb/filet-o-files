@@ -235,7 +235,8 @@ const deleteRecipeHandler = async () => {
 
   deleting.value = true
   try {
-    await recipesStore.deleteRecipe(recipe.value.id)
+    // Удаляем последовательно: файлы -> теги -> рецепт
+    await recipesStore.deleteRecipeWithDependencies(recipe.value)
     showMessage('Рецепт успешно удалён', 'success')
     deleteDialog.value = false
     router.push('/')
