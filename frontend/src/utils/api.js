@@ -32,10 +32,17 @@ api.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`
-          return api(originalRequest)
         })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`
+            return api(originalRequest)
+          })
+          .catch(async () => {
+            // Если в очереди уже есть ошибка - перенаправляем на login
+            const { default: router } = await import('../router/index')
+            router.push('/login')
+            return Promise.reject(err)
+          })
       }
 
       originalRequest._retry = true
@@ -53,13 +60,18 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${tokenService.accessToken}`
           return api(originalRequest)
         } else {
+          // Refresh вернул false - токены недействительны
           processQueue(new Error('Refresh failed'), null)
+          auth.clearAuth()
           router.push('/login')
           return Promise.reject(err)
         }
       } catch (refreshError) {
         const { default: router } = await import('../router/index')
+        const { useAuthStore } = await import('../stores/auth.store')
+
         processQueue(refreshError, null)
+        useAuthStore().clearAuth()
         router.push('/login')
         return Promise.reject(refreshError)
       } finally {

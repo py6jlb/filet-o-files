@@ -125,6 +125,8 @@ export const useAuthStore = defineStore('auth', {
 
       if (!accessToken || !refreshToken) {
         this.isInitialized = true
+        this.clearAuth()
+        router.push('/login')
         return
       }
 
@@ -132,9 +134,21 @@ export const useAuthStore = defineStore('auth', {
         const expiryTime = getTokenExpiryTime(accessToken)
 
         if (expiryTime <= 0) {
+          // Токен истёк - пробуем обновить
           this.user = parseJwt(accessToken)
-          this.refresh()
-          this.isInitialized = true
+          // Вызываем refresh и ждём результат
+          this.refresh().then((success) => {
+            if (!success) {
+              // Не удалось обновить токен - перенаправляем на login
+              this.clearAuth()
+              router.push('/login')
+            }
+          }).catch(() => {
+            this.clearAuth()
+            router.push('/login')
+          }).finally(() => {
+            this.isInitialized = true
+          })
           return
         }
 
@@ -143,6 +157,7 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         console.error('Failed to initialize auth:', error)
         this.clearAuth()
+        router.push('/login')
       } finally {
         this.isInitialized = true
       }

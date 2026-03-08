@@ -7,6 +7,21 @@ import LoginView from '@/views/LoginView.vue'
 import AddRecipeView from '@/views/AddRecipeView.vue'
 import EditRecipeView from '@/views/EditRecipeView.vue'
 import { useAuthStore } from '../stores/auth.store'
+import tokenService from '../utils/token.service'
+
+// Функция проверки валидности токена
+const isTokenValid = () => {
+  const token = tokenService.accessToken
+  if (!token) return false
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    // Проверяем, что токен не истёк (с запасом 30 секунд)
+    return payload.exp * 1000 > Date.now() + 30000
+  } catch {
+    return false
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,11 +73,24 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  if (to.meta.requiresAuth && !authStore.user) {
-    next({ name: 'login' })
-  } else {
+
+  // Проверяем, инициализирован ли auth store
+  if (!authStore.isInitialized) {
+    // Ждём инициализации - показываем текущую страницу
     next()
+    return
   }
+
+  // Проверяем: нужен ли auth и валиден ли токен
+  if (to.meta.requiresAuth) {
+    if (!authStore.user || !isTokenValid()) {
+      // Токен недействителен или пользователь не авторизован
+      next({ name: 'login' })
+      return
+    }
+  }
+
+  next()
 })
 
 export default router
