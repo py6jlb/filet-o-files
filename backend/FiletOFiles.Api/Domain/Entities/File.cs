@@ -11,6 +11,6 @@ public sealed class File
     public long Size { get; set; }
     public bool IsTitle { get; set; }
 
-    public string? RecipeId { get; set; }
-    public Recipe? Recipe { get; set; }
+    public string RecipeId { get; set; }
+    public Recipe Recipe { get; set; }
 }

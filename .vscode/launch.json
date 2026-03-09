@@ -1,0 +1,51 @@
+{
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Запустить оба проекта",
+            "configurations": [".NET FiletOFiles.Api (web)", "Vite"],
+            "stopAll": true
+        }
+    ],
+    "configurations": [
+        {
+            "name": "C#: FiletOFiles.Api Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/backend/FiletOFiles.Api/FiletOFiles.Api.csproj"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        },
+        {
+            "name": ".NET FiletOFiles.Api (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/backend/FiletOFiles.Api/bin/Debug/net9.0/FiletOFiles.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/backend/FiletOFiles.Api",
+            "stopAtEntry": false,
+            "launchSettingsProfile": "https",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/scalar"
+            },
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Vite",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/frontend/src",
+            "sourceMaps": true,
+            "preLaunchTask": "vite: dev"
+        }
+    ]
+}

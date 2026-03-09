@@ -6,9 +6,11 @@
         "editor.defaultFormatter": "csharpier.csharpier-vscode"
     },
     "cSpell.words": [
+        "ASPNETCORE",
         "csdevkit",
         "devcontainers",
         "dotnettools",
-        "Hmac"
+        "Hmac",
+        "Iddict"
     ],
 }

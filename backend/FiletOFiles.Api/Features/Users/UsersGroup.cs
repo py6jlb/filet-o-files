@@ -1,4 +1,5 @@
 using System;
+using FiletOFiles.Api.Features.Users.CurrentUser;
 using FiletOFiles.Api.Features.Users.GetUser;
 
 namespace FiletOFiles.Api.Features.Users;
@@ -14,7 +15,8 @@ public static class UserGroup
             .WithOpenApi()
             .WithTags("Users")
             .RequireAuthorization()
-            .MapGetUser();
+            .MapGetUser()
+            .MapCurrentUserUser();
 
         return endpointRouteBuilder;
     }

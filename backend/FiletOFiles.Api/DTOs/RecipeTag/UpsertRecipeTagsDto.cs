@@ -4,5 +4,5 @@ namespace FiletOFiles.Api.DTOs.RecipeTag;
 
 public sealed record UpsertRecipeTagsDto
 {
-    public List<string> TagIds { get; set; }
+    public List<RecipeTagDto> Tags { get; set; }
 }

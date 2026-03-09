@@ -27,7 +27,7 @@ public static class UpdateRecipeTagEndpoint
 
     public static async Task<IResult> HandleAsync(
         [FromRoute] string recipeId,
-        [FromBody] UpsertRecipeTagsDto request,
+        [FromBody] RecipeTagDto request,
         [FromServices] AppDbContext db,
         CancellationToken cancellationToken
     )
@@ -44,32 +44,25 @@ public static class UpdateRecipeTagEndpoint
             );
         }
 
-        var currentTagIds = recipe.RecipeTags.Select(x => x.TagId).ToHashSet();
-        if (currentTagIds.SetEquals(request.TagIds))
+        var currentTag = recipe.RecipeTags.FirstOrDefault(x => x.TagId == request.TagId);
+        if (currentTag is null)
         {
-            return TypedResults.Ok();
-        }
-
-        List<string> existingTagIds = await db
-            .Tags.Where(t => request.TagIds.Contains(t.Id))
-            .Select(t => t.Id)
-            .ToListAsync(cancellationToken: cancellationToken);
-
-        if (existingTagIds.Count != request.TagIds.Count)
-        {
-            return TypedResults.Problem(
-                detail: "One or more tag IDs is invalid",
-                statusCode: StatusCodes.Status400BadRequest
+            recipe.RecipeTags.Add(
+                new RecipeTag
+                {
+                    RecipeId = recipeId,
+                    TagId = request.TagId,
+                    AdditionalData = request.AdditionalData,
+                }
             );
+
+            await db.SaveChangesAsync(cancellationToken);
         }
-
-        recipe.RecipeTags.RemoveAll(rt => !request.TagIds.Contains(rt.TagId));
-        var tagIdsToAdd = request.TagIds.Except(currentTagIds).ToArray();
-        recipe.RecipeTags.AddRange(
-            tagIdsToAdd.Select(tagId => new RecipeTag { RecipeId = recipeId, TagId = tagId })
-        );
-
-        await db.SaveChangesAsync(cancellationToken);
+        else
+        {
+            currentTag.AdditionalData = request.AdditionalData;
+            await db.SaveChangesAsync(cancellationToken);
+        }
         return TypedResults.NoContent();
     }
 }

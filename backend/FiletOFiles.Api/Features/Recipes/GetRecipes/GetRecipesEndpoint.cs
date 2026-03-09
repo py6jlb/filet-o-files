@@ -48,22 +48,39 @@ public static class GetRecipesEndpoint
 
         Search ??= Search?.Trim().ToLower();
         var sortMappings = sortMappingProvider.GetMappings<RecipeDto, Recipe>();
-        var recipesQuery = db
-            .Recipes.Where(r =>
-                Search == null
-                || r.Title.ToLower().Contains(Search)
+
+        IQueryable<Recipe> recipesQuery = db
+            .Recipes.Include(r => r.Tags)
+            .Include(r => r.RecipeTags)
+            .Include(r => r.Files)
+            .AsQueryable();
+
+        // Фильтрация по названию/описанию
+        if (!string.IsNullOrEmpty(Search))
+        {
+            recipesQuery = recipesQuery.Where(r =>
+                r.Title.ToLower().Contains(Search)
                 || r.Descriptions != null && r.Descriptions.ToLower().Contains(Search)
-            )
-            .ApplySort(Sort, sortMappings)
-            .Select(r => r.ToDto());
+            );
+        }
+
+        // Фильтрация по тегам
+        if (!string.IsNullOrEmpty(Tags))
+        {
+            var tagIds = Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            if (tagIds.Length > 0)
+            {
+                recipesQuery = recipesQuery.Where(r => r.Tags.Any(t => tagIds.Contains(t.Id)));
+            }
+        }
 
         var result = await PaginationResult<RecipeDto>.CreateAsync(
-            recipesQuery,
+            recipesQuery.ApplySort(Sort, sortMappings).Select(r => r.ToDto()),
             Page,
             PageSize,
             cancellationToken
         );
 
-        return result.TotalCount == 0 ? TypedResults.NotFound() : TypedResults.Ok(result);
+        return TypedResults.Ok(result);
     }
 }

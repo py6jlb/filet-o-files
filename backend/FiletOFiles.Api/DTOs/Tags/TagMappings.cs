@@ -6,12 +6,40 @@ namespace FiletOFiles.Api.DTOs.Tags;
 
 public static class TagMappings
 {
+    private static readonly string[] DefaultColors =
+    {
+        "#E53935",
+        "#D81B60",
+        "#8E24AA",
+        "#5E35B1",
+        "#3949AB",
+        "#1E88E5",
+        "#039BE5",
+        "#00ACC1",
+        "#00897B",
+        "#43A047",
+        "#7CB342",
+        "#C0CA33",
+        "#FDD835",
+        "#FFB300",
+        "#FB8C00",
+        "#F4511E",
+        "#6D4C41",
+        "#757575",
+        "#546E7A",
+    };
+
     public static Tag ToEntity(this CreateTagDto dto)
     {
+        // Генерируем случайный цвет, если не передан
+        var color = string.IsNullOrEmpty(dto.Color)
+            ? DefaultColors[Random.Shared.Next(DefaultColors.Length)]
+            : dto.Color;
+
         return new()
         {
             Id = $"t_{Ulid.NewUlid()}",
-            Color = dto.Color,
+            Color = color,
             Name = dto.Name,
         };
     }
@@ -23,6 +51,17 @@ public static class TagMappings
             Id = tag.Id,
             Color = tag.Color,
             Name = tag.Name,
+        };
+    }
+
+    public static TagDto ToDto(this Tag tag, string? additionalData)
+    {
+        return new TagDto
+        {
+            Id = tag.Id,
+            Color = tag.Color,
+            Name = tag.Name,
+            AdditionalData = additionalData,
         };
     }
 

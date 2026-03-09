@@ -1,0 +1,20 @@
+{
+	"name": "Node.js",
+	"build": {
+		"dockerfile": "./Dockerfile",
+		"context": "."
+	},
+	"forwardPorts": [
+		5173
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"Vue.volar",
+				"dbaeumer.vscode-eslint",
+				"EditorConfig.EditorConfig",
+				"esbenp.prettier-vscode"
+			]
+		}
+	}
+}

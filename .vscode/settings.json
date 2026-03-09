@@ -1,0 +1,21 @@
+{
+    "[csharp]": {
+        "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    },
+    "cSpell.words": [
+        "Antiforgery",
+        "ASPNETCORE",
+        "Buefy",
+        "csdevkit",
+        "devcontainers",
+        "dotnettools",
+        "Hmac",
+        "Iddict",
+        "pinia",
+        "VITE",
+        "vuetify"
+    ],
+}

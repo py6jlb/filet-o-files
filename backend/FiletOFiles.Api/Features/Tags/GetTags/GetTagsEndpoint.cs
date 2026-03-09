@@ -30,7 +30,7 @@ public static class GetTagsEndpoint
         [FromServices] SortMappingProvider sortMappingProvider,
         CancellationToken cancellationToken,
         [FromQuery(Name = "page")] int Page = 1,
-        [FromQuery(Name = "pageSize")] int PageSize = 10
+        [FromQuery(Name = "pageSize")] int PageSize = 100
     )
     {
         Search ??= Search?.Trim().ToLower();

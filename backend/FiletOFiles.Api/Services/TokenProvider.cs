@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using FiletOFiles.Api.DTOs.Auth;
+using FiletOFiles.Api.DTOs.AuthManagement;
 using FiletOFiles.Api.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -12,9 +13,9 @@ namespace FiletOFiles.Api.Services;
 
 public sealed class TokenProvider
 {
-    private readonly JwtAuthOptions _jwtAuthOptions;
+    private readonly AuthOptions _jwtAuthOptions;
 
-    public TokenProvider(IOptions<JwtAuthOptions> jwtAuthOptions)
+    public TokenProvider(IOptions<AuthOptions> jwtAuthOptions)
     {
         _jwtAuthOptions = jwtAuthOptions.Value;
     }
@@ -28,10 +29,12 @@ public sealed class TokenProvider
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtAuthOptions.Key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
         List<Claim> claims =
         [
             new Claim(JwtRegisteredClaimNames.Sub, tokenRequest.UserId),
             new Claim(JwtRegisteredClaimNames.Email, tokenRequest.Email),
+            .. tokenRequest.Roles.Select(role => new Claim(JwtCustomClaimNames.Role, role)),
         ];
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -51,7 +54,8 @@ public sealed class TokenProvider
 
     private string GenerateRefreshToken()
     {
+        byte[] ulidBytes = Encoding.UTF8.GetBytes(Ulid.NewUlid().ToString());
         byte[] randomBytes = RandomNumberGenerator.GetBytes(32);
-        return Convert.ToBase64String(randomBytes);
+        return Convert.ToBase64String([.. ulidBytes, .. randomBytes]);
     }
 }

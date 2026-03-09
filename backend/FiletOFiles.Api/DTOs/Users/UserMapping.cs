@@ -23,7 +23,7 @@ public static class UserMapping
     {
         return new User
         {
-            Id = $"t_{Ulid.NewUlid()}",
+            Id = $"u_{Ulid.NewUlid()}",
             Email = dto.Email,
             Name = dto.Name,
             CreatedAtUtc = DateTime.UtcNow,

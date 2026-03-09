@@ -180,8 +180,7 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                         .HasColumnType("TEXT")
                         .HasColumnName("user_name");
 
-                    b.HasKey("Id")
-                        .HasName("pk_asp_net_users");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -191,6 +190,8 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("asp_net_users", (string)null);
+
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -293,9 +294,24 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                     b.ToTable("asp_net_user_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.AppIdentityUser", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_approved");
+
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("must_change_password");
+
+                    b.ToTable("app_identity_user", (string)null);
+                });
+
             modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.RefreshToken", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                    b.HasOne("FiletOFiles.Api.Domain.Entities.AppIdentityUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -360,6 +376,16 @@ namespace FiletOFiles.Api.Migrations.AppDbIdentity
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
+                });
+
+            modelBuilder.Entity("FiletOFiles.Api.Domain.Entities.AppIdentityUser", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithOne()
+                        .HasForeignKey("FiletOFiles.Api.Domain.Entities.AppIdentityUser", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_app_identity_user_asp_net_users_id");
                 });
 #pragma warning restore 612, 618
         }

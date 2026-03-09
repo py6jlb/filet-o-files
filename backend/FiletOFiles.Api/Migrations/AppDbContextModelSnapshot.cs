@@ -96,6 +96,11 @@ namespace FiletOFiles.Api.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("tag_id");
 
+                    b.Property<string>("AdditionalData")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("additional_data");
+
                     b.HasKey("RecipeId", "TagId")
                         .HasName("pk_recipe_tag");
 
