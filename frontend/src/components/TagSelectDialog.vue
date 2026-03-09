@@ -3,47 +3,51 @@
     <v-card>
       <v-card-title>Выбор тега</v-card-title>
       <v-card-text>
-        <v-text-field
-          v-model="searchQuery"
+        <v-autocomplete
+          v-model="selectedTagInput"
+          :items="tagSearchResults"
+          item-title="name"
+          item-value="id"
           label="Поиск тега"
           variant="outlined"
           density="compact"
           prepend-inner-icon="mdi-magnify"
-          clearable
-          @update:model-value="onSearch"
-        ></v-text-field>
+          chips
+          closable-chips
+          multiple
+          return-object
+          :loading="tagsLoading"
+          @update:search="onTagSearch"
+          @update:model-value="onTagsSelected"
+          @update:opened="onMenuOpen"
+          cache-items
+        >
+          <template v-slot:chip="{ props, item }">
+            <v-chip
+              v-bind="props"
+              closable
+              @click:close="removeTag(item.raw)"
+              size="small"
+              :style="{
+                backgroundColor: item.raw.color || '#757575',
+                color: getContrastColor(item.raw.color),
+              }"
+            >
+              {{ item.raw.name }}
+            </v-chip>
+          </template>
+        </v-autocomplete>
 
-        <v-list v-if="searchResults.length > 0" class="mt-2" max-height="300" style="overflow-y: auto">
-          <v-list-item
-            v-for="tag in searchResults"
-            :key="tag.id"
-            @click="selectTag(tag)"
-          >
-            <template v-slot:prepend>
-              <v-chip
-                size="small"
-                :style="{
-                  backgroundColor: tag.color || '#757575',
-                  color: getContrastColor(tag.color),
-                }"
-              >
-                {{ tag.name }}
-              </v-chip>
-            </template>
-          </v-list-item>
-        </v-list>
-        <div v-else-if="searchQuery && !loading" class="text-center mt-4">
-          <v-btn
-            color="primary"
-            variant="tonal"
-            @click="createTag"
-          >
+        <div v-if="selectedTagInput.length > 0" class="text-center mt-2">
+          <v-btn color="primary" @click="applySelected">
+            Добавить выбранные
+          </v-btn>
+        </div>
+        <div v-else-if="searchQuery && !tagsLoading" class="text-center mt-2">
+          <v-btn color="primary" variant="tonal" @click="createTag">
             <v-icon left>mdi-plus</v-icon>
             Создать "{{ searchQuery }}"
           </v-btn>
-        </div>
-        <div v-else-if="!searchQuery" class="text-center mt-4 text-grey">
-          Введите название для поиска
         </div>
       </v-card-text>
       <v-card-actions>
@@ -72,65 +76,90 @@ const emit = defineEmits(['update:modelValue', 'select'])
 const tagStore = useTagsStore()
 
 const dialogVisible = ref(props.modelValue)
-const searchQuery = ref('')
-const searchResults = ref([])
-const loading = ref(false)
+const tagSearchQuery = ref('')
+const tagSearchResults = ref([])
+const tagsLoading = ref(false)
+const selectedTagInput = ref([])
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, async (val) => {
   dialogVisible.value = val
   if (val) {
-    searchQuery.value = ''
-    searchResults.value = []
-    loadAllTags()
+    tagSearchQuery.value = ''
+    selectedTagInput.value = []
+
+    // Загружаем теги при открытии
+    tagsLoading.value = true
+    try {
+      const result = await tagStore.searchTags('')
+      tagSearchResults.value = result.items || result || []
+    } catch (error) {
+      console.error('Ошибка загрузки тегов:', error)
+    } finally {
+      tagsLoading.value = false
+    }
   }
 })
 
 const searchTagsDebounced = debounce(async (query) => {
   if (!query || query.length < 1) {
-    searchResults.value = []
+    tagSearchResults.value = []
     return
   }
 
-  loading.value = true
+  tagsLoading.value = true
   try {
     const result = await tagStore.searchTags(query)
-    searchResults.value = result.items || result || []
+    tagSearchResults.value = result.items || result || []
   } catch (error) {
     console.error('Ошибка поиска тегов:', error)
-    searchResults.value = []
+    tagSearchResults.value = []
   } finally {
-    loading.value = false
+    tagsLoading.value = false
   }
 }, 300)
 
-const onSearch = (value) => {
-  searchQuery.value = value || ''
+const onTagSearch = (value) => {
+  tagSearchQuery.value = value || ''
   searchTagsDebounced(value || '')
 }
 
-const loadAllTags = async () => {
-  loading.value = true
-  try {
-    const result = await tagStore.searchTags('')
-    searchResults.value = result.items || result || []
-  } catch (error) {
-    console.error('Ошибка загрузки тегов:', error)
-  } finally {
-    loading.value = false
+const onMenuOpen = async () => {
+  if (tagSearchResults.value.length === 0) {
+    tagsLoading.value = true
+    try {
+      const result = await tagStore.searchTags('')
+      tagSearchResults.value = result.items || result || []
+    } catch (error) {
+      console.error('Ошибка загрузки тегов:', error)
+    } finally {
+      tagsLoading.value = false
+    }
   }
 }
 
-const selectTag = (tag) => {
-  emit('select', tag)
+const onTagsSelected = (selected) => {
+  selectedTagInput.value = selected
+}
+
+const removeTag = (tag) => {
+  selectedTagInput.value = selectedTagInput.value.filter((t) => t.id !== tag.id)
+}
+
+const applySelected = () => {
+  // Добавляем по одному тегу
+  selectedTagInput.value.forEach(tag => {
+    emit('select', tag)
+  })
   close()
 }
 
 const createTag = async () => {
-  if (!searchQuery.value) return
+  if (!tagSearchQuery.value) return
 
   try {
-    const newTag = await tagStore.createTag({ name: searchQuery.value })
-    selectTag(newTag)
+    const newTag = await tagStore.createTag({ name: tagSearchQuery.value })
+    emit('select', newTag)
+    close()
   } catch (error) {
     console.error('Ошибка создания тега:', error)
   }
