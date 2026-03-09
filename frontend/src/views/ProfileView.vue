@@ -3,13 +3,8 @@
     <v-col cols="12" sm="8" md="4">
       <v-card>
         <v-card-text>
-          <div v-if="loading">
-            <span></span>
-            <span>Загрузка профиля...</span>
-          </div>
-          <div v-else-if="error">
-            {{ error }}
-          </div>
+          <LoadingIndicator v-if="loading" text="Загрузка профиля..." />
+          <ErrorMessage v-else-if="error" :message="error" />
           <template v-else>
             <v-img
               src="images/avatar.svg"
@@ -40,6 +35,8 @@
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/user.store'
+import LoadingIndicator from '../components/LoadingIndicator.vue'
+import ErrorMessage from '../components/ErrorMessage.vue'
 
 const userStore = useUserStore()
 const { user, loading, error } = storeToRefs(userStore)

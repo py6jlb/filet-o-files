@@ -1,26 +1,24 @@
 <template>
   <div>
     <!-- Загрузка -->
-    <div v-if="loading" class="text-center py-8">
-      <v-progress-circular indeterminate color="primary"></v-progress-circular>
-      <div class="mt-2">Загрузка рецепта...</div>
-    </div>
+    <LoadingIndicator v-if="loading" text="Загрузка рецепта..." />
 
     <!-- Ошибка -->
-    <div v-else-if="error" class="text-center py-8">
-      <v-alert type="error" variant="tonal" class="mb-4">
-        {{ error }}
-      </v-alert>
-      <v-btn color="primary" to="/">Вернуться к списку рецептов</v-btn>
-    </div>
+    <ErrorMessage
+      v-else-if="error"
+      message="Ошибка при загрузке"
+      button-text="Вернуться к списку"
+      @button-click="router.push('/')"
+    />
 
     <!-- Рецепт не найден -->
-    <div v-else-if="!recipe" class="text-center py-8">
-      <v-alert type="warning" variant="tonal" class="mb-4">
-        Рецепт не найден
-      </v-alert>
-      <v-btn color="primary" to="/">Вернуться к списку рецептов</v-btn>
-    </div>
+    <ErrorMessage
+      v-else-if="!recipe"
+      message="Рецепт не найден"
+      type="warning"
+      button-text="Вернуться к списку"
+      @button-click="router.push('/')"
+    />
 
     <!-- Просмотр рецепта -->
     <div v-else>
@@ -87,7 +85,7 @@
         <!-- Описание (рендерится как Markdown) -->
         <v-card-text v-if="recipe.descriptions">
           <div class="text-subtitle-1 text-grey-darken-1 mb-2">Описание</div>
-          <div class="markdown-content" v-html="renderedDescription"></div>
+          <MarkdownRenderer :content="recipe.descriptions" />
         </v-card-text>
 
         <!-- Дата создания -->
@@ -103,18 +101,7 @@
       <v-card v-if="recipe.files?.length > 1" variant="outlined" class="mb-4">
         <v-card-title>Галерея</v-card-title>
         <v-card-text>
-          <div class="d-flex flex-wrap ga-2">
-            <v-img
-              v-for="file in recipe.files"
-              :key="file.id"
-              :src="getFileUrl(file.id)"
-              width="120"
-              height="120"
-              cover
-              class="rounded-lg cursor-pointer"
-              @click="openImage(getFileUrl(file.id))"
-            ></v-img>
-          </div>
+          <FileGallery :files="recipe.files" :size="120" @click="openImage" />
         </v-card-text>
       </v-card>
 
@@ -131,53 +118,40 @@
     </div>
 
     <!-- Диалог подтверждения удаления -->
-    <v-dialog v-model="deleteDialog" max-width="400">
-      <v-card>
-        <v-card-title class="text-h6">Подтверждение удаления</v-card-title>
-        <v-card-text>
-          Вы уверены, что хотите удалить рецепт "{{ recipe?.title }}"?
-          Это действие нельзя отменить.
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn
-            color="error"
-            variant="elevated"
-            @click="deleteRecipeHandler"
-            :loading="deleting"
-          >
-            Удалить
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <DeleteConfirmDialog
+      v-model="deleteDialog"
+      title="Подтверждение удаления"
+      :message="`Вы уверены, что хотите удалить рецепт «${recipe?.title}»? Это действие нельзя отменить.`"
+      :loading="deleting"
+      @confirm="deleteRecipeHandler"
+    />
 
     <!-- Диалог просмотра изображения -->
-    <v-dialog v-model="imageDialog" max-width="90vw">
-      <v-img
-        :src="selectedImage"
-        max-height="80vh"
-        contain
-        @click="imageDialog = false"
-      ></v-img>
-    </v-dialog>
+    <ImageViewerDialog
+      v-model="imageDialog"
+      :src="selectedImage"
+    />
 
     <!-- Уведомление -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000" top>
-      {{ snackbar.text }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar.show = false">Закрыть</v-btn>
-      </template>
-    </v-snackbar>
+    <SnackbarNotification
+      v-model="snackbar.show"
+      :text="snackbar.text"
+      :color="snackbar.color"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipesStore } from '../stores/recipes.store'
-import { marked } from 'marked'
+import LoadingIndicator from '../components/LoadingIndicator.vue'
+import ErrorMessage from '../components/ErrorMessage.vue'
+import MarkdownRenderer from '../components/MarkdownRenderer.vue'
+import FileGallery from '../components/FileGallery.vue'
+import DeleteConfirmDialog from '../components/DeleteConfirmDialog.vue'
+import ImageViewerDialog from '../components/ImageViewerDialog.vue'
+import SnackbarNotification from '../components/SnackbarNotification.vue'
 import { getContrastColor } from '../utils/colors'
 
 const route = useRoute()
@@ -197,12 +171,6 @@ const snackbar = reactive({
   show: false,
   text: '',
   color: 'success',
-})
-
-// Рендеринг markdown
-const renderedDescription = computed(() => {
-  if (!recipe.value?.descriptions) return ''
-  return marked.parse(recipe.value.descriptions)
 })
 
 const getFileUrl = (fileId) => {
@@ -275,115 +243,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-
-/* Стили для markdown контента */
-:deep(.markdown-content h1) {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 0.5rem;
-}
-
-:deep(.markdown-content h2) {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 0.25rem;
-}
-
-:deep(.markdown-content h3) {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-:deep(.markdown-content p) {
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-:deep(.markdown-content ul),
-:deep(.markdown-content ol) {
-  margin-bottom: 1rem;
-  padding-left: 1.5rem;
-}
-
-:deep(.markdown-content li) {
-  margin-bottom: 0.25rem;
-}
-
-:deep(.markdown-content code) {
-  background: #f0f0f0;
-  padding: 0.125rem 0.375rem;
-  border-radius: 4px;
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 0.9em;
-}
-
-:deep(.markdown-content pre) {
-  background: #2d2d2d;
-  color: #f8f8f2;
-  padding: 1rem;
-  border-radius: 6px;
-  overflow-x: auto;
-  margin-bottom: 1rem;
-}
-
-:deep(.markdown-content pre code) {
-  background: transparent;
-  padding: 0;
-  color: inherit;
-}
-
-:deep(.markdown-content blockquote) {
-  border-left: 4px solid #e0e0e0;
-  padding-left: 1rem;
-  margin-left: 0;
-  color: #666;
-  font-style: italic;
-}
-
-:deep(.markdown-content a) {
-  color: #1976d2;
-  text-decoration: none;
-}
-
-:deep(.markdown-content a:hover) {
-  text-decoration: underline;
-}
-
-:deep(.markdown-content img) {
-  max-width: 100%;
-  border-radius: 4px;
-}
-
-:deep(.markdown-content table) {
-  border-collapse: collapse;
-  width: 100%;
-  margin-bottom: 1rem;
-}
-
-:deep(.markdown-content th),
-:deep(.markdown-content td) {
-  border: 1px solid #e0e0e0;
-  padding: 0.5rem;
-  text-align: left;
-}
-
-:deep(.markdown-content th) {
-  background: #f5f5f5;
-}
-
-:deep(.markdown-content hr) {
-  border: none;
-  border-top: 1px solid #e0e0e0;
-  margin: 1.5rem 0;
-}
+/* Стили в MarkdownRenderer.vue */
 </style>

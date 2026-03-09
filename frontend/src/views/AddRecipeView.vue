@@ -82,43 +82,7 @@
       <!-- Таблица тегов -->
       <v-row v-if="recipeTags.length > 0" class="mt-0">
         <v-col cols="12">
-          <v-table density="compact" class="tags-table">
-            <tbody>
-              <tr v-for="tagInfo in recipeTags" :key="tagInfo.id">
-                <td class="tag-cell">
-                  <v-chip
-                    size="small"
-                    :style="{
-                      backgroundColor: tagInfo.color || '#757575',
-                      color: getContrastColor(tagInfo.color),
-                    }"
-                  >
-                    {{ tagInfo.name }}
-                  </v-chip>
-                </td>
-                <td class="info-cell">
-                  <v-textarea
-                    v-model="tagInfo.additionalInfo"
-                    density="compact"
-                    variant="outlined"
-                    placeholder="Доп. информация"
-                    rows="1"
-                    auto-grow
-                    hide-details
-                  ></v-textarea>
-                </td>
-                <td class="action-cell">
-                  <v-btn
-                    icon="mdi-delete"
-                    size="small"
-                    variant="text"
-                    color="error"
-                    @click="removeTag(tagInfo)"
-                  ></v-btn>
-                </td>
-              </tr>
-            </tbody>
-          </v-table>
+          <TagsTable :tags="recipeTags" @remove="removeTag" />
         </v-col>
       </v-row>
 
@@ -156,12 +120,11 @@
       </v-row>
     </v-form>
     <!-- Сообщения -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000" top>
-      {{ snackbar.text }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar.show = false"> Закрыть </v-btn>
-      </template>
-    </v-snackbar>
+    <SnackbarNotification
+      v-model="snackbar.show"
+      :text="snackbar.text"
+      :color="snackbar.color"
+    />
   </div>
 </template>
 
@@ -171,7 +134,8 @@ import { ref, reactive } from 'vue'
 import { useRecipesStore } from '../stores/recipes.store'
 import MarkdownEditor from '../components/MarkdownEditor.vue'
 import TagSelectDialog from '../components/TagSelectDialog.vue'
-import { getContrastColor } from '../utils/colors'
+import TagsTable from '../components/TagsTable.vue'
+import SnackbarNotification from '../components/SnackbarNotification.vue'
 
 const recipesStore = useRecipesStore()
 
@@ -335,50 +299,8 @@ const showMessage = (text, color = 'success') => {
   text-align: center;
 }
 
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.tag-info-input {
-  min-width: 200px;
-}
-
-.tag-info-input :deep(.v-field) {
-  font-size: 12px;
-}
-
-.file-preview-item {
-  position: relative;
-  flex-shrink: 0;
-}
-
 .files-preview-container {
   overflow-x: auto;
   padding-bottom: 4px;
-}
-
-.remove-file-btn {
-  top: -15px;
-  left: 64px;
-}
-
-.tags-table {
-  width: 100%;
-}
-
-.tags-table .tag-cell {
-  width: 120px;
-  vertical-align: middle;
-}
-
-.tags-table .info-cell {
-  vertical-align: middle;
-}
-
-.tags-table .action-cell {
-  width: 50px;
-  vertical-align: middle;
-  text-align: center;
 }
 </style>
