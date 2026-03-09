@@ -14,7 +14,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   files: {
     type: Array,
     default: () => []
@@ -30,6 +32,8 @@ defineProps({
 })
 
 defineEmits(['click'])
+
+const gapClass = computed(() => props.gap)
 
 const getFileUrl = (fileId) => {
   return `${import.meta.env.VITE_API_BASE_URL}/files/${fileId}`
