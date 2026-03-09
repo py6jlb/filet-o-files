@@ -1,11 +1,13 @@
 <template>
   <div>
-    <v-toolbar border floating class="w-100 mb-4" rounded="lg">
+    <!-- Панель поиска -->
+    <v-toolbar border floating class="w-100 mb-3" rounded="lg" density="comfortable">
       <div class="d-flex w-100 px-2 py-1 align-center flex-wrap ga-2">
+        <!-- Поиск по названию -->
         <v-text-field
           v-model="searchQuery"
-          density="comfortable"
-          placeholder="Поиск по названию"
+          density="compact"
+          placeholder="Поиск..."
           variant="solo"
           clearable
           flat
@@ -13,46 +15,53 @@
           single-line
           class="flex-grow-1"
           style="min-width: 200px"
+          @keyup.enter="doSearch"
         />
 
-        <v-autocomplete
-          v-model="selectedTags"
-          :items="tagSearchResults"
-          item-title="name"
-          item-value="id"
-          label="Теги"
-          variant="solo"
-          density="comfortable"
-          chips
-          closable-chips
-          multiple
-          return-object
-          :loading="tagsLoading"
-          hide-details
-          class="flex-grow-1"
-          style="min-width: 200px"
-          @update:search="onTagSearch"
-          @update:opened="onMenuOpen"
-          cache-items
-        >
-          <template v-slot:chip="{ props, item }">
-            <v-chip v-bind="props" size="small">
-              {{ item.raw.name }}
-            </v-chip>
-          </template>
-        </v-autocomplete>
+        <!-- Кнопка поиска -->
+        <v-btn icon="mdi-magnify" color="primary" @click="doSearch"></v-btn>
 
-        <v-btn size="large" color="primary" @click="doSearch">
-          <v-icon left>mdi-magnify</v-icon>
-          Искать
+        <!-- Кнопка фильтра по тегам -->
+        <v-btn
+          icon="mdi-filter-variant"
+          :color="selectedTagIds.length > 0 ? 'primary' : 'default'"
+          @click="openFilterDialog"
+        >
+          <v-badge
+            v-if="selectedTagIds.length > 0"
+            dot
+            color="error"
+            location="top right"
+            :offset-x="-5"
+            :offset-y="-5"
+          >
+            <v-icon>mdi-filter-variant</v-icon></v-badge
+          >
+          <v-icon v-else>mdi-filter-variant</v-icon>
         </v-btn>
       </div>
 
       <template v-slot:prepend>
-        <v-btn icon="mdi-plus" to="/add_recipe"></v-btn>
-        <v-divider class="mx-1" vertical></v-divider>
+        <v-btn icon="mdi-plus" to="/add_recipe" color="primary"></v-btn>
       </template>
     </v-toolbar>
+
+    <!-- Выбранные теги -->
+    <div v-if="selectedTagIds.length > 0" class="mb-4 d-flex align-center flex-wrap ga-2">
+      <v-chip
+        v-for="tag in selectedTagsChips"
+        :key="tag.id"
+        closable
+        size="small"
+        :style="{
+          backgroundColor: tag.color || '#757575',
+          color: getContrastColor(tag.color),
+        }"
+        @click:close="removeTag(tag.id)"
+      >
+        {{ tag.name }}
+      </v-chip>
+    </div>
 
     <div>
       <div v-if="loading" class="text-center py-8">
@@ -123,6 +132,13 @@
         </div>
       </template>
     </div>
+
+    <!-- Диалог фильтра по тегам -->
+    <FilterDialog
+      v-model="filterDialog"
+      :selected-tags="selectedTagIds"
+      @update="onTagsFilterUpdate"
+    />
   </div>
 </template>
 
@@ -132,7 +148,7 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useRecipesStore } from '../stores/recipes.store'
 import { useTagsStore } from '../stores/tags.store'
-import { debounce } from '../utils/debounce'
+import FilterDialog from '../components/FilterDialog.vue'
 import { getContrastColor } from '../utils/colors'
 
 const router = useRouter()
@@ -142,9 +158,9 @@ const { recipes, loading, error } = storeToRefs(recipesStore)
 
 // Состояние поиска
 const searchQuery = ref('')
-const selectedTags = ref([])
-const tagSearchResults = ref([])
-const tagsLoading = ref(false)
+const selectedTagIds = ref([])
+const selectedTagsChips = ref([]) // Для отображения чипов
+const filterDialog = ref(false)
 const currentPage = ref(1)
 
 // Вычисляемое
@@ -153,61 +169,49 @@ const totalPages = computed(() => {
   return Math.ceil(recipes.value.totalCount / recipes.value.pageSize)
 })
 
-// Debounced поиск тегов
-const searchTagsDebounced = debounce(async (query) => {
-  if (!query || query.length < 1) {
-    tagSearchResults.value = []
-    return
-  }
-
-  tagsLoading.value = true
-  try {
-    const result = await tagsStore.searchTags(query)
-    tagSearchResults.value = result.items || result || []
-  } catch (err) {
-    console.error('Ошибка поиска тегов:', err)
-    tagSearchResults.value = []
-  } finally {
-    tagsLoading.value = false
-  }
-}, 300)
-
-const onTagSearch = (value) => {
-  searchTagsDebounced(value || '')
+// Открытие диалога фильтра
+const openFilterDialog = () => {
+  filterDialog.value = true
 }
 
-const onMenuOpen = async () => {
-  if (tagSearchResults.value.length === 0) {
-    tagsLoading.value = true
+// Обновление тегов после фильтрации
+const onTagsFilterUpdate = async (tagIds) => {
+  selectedTagIds.value = tagIds
+
+  // Загружаем информацию о выбранных тегах для отображения чипов
+  if (tagIds.length > 0) {
     try {
       const result = await tagsStore.searchTags('')
-      tagSearchResults.value = result.items || result || []
+      const allTags = result.items || result || []
+      selectedTagsChips.value = allTags.filter((t) => tagIds.includes(t.id))
     } catch (err) {
       console.error('Ошибка загрузки тегов:', err)
-    } finally {
-      tagsLoading.value = false
     }
+  } else {
+    selectedTagsChips.value = []
   }
+}
+
+// Удаление тега из фильтра
+const removeTag = (tagId) => {
+  selectedTagIds.value = selectedTagIds.value.filter((id) => id !== tagId)
+  selectedTagsChips.value = selectedTagsChips.value.filter((t) => t.id !== tagId)
 }
 
 // Поиск
 const doSearch = () => {
   currentPage.value = 1
-  const tags = selectedTags.value.map((t) => t.id)
-  recipesStore.fetchRecipes(searchQuery.value, tags, 1)
+  recipesStore.fetchRecipes(searchQuery.value, selectedTagIds.value, 1)
 }
 
 // Смена страницы
 const onPageChange = (page) => {
-  const tags = selectedTags.value.map((t) => t.id)
-  recipesStore.fetchRecipes(searchQuery.value, tags, page)
+  recipesStore.fetchRecipes(searchQuery.value, selectedTagIds.value, page)
 }
 
 // Получение URL файла
 const getFileUrl = (fileId) => {
-  const url = `${import.meta.env.VITE_API_BASE_URL}/files/${fileId}`
-  console.log(url)
-  return url
+  return `${import.meta.env.VITE_API_BASE_URL}/files/${fileId}`
 }
 
 const goToRecipe = (id) => {
