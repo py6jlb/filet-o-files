@@ -4,6 +4,7 @@ import RecipeView from '@/views/RecipeView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import SchedulerView from '@/views/SchedulerView.vue'
 import LoginView from '@/views/LoginView.vue'
+import LogoutView from '@/views/LogoutView.vue'
 import AddRecipeView from '@/views/AddRecipeView.vue'
 import EditRecipeView from '@/views/EditRecipeView.vue'
 import { useAuthStore } from '../stores/auth.store'
@@ -30,43 +31,49 @@ const router = createRouter({
       path: '/',
       name: 'recipes',
       component: RecipesView,
-      meta: { requiresAuth: true, routeName: "Рецепты" },
+      meta: { requiresAuth: true, routeName: 'Рецепты' },
     },
     {
       path: '/recipe/:id',
       name: 'recipe',
       component: RecipeView,
-      meta: { requiresAuth: true, routeName: "Просмотр рецепта" },
+      meta: { requiresAuth: true, routeName: 'Просмотр рецепта' },
     },
     {
       path: '/add_recipe',
       name: 'add_recipe',
       component: AddRecipeView,
-      meta: { requiresAuth: true, routeName: "Новый рецепт" },
+      meta: { requiresAuth: true, routeName: 'Новый рецепт' },
     },
     {
       path: '/edit_recipe/:id',
       name: 'edit_recipe',
       component: EditRecipeView,
-      meta: { requiresAuth: true, routeName: "Редактирование рецепта" },
+      meta: { requiresAuth: true, routeName: 'Редактирование рецепта' },
     },
     {
       path: '/scheduler',
       name: 'scheduler',
       component: SchedulerView,
-      meta: { requiresAuth: true, routeName: "Планирование" },
+      meta: { requiresAuth: true, routeName: 'Планирование' },
     },
     {
       path: '/profile',
       name: 'profile',
       component: ProfileView,
-      meta: { requiresAuth: true, routeName: "Профиль" },
+      meta: { requiresAuth: true, routeName: 'Профиль' },
     },
     {
       path: '/login',
       name: 'login',
       component: LoginView,
-      meta: { requiresAuth: false, routeName: "Вход" },
+      meta: { requiresAuth: false, routeName: 'Вход' },
+    },
+    {
+      path: '/logout',
+      name: 'logout',
+      component: LogoutView,
+      meta: { requiresAuth: false, routeName: 'Выход' },
     },
   ],
 })

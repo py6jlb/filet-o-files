@@ -19,16 +19,10 @@
         <v-icon>mdi-calendar-month</v-icon> Планирование
       </v-list-item>
     </v-list>
-    <template v-slot:append>
-      <div class="pa-2">
-        <LoginInfo />
-      </div>
-    </template>
   </v-navigation-drawer>
 </template>
 
 <script setup>
-import LoginInfo from './LoginInfo.vue'
 
 const modelValue = defineModel()
 
