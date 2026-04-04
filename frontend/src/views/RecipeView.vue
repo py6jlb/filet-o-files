@@ -94,7 +94,7 @@
       <v-card v-if="recipe.files?.length != 0" variant="outlined" class="mb-4">
         <v-card-title>Галерея</v-card-title>
         <v-card-text>
-          <FileGallery :files="recipe.files" :size="120" @click="openImage" />
+          <FileGallery :files="recipe.files" :size="120" @click="openGalleryImage" />
         </v-card-text>
       </v-card>
 
@@ -197,7 +197,26 @@ const formatDate = (dateString) => {
   })
 }
 
+// Открытие изображения или скачивание PDF
 const openImage = (url) => {
+
+  selectedImage.value = url
+  imageDialog.value = true
+}
+
+// Открытие изображения или скачивание PDF
+const openGalleryImage = (url, mimeType) => {
+  // Если это не изображение (например PDF) - скачиваем файл
+  if (mimeType && !mimeType.startsWith('image/')) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = ''
+    link.target = '_blank'
+    link.click()
+    return
+  }
+
+  // Иначе открываем диалог просмотра
   selectedImage.value = url
   imageDialog.value = true
 }

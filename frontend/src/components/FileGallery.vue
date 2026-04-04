@@ -9,7 +9,7 @@
         :height="size"
         cover
         class="rounded-lg cursor-pointer"
-        @click="$emit('click', getFileUrl(file.id))"
+        @click="$emit('click', getFileUrl(file.id), file.mimeType)"
       ></v-img>
       <!-- PDF с превью -->
       <v-img
@@ -19,7 +19,7 @@
         :height="size"
         cover
         class="rounded-lg cursor-pointer"
-        @click="$emit('click', getFileUrl(file.id))"
+        @click="$emit('click', getFileUrl(file.id), file.mimeType)"
       ></v-img>
     </template>
   </div>
