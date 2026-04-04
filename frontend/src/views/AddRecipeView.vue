@@ -41,6 +41,14 @@
                   cover
                   class="rounded-lg elevation-1"
                 ></v-img>
+                <v-img
+                  v-else-if="preview.type === 'pdf' && preview.url"
+                  :src="preview.url"
+                  width="80"
+                  height="80"
+                  cover
+                  class="rounded-lg elevation-1"
+                ></v-img>
                 <div
                   v-else
                   class="pdf-preview rounded-lg elevation-1 d-flex align-center justify-center"
@@ -136,6 +144,7 @@ import MarkdownEditor from '../components/MarkdownEditor.vue'
 import TagSelectDialog from '../components/TagSelectDialog.vue'
 import TagsTable from '../components/TagsTable.vue'
 import SnackbarNotification from '../components/SnackbarNotification.vue'
+import { generatePdfPreview, isPdfFile, dataUrlToBlob } from '../utils/pdf-preview'
 
 const recipesStore = useRecipesStore()
 
@@ -193,34 +202,50 @@ const triggerFileSelect = () => {
   fileInput.value?.click()
 }
 
-const handleFileSelect = (event) => {
+const handleFileSelect = async (event) => {
   const files = event.target.files
   if (!files || files.length === 0) return
 
   // Добавляем новые файлы к существующим
   const newFiles = Array.from(files)
 
-  newFiles.forEach((file) => {
+  for (const file of newFiles) {
     const isImage = file.type.startsWith('image/')
+    const isPdf = isPdfFile(file)
 
     if (isImage) {
       const reader = new FileReader()
-      reader.onload = (e) => {
-        filesPreview.value.push({
-          type: 'image',
-          url: e.target.result,
-          file: file,
-        })
-      }
+      const promise = new Promise((resolve) => {
+        reader.onload = (e) => {
+          filesPreview.value.push({
+            type: 'image',
+            url: e.target.result,
+            file: file,
+            preview: null,
+          })
+          resolve()
+        }
+      })
       reader.readAsDataURL(file)
-    } else {
+      await promise
+    } else if (isPdf) {
+      // Генерируем превью для PDF
+      const previewUrl = await generatePdfPreview(file, 200)
       filesPreview.value.push({
         type: 'pdf',
+        url: previewUrl,
+        file: file,
+        preview: previewUrl ? dataUrlToBlob(previewUrl) : null,
+      })
+    } else {
+      filesPreview.value.push({
+        type: 'other',
         url: null,
         file: file,
+        preview: null,
       })
     }
-  })
+  }
 
   // Добавляем в recipe.files
   recipe.files = [...recipe.files, ...newFiles]
@@ -264,7 +289,8 @@ const submitForm = async () => {
     if (recipe.files && recipe.files.length > 0) {
       for (let i = 0; i < recipe.files.length; i++) {
         const isTitle = i === 0 // Первый файл - главное изображение
-        await recipesStore.uploadFile(newRecipe.id, recipe.files[i], isTitle)
+        const filePreview = filesPreview.value[i]?.preview || null
+        await recipesStore.uploadFile(newRecipe.id, recipe.files[i], isTitle, filePreview)
       }
     }
 

@@ -17,6 +17,7 @@ public static class FileMappings
             MimeType = file.MimeType,
             RecipeId = file.RecipeId,
             Size = file.Size,
+            PreviewFileId = file.PreviewFileId,
         };
     }
 
@@ -31,6 +32,7 @@ public static class FileMappings
             RecipeId = dto.RecipeId,
             Size = dto.Size,
             Source = dto.Source,
+            PreviewFileId = dto.PreviewFileId,
         };
     }
 }

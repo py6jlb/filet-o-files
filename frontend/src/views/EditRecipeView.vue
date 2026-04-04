@@ -62,6 +62,14 @@
                     cover
                     class="rounded-lg elevation-1"
                   ></v-img>
+                  <v-img
+                    v-else-if="preview.type === 'pdf' && preview.url"
+                    :src="preview.url"
+                    width="80"
+                    height="80"
+                    cover
+                    class="rounded-lg elevation-1"
+                  ></v-img>
                   <div
                     v-else
                     class="pdf-preview rounded-lg elevation-1 d-flex align-center justify-center"
@@ -94,6 +102,14 @@
                 <v-img
                   v-if="file.mimeType?.startsWith('image')"
                   :src="getFileUrl(file.id)"
+                  width="80"
+                  height="80"
+                  cover
+                  class="rounded-lg elevation-1"
+                ></v-img>
+                <v-img
+                  v-else-if="file.previewFileId && getPreviewUrl(file)"
+                  :src="getPreviewUrl(file)"
                   width="80"
                   height="80"
                   cover
@@ -205,6 +221,7 @@ import TagSelectDialog from '../components/TagSelectDialog.vue'
 import TagsTable from '../components/TagsTable.vue'
 import SnackbarNotification from '../components/SnackbarNotification.vue'
 import api from '../utils/api'
+import { generatePdfPreview, isPdfFile, dataUrlToBlob } from '../utils/pdf-preview'
 
 const route = useRoute()
 const router = useRouter()
@@ -245,6 +262,13 @@ const rules = {
 
 const getFileUrl = (fileId) => {
   return `${import.meta.env.VITE_API_BASE_URL}/files/${fileId}`
+}
+
+const getPreviewUrl = (file) => {
+  if (file.previewFileId) {
+    return getFileUrl(file.previewFileId)
+  }
+  return null
 }
 
 // Загрузка рецепта
@@ -305,33 +329,49 @@ const triggerFileSelect = () => {
   fileInput.value?.click()
 }
 
-const handleFileSelect = (event) => {
+const handleFileSelect = async (event) => {
   const files = event.target.files
   if (!files || files.length === 0) return
 
   const newFilesArr = Array.from(files)
 
-  newFilesArr.forEach((file) => {
+  for (const file of newFilesArr) {
     const isImage = file.type.startsWith('image/')
+    const isPdf = isPdfFile(file)
 
     if (isImage) {
       const reader = new FileReader()
-      reader.onload = (e) => {
-        newFilesPreview.value.push({
-          type: 'image',
-          url: e.target.result,
-          file: file,
-        })
-      }
+      const promise = new Promise((resolve) => {
+        reader.onload = (e) => {
+          newFilesPreview.value.push({
+            type: 'image',
+            url: e.target.result,
+            file: file,
+            preview: null,
+          })
+          resolve()
+        }
+      })
       reader.readAsDataURL(file)
-    } else {
+      await promise
+    } else if (isPdf) {
+      // Генерируем превью для PDF
+      const previewUrl = await generatePdfPreview(file, 200)
       newFilesPreview.value.push({
         type: 'pdf',
+        url: previewUrl,
+        file: file,
+        preview: previewUrl ? dataUrlToBlob(previewUrl) : null,
+      })
+    } else {
+      newFilesPreview.value.push({
+        type: 'other',
         url: null,
         file: file,
+        preview: null,
       })
     }
-  })
+  }
 
   newFiles.value = [...newFiles.value, ...newFilesArr]
   event.target.value = ''
@@ -381,7 +421,8 @@ const submitForm = async () => {
     if (newFiles.value && newFiles.value.length > 0) {
       for (let i = 0; i < newFiles.value.length; i++) {
         const isTitle = existingFiles.value.length === 0 && i === 0 // Первый файл - главное изображение
-        await recipesStore.uploadFile(recipeId, newFiles.value[i], isTitle)
+        const filePreview = newFilesPreview.value[i]?.preview || null
+        await recipesStore.uploadFile(recipeId, newFiles.value[i], isTitle, filePreview)
       }
     }
 

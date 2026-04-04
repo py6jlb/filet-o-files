@@ -49,10 +49,11 @@
         <!-- Изображение -->
         <v-img
           v-if="recipe.files?.length > 0"
-          :src="getFileUrl(recipe.files[0].id)"
+          :src="getTitleImageUrl(recipe.files[0])"
           height="300"
           cover
-          class="bg-grey-lighten-2"
+          class="bg-grey-lighten-2 cursor-pointer"
+          @click="openImage(getFileUrl(recipe.files[0].id))"
         ></v-img>
         <v-img
           v-else
@@ -178,6 +179,24 @@ const snackbar = reactive({
 
 const getFileUrl = (fileId) => {
   return `${import.meta.env.VITE_API_BASE_URL}/files/${fileId}`
+}
+
+// Получение URL для главного изображения (используем превью для PDF)
+const getTitleImageUrl = (file) => {
+  if (!file) return ''
+
+  // Если это изображение - возвращаем сам файл
+  if (file.mimeType?.startsWith('image')) {
+    return getFileUrl(file.id)
+  }
+
+  // Если это PDF и есть превью - возвращаем превью
+  if (file.previewFileId) {
+    return getFileUrl(file.previewFileId)
+  }
+
+  // Иначе возвращаем сам файл (будет показана иконка)
+  return getFileUrl(file.id)
 }
 
 const formatDate = (dateString) => {

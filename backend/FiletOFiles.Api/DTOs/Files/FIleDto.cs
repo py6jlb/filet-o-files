@@ -10,5 +10,6 @@ public sealed record FileDto
     public required string Source { get; init; }
     public long Size { get; init; }
     public bool IsTitle { get; init; }
+    public string? PreviewFileId { get; init; }
     public string RecipeId { get; init; }
 }

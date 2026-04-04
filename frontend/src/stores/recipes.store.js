@@ -48,11 +48,15 @@ export const useRecipesStore = defineStore('recipes', {
       }
     },
 
-    async uploadFile(recipeId, file, isTitle = false) {
+    async uploadFile(recipeId, file, isTitle = false, preview = null) {
       const formData = new FormData()
       formData.append('RecipeId', recipeId)
       formData.append('File', file)
       formData.append('IsTitle', isTitle.toString())
+
+      if (preview) {
+        formData.append('Preview', preview)
+      }
 
       try {
         await axios.post('/files', formData, {

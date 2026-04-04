@@ -10,4 +10,6 @@ public sealed class UploadFile
     public IFormFile File { get; set; }
 
     public bool IsTitle { get; set; }
+
+    public IFormFile? Preview { get; set; }
 }

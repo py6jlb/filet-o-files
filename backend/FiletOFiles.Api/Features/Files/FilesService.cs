@@ -35,18 +35,13 @@ public sealed class FilesService
             return Result.Fail(new Error($"Не найден рецепт").WithMetadata("code", 404));
         }
 
-        string sha1Hash;
-        using (var stream = request.File.OpenReadStream())
-        {
-            using var sha1 = SHA1.Create();
-            byte[] hashBytes = await sha1.ComputeHashAsync(stream, cancellationToken);
-            sha1Hash = Convert.ToHexStringLower(hashBytes);
-        }
+        string sha1Hash = await ComputeSha1HashAsync(request.File, cancellationToken);
 
         var path = Path.Combine(_cfg.Path, recipe.Id);
         var dirName = Path.GetDirectoryName(path);
         var dirInfo = Directory.CreateDirectory(path);
         var filePath = Path.Combine(path, sha1Hash);
+        
         if (File.Exists(filePath))
         {
             return Result.Fail(
@@ -60,6 +55,33 @@ public sealed class FilesService
             await request.File.CopyToAsync(stream, cancellationToken);
         }
 
+        // Сохраняем превью, если оно есть
+        string? previewFileId = null;
+        if (request.Preview != null && request.Preview.Length > 0)
+        {
+            var previewHash = await ComputeSha1HashAsync(request.Preview, cancellationToken);
+            var previewFilePath = Path.Combine(path, previewHash);
+
+            if (!File.Exists(previewFilePath))
+            {
+                using var previewStream = new FileStream(previewFilePath, FileMode.Create);
+                await request.Preview.CopyToAsync(previewStream, cancellationToken);
+            }
+
+            var previewFileDto = new FileDto()
+            {
+                FileName = request.Preview.FileName,
+                Source = previewFilePath,
+                MimeType = MimeTypes.GetMimeType(request.Preview.FileName),
+                IsTitle = false,
+                RecipeId = recipe.Id,
+                Size = request.Preview.Length,
+            };
+            var previewEntity = previewFileDto.ToEntity();
+            await _db.Files.AddAsync(previewEntity, cancellationToken);
+            previewFileId = previewEntity.Id;
+        }
+
         var newFile = new FileDto()
         {
             FileName = request.File.FileName,
@@ -68,11 +90,25 @@ public sealed class FilesService
             IsTitle = request.IsTitle,
             RecipeId = recipe.Id,
             Size = request.File.Length,
+            PreviewFileId = previewFileId,
         };
         await _db.Files.AddAsync(newFile.ToEntity(), cancellationToken);
+
+        //сохраняем все добавленное
         await _db.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
+    }
+
+    private static async Task<string> ComputeSha1HashAsync(
+        IFormFile file,
+        CancellationToken cancellationToken
+    )
+    {
+        using var stream = file.OpenReadStream();
+        using var sha1 = SHA1.Create();
+        byte[] hashBytes = await sha1.ComputeHashAsync(stream, cancellationToken);
+        return Convert.ToHexStringLower(hashBytes);
     }
 
     public async Task<Result<FileDto>> GetFileDescriptor(
@@ -80,7 +116,9 @@ public sealed class FilesService
         CancellationToken cancellationToken
     )
     {
-        var fileDescr = await _db.Files.FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
+        var fileDescr = await _db
+            .Files.Include(f => f.PreviewFile)
+            .FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
         if (fileDescr == null)
         {
             return Result.Fail<FileDto>(new Error("Файл не найден").WithMetadata("code", 404));
@@ -102,12 +140,16 @@ public sealed class FilesService
 
     public async Task<Result> DeleteFile(string fileId, CancellationToken cancellationToken)
     {
-        var fileDescr = await _db.Files.FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
+        var fileDescr = await _db
+            .Files.Include(f => f.PreviewFile)
+            .FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
+
         if (fileDescr == null)
         {
             return Result.Fail(new Error("Файл не найден").WithMetadata("code", 404));
         }
 
+        // Удаляем основной файл
         var path = Path.Combine(_cfg.Path, fileDescr.Source);
         try
         {
@@ -119,20 +161,37 @@ public sealed class FilesService
         }
         catch (IOException ex)
         {
-            return Result.Fail(
-                new Error($"Error deleting file: {ex.Message}").WithMetadata("code", 500)
-            );
+            // Игнорируем ошибки удаления основного файла
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Result.Fail(new Error($"Access denied: {ex.Message}").WithMetadata("code", 500));
+            // Игнорируем ошибки доступа
         }
-        catch (Exception ex)
+
+        // Удаляем превью, если есть
+        if (fileDescr.PreviewFile != null)
         {
-            return Result.Fail(
-                new Error($"An unexpected error occurred: {ex.Message}").WithMetadata("code", 500)
-            );
+            var previewPath = Path.Combine(_cfg.Path, fileDescr.PreviewFile.Source);
+            try
+            {
+                var attr = File.GetAttributes(previewPath);
+                if (!attr.HasFlag(FileAttributes.Directory))
+                {
+                    File.Delete(previewPath);
+                }
+            }
+            catch (IOException ex)
+            {
+                // Игнорируем ошибки удаления превью
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Игнорируем ошибки доступа
+            }
+
+            _db.Files.Remove(fileDescr.PreviewFile);
         }
+
         _db.Files.Remove(fileDescr);
         await _db.SaveChangesAsync(cancellationToken);
         return Result.Ok();

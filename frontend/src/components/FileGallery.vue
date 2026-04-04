@@ -1,15 +1,36 @@
 <template>
   <div class="d-flex flex-wrap" :class="gapClass">
-    <v-img
-      v-for="file in files"
-      :key="file.id"
-      :src="getFileUrl(file.id)"
-      :width="size"
-      :height="size"
-      cover
-      class="rounded-lg cursor-pointer"
-      @click="$emit('click', getFileUrl(file.id))"
-    ></v-img>
+    <template v-for="file in files" :key="file.id">
+      <!-- Изображение -->
+      <v-img
+        v-if="file.mimeType?.startsWith('image')"
+        :src="getFileUrl(file.id)"
+        :width="size"
+        :height="size"
+        cover
+        class="rounded-lg cursor-pointer"
+        @click="$emit('click', getFileUrl(file.id))"
+      ></v-img>
+      <!-- PDF с превью -->
+      <v-img
+        v-else-if="file.previewFileId"
+        :src="getFileUrl(file.previewFileId)"
+        :width="size"
+        :height="size"
+        cover
+        class="rounded-lg cursor-pointer"
+        @click="$emit('click', getFileUrl(file.id))"
+      ></v-img>
+      <!-- PDF без превью - иконка -->
+      <div
+        v-else
+        class="pdf-preview rounded-lg d-flex align-center justify-center cursor-pointer"
+        :style="{ width: size + 'px', height: size + 'px' }"
+        @click="$emit('click', getFileUrl(file.id))"
+      >
+        <v-icon size="32" color="red">mdi-file-pdf-box</v-icon>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -43,5 +64,8 @@ const getFileUrl = (fileId) => {
 <style scoped>
 .cursor-pointer {
   cursor: pointer;
+}
+.pdf-preview {
+  background-color: #f5f5f5;
 }
 </style>
