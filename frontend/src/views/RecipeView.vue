@@ -210,7 +210,7 @@ const openImage = (url) => {
 const openGalleryImage = (url, mimeType, fileId) => {
   // Если это не изображение (например PDF) - открываем на новой вкладке
   if (mimeType && !mimeType.startsWith('image/')) {
-    window.open(`/pdf/${fileId}`, '_blank')
+    window.open(`/pdf/${fileId}/${fileId}.pdf`, '_blank')
     return
   }
 

@@ -77,7 +77,7 @@ const router = createRouter({
       meta: { requiresAuth: false, routeName: 'Выход' },
     },
     {
-      path: '/pdf/:id',
+      path: '/pdf/:id/:name',
       name: 'pdf',
       component: PdfView,
       meta: { requiresAuth: true, routeName: 'Просмотр PDF' },

@@ -10,7 +10,7 @@ public static class GetFileEndpoint
     public static IEndpointRouteBuilder MapGetFile(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder
-            .MapGet("/{fileId}", HandleAsync)
+            .MapGet("/{fileId}/{filename?}", HandleAsync)
             .WithName(nameof(GetFileEndpoint))
             .WithDescription("Получить файл")
             .AllowAnonymous()
@@ -23,6 +23,7 @@ public static class GetFileEndpoint
     public static async Task<IResult> HandleAsync(
         [FromServices] FilesService service,
         string fileId,
+        string? filename,
         CancellationToken cancellationToken
     )
     {
@@ -33,11 +34,7 @@ public static class GetFileEndpoint
         }
         var result = service.GetFileStream(descr.Value.Source);
         return result.IsSuccess
-            ? TypedResults.File(
-                result.Value,
-                contentType: descr.Value.MimeType,
-                fileDownloadName: descr.Value.FileName
-            )
+            ? TypedResults.File(result.Value, contentType: descr.Value.MimeType)
             : ErrorHelper.GetProblem(result.Errors[0]);
     }
 }
