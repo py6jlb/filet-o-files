@@ -197,26 +197,24 @@ const formatDate = (dateString) => {
   })
 }
 
-// Открытие изображения или скачивание PDF
+// Открытие изображения или PDF (для главного изображения)
 const openImage = (url) => {
 
+
+  // Иначе открываем диалог просмотра изображения
   selectedImage.value = url
   imageDialog.value = true
 }
 
-// Открытие изображения или скачивание PDF
-const openGalleryImage = (url, mimeType) => {
-  // Если это не изображение (например PDF) - скачиваем файл
+// Открытие изображения или PDF (для галереи)
+const openGalleryImage = (url, mimeType, fileId) => {
+  // Если это не изображение (например PDF) - открываем на новой вкладке
   if (mimeType && !mimeType.startsWith('image/')) {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = ''
-    link.target = '_blank'
-    link.click()
+    window.open(`/pdf/${fileId}`, '_blank')
     return
   }
 
-  // Иначе открываем диалог просмотра
+  // Иначе открываем диалог просмотра изображения
   selectedImage.value = url
   imageDialog.value = true
 }

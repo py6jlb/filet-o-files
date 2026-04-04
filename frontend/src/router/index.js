@@ -7,6 +7,7 @@ import LoginView from '@/views/LoginView.vue'
 import LogoutView from '@/views/LogoutView.vue'
 import AddRecipeView from '@/views/AddRecipeView.vue'
 import EditRecipeView from '@/views/EditRecipeView.vue'
+import PdfView from '@/views/PdfView.vue'
 import { useAuthStore } from '../stores/auth.store'
 import tokenService from '../utils/token.service'
 
@@ -74,6 +75,12 @@ const router = createRouter({
       name: 'logout',
       component: LogoutView,
       meta: { requiresAuth: false, routeName: 'Выход' },
+    },
+    {
+      path: '/pdf/:id',
+      name: 'pdf',
+      component: PdfView,
+      meta: { requiresAuth: true, routeName: 'Просмотр PDF' },
     },
   ],
 })
