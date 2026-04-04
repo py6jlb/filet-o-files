@@ -53,6 +53,7 @@ public static class GetRecipesEndpoint
             .Recipes.Include(r => r.Tags)
             .Include(r => r.RecipeTags)
             .Include(r => r.Files)
+            .ThenInclude(f => f.PreviewFile)
             .AsQueryable();
 
         // Фильтрация по названию/описанию

@@ -13,5 +13,11 @@ public class FileConfigurations : IEntityTypeConfiguration<File>
         builder.HasKey(f => f.Id);
         builder.Property(f => f.FileName).IsRequired();
         builder.Property(f => f.Source).IsRequired();
+
+        // Связь с превью
+        builder.HasOne(f => f.PreviewFile)
+            .WithMany()
+            .HasForeignKey(f => f.PreviewFileId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

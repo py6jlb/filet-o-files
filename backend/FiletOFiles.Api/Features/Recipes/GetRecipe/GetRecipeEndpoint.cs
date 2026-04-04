@@ -33,6 +33,7 @@ public static class GetRecipeEndpoint
             .Recipes.Where(x => x.Id == id)
             .Include(x => x.Tags)
             .Include(x => x.Files)
+            .ThenInclude(f => f.PreviewFile)
             .FirstOrDefaultAsync(cancellationToken);
 
         return recipe is null ? TypedResults.NotFound() : TypedResults.Ok(recipe.ToDto());

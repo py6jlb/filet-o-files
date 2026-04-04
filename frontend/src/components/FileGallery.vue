@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-wrap" :class="gapClass">
-    <template v-for="file in files" :key="file.id">
+    <template v-for="file in displayableFiles" :key="file.id">
       <!-- Изображение -->
       <v-img
         v-if="file.mimeType?.startsWith('image')"
@@ -21,15 +21,6 @@
         class="rounded-lg cursor-pointer"
         @click="$emit('click', getFileUrl(file.id))"
       ></v-img>
-      <!-- PDF без превью - иконка -->
-      <div
-        v-else
-        class="pdf-preview rounded-lg d-flex align-center justify-center cursor-pointer"
-        :style="{ width: size + 'px', height: size + 'px' }"
-        @click="$emit('click', getFileUrl(file.id))"
-      >
-        <v-icon size="32" color="red">mdi-file-pdf-box</v-icon>
-      </div>
     </template>
   </div>
 </template>
@@ -56,6 +47,21 @@ defineEmits(['click'])
 
 const gapClass = computed(() => props.gap)
 
+// Фильтруем файлы: только изображения или PDF с превью
+const displayableFiles = computed(() => {
+  return props.files.filter(file => {
+    // Показываем все изображения
+    if (file.mimeType?.startsWith('image')) {
+      return true
+    }
+    // Показываем PDF только если есть превью
+    if (file.previewFileId) {
+      return true
+    }
+    return false
+  })
+})
+
 const getFileUrl = (fileId) => {
   return `${import.meta.env.VITE_API_BASE_URL}/files/${fileId}`
 }
@@ -64,8 +70,5 @@ const getFileUrl = (fileId) => {
 <style scoped>
 .cursor-pointer {
   cursor: pointer;
-}
-.pdf-preview {
-  background-color: #f5f5f5;
 }
 </style>

@@ -24,21 +24,11 @@
     <div v-else>
       <!-- Кнопки действий -->
       <div class="d-flex justify-end mb-4 ga-2">
-        <v-btn
-          color="primary"
-          variant="outlined"
-          size="small"
-          :to="`/edit_recipe/${recipe.id}`"
-        >
+        <v-btn color="primary" variant="outlined" size="small" :to="`/edit_recipe/${recipe.id}`">
           <v-icon left>mdi-pencil</v-icon>
           Редактировать
         </v-btn>
-        <v-btn
-          color="error"
-          variant="outlined"
-          size="small"
-          @click="confirmDelete"
-        >
+        <v-btn color="error" variant="outlined" size="small" @click="confirmDelete">
           <v-icon left>mdi-delete</v-icon>
           Удалить
         </v-btn>
@@ -49,11 +39,11 @@
         <!-- Изображение -->
         <v-img
           v-if="recipe.files?.length > 0"
-          :src="getTitleImageUrl(recipe.files[0])"
+          :src="getTitleImageUrl(recipe)"
           height="300"
           cover
           class="bg-grey-lighten-2 cursor-pointer"
-          @click="openImage(getFileUrl(recipe.files[0].id))"
+          @click="openImage(getTitleImageClickUrl(recipe.files[0]))"
         ></v-img>
         <v-img
           v-else
@@ -101,7 +91,7 @@
       </v-card>
 
       <!-- Галерея изображений -->
-      <v-card v-if="recipe.files?.length > 1" variant="outlined" class="mb-4">
+      <v-card v-if="recipe.files?.length != 0" variant="outlined" class="mb-4">
         <v-card-title>Галерея</v-card-title>
         <v-card-text>
           <FileGallery :files="recipe.files" :size="120" @click="openImage" />
@@ -109,13 +99,7 @@
       </v-card>
 
       <!-- Кнопка назад -->
-      <v-btn
-        variant="text"
-        color="primary"
-        size="small"
-        to="/"
-        class="mt-4"
-      >
+      <v-btn variant="text" color="primary" size="small" to="/" class="mt-4">
         <v-icon left>mdi-arrow-left</v-icon>
         Назад к списку рецептов
       </v-btn>
@@ -131,17 +115,10 @@
     />
 
     <!-- Диалог просмотра изображения -->
-    <ImageViewerDialog
-      v-model="imageDialog"
-      :src="selectedImage"
-    />
+    <ImageViewerDialog v-model="imageDialog" :src="selectedImage" />
 
     <!-- Уведомление -->
-    <SnackbarNotification
-      v-model="snackbar.show"
-      :text="snackbar.text"
-      :color="snackbar.color"
-    />
+    <SnackbarNotification v-model="snackbar.show" :text="snackbar.text" :color="snackbar.color" />
   </div>
 </template>
 
@@ -182,20 +159,29 @@ const getFileUrl = (fileId) => {
 }
 
 // Получение URL для главного изображения (используем превью для PDF)
-const getTitleImageUrl = (file) => {
-  if (!file) return ''
+const getTitleImageUrl = (recipe) => {
+  if (!recipe.files || recipe.files.length === 0) return ''
+  const titleFile = recipe.files.find((file) => file.isTitle)
+  if (!titleFile) return ''
+
 
   // Если это изображение - возвращаем сам файл
-  if (file.mimeType?.startsWith('image')) {
-    return getFileUrl(file.id)
+  if (titleFile.mimeType?.startsWith('image')) {
+    return getFileUrl(titleFile.id)
   }
 
-  // Если это PDF и есть превью - возвращаем превью
-  if (file.previewFileId) {
-    return getFileUrl(file.previewFileId)
+  // Если это PDF (не изображение) и есть превью - возвращаем превью
+  if (titleFile.previewFileId) {
+    return getFileUrl(titleFile.previewFileId)
   }
 
-  // Иначе возвращаем сам файл (будет показана иконка)
+  // PDF без превью - возвращаем null, чтобы не показывать
+  return null
+}
+
+// Получение URL для открытия при клике (всегда оригинальный файл)
+const getTitleImageClickUrl = (file) => {
+  if (!file) return ''
   return getFileUrl(file.id)
 }
 

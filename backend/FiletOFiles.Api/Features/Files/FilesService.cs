@@ -41,7 +41,7 @@ public sealed class FilesService
         var dirName = Path.GetDirectoryName(path);
         var dirInfo = Directory.CreateDirectory(path);
         var filePath = Path.Combine(path, sha1Hash);
-        
+
         if (File.Exists(filePath))
         {
             return Result.Fail(
@@ -140,6 +140,7 @@ public sealed class FilesService
 
     public async Task<Result> DeleteFile(string fileId, CancellationToken cancellationToken)
     {
+        // Загружаем файл с превью
         var fileDescr = await _db
             .Files.Include(f => f.PreviewFile)
             .FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
@@ -149,50 +150,43 @@ public sealed class FilesService
             return Result.Fail(new Error("Файл не найден").WithMetadata("code", 404));
         }
 
-        // Удаляем основной файл
-        var path = Path.Combine(_cfg.Path, fileDescr.Source);
-        try
-        {
-            var attr = File.GetAttributes(path);
-            if (!attr.HasFlag(FileAttributes.Directory))
-            {
-                File.Delete(path);
-            }
-        }
-        catch (IOException ex)
-        {
-            // Игнорируем ошибки удаления основного файла
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            // Игнорируем ошибки доступа
-        }
+        // Собираем все файлы для удаления (основной + превью)
+        var filesToDelete = new List<Domain.Entities.File>();
 
-        // Удаляем превью, если есть
+        // Добавляем превью первым (оно будет удалено первым)
         if (fileDescr.PreviewFile != null)
         {
-            var previewPath = Path.Combine(_cfg.Path, fileDescr.PreviewFile.Source);
-            try
-            {
-                var attr = File.GetAttributes(previewPath);
-                if (!attr.HasFlag(FileAttributes.Directory))
-                {
-                    File.Delete(previewPath);
-                }
-            }
-            catch (IOException ex)
-            {
-                // Игнорируем ошибки удаления превью
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                // Игнорируем ошибки доступа
-            }
-
-            _db.Files.Remove(fileDescr.PreviewFile);
+            filesToDelete.Add(fileDescr.PreviewFile);
         }
 
-        _db.Files.Remove(fileDescr);
+        // Добавляем основной файл
+        filesToDelete.Add(fileDescr);
+
+        // Удаляем файлы с диска
+        foreach (var file in filesToDelete)
+        {
+            try
+            {
+                var filePath = Path.Combine(_cfg.Path, file.Source);
+                if (File.Exists(filePath))
+                {
+                    var attr = File.GetAttributes(filePath);
+                    if (!attr.HasFlag(FileAttributes.Directory))
+                    {
+                        File.Delete(filePath);
+                    }
+                }
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+        }
+
+        // Удаляем из БД (все записи)
+        foreach (var file in filesToDelete)
+        {
+            _db.Files.Remove(file);
+        }
+
         await _db.SaveChangesAsync(cancellationToken);
         return Result.Ok();
     }
