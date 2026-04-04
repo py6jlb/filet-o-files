@@ -11,7 +11,7 @@
       <v-alert type="error" variant="tonal" class="mb-4">
         {{ error }}
       </v-alert>
-      <v-btn color="primary" to="/">Вернуться к списку рецептов</v-btn>
+      <v-btn color="primary" size="small" to="/">Вернуться к списку рецептов</v-btn>
     </div>
 
     <!-- Форма редактирования -->
@@ -41,7 +41,7 @@
               style="display: none"
               @change="handleFileSelect"
             />
-            <v-btn variant="outlined" prepend-icon="mdi-paperclip" @click="triggerFileSelect">
+            <v-btn variant="outlined" size="small" prepend-icon="mdi-paperclip" @click="triggerFileSelect">
               Добавить файлы
             </v-btn>
 
@@ -133,6 +133,7 @@
           <v-col cols="12">
             <v-btn
               variant="outlined"
+              size="small"
               prepend-icon="mdi-tag-plus"
               @click="openTagDialog"
             >
@@ -160,7 +161,7 @@
             <v-btn
               type="submit"
               color="success"
-              size="large"
+              size="small"
               variant="elevated"
               :disabled="!formValid"
               :loading="submitting"
@@ -172,7 +173,7 @@
             <v-btn
               type="button"
               color="grey"
-              size="large"
+              size="small"
               variant="outlined"
               @click="cancel"
               :loading="submitting"

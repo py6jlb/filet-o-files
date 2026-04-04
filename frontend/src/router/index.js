@@ -100,4 +100,11 @@ router.beforeEach((to, from, next) => {
   next()
 })
 
+// Обновление заголовка страницы при каждом переходе
+router.afterEach((to) => {
+  const appName = 'Поваренная книга'
+  const routeName = to.meta.routeName || 'Страница'
+  document.title = `${appName} - ${routeName}`
+})
+
 export default router

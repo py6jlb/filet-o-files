@@ -12,6 +12,7 @@
           variant="outlined"
           density="compact"
           prepend-inner-icon="mdi-magnify"
+          no-data-text="Данных нет"
           chips
           closable-chips
           multiple
@@ -43,10 +44,10 @@
             Добавить выбранные
           </v-btn>
         </div>
-        <div v-else-if="searchQuery && !tagsLoading" class="text-center mt-2">
+        <div v-else-if="tagSearchQuery && !tagsLoading" class="text-center mt-2">
           <v-btn color="primary" variant="tonal" @click="createTag">
             <v-icon left>mdi-plus</v-icon>
-            Создать "{{ searchQuery }}"
+            Создать "{{ tagSearchQuery }}"
           </v-btn>
         </div>
       </v-card-text>

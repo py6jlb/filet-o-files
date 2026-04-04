@@ -25,7 +25,7 @@
             style="display: none"
             @change="handleFileSelect"
           />
-          <v-btn variant="outlined" prepend-icon="mdi-paperclip" @click="triggerFileSelect">
+          <v-btn variant="outlined" size="small" prepend-icon="mdi-paperclip" @click="triggerFileSelect">
             Добавить файлы
           </v-btn>
 
@@ -73,7 +73,7 @@
       <!-- Блок выбора тегов -->
       <v-row class="mt-0">
         <v-col cols="12">
-          <v-btn variant="outlined" prepend-icon="mdi-tag-plus" @click="openTagDialog">
+          <v-btn variant="outlined" size="small" prepend-icon="mdi-tag-plus" @click="openTagDialog">
             Добавить тег
           </v-btn>
         </v-col>
@@ -95,7 +95,7 @@
           <v-btn
             type="submit"
             color="success"
-            size="large"
+            size="small"
             variant="elevated"
             :disabled="!formValid"
             :loading="submitting"
@@ -108,7 +108,7 @@
           <v-btn
             type="button"
             color="grey"
-            size="large"
+            size="small"
             variant="outlined"
             @click="resetForm"
             :disabled="submitting"

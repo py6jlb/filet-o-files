@@ -27,6 +27,7 @@
         <v-btn
           color="primary"
           variant="outlined"
+          size="small"
           :to="`/edit_recipe/${recipe.id}`"
         >
           <v-icon left>mdi-pencil</v-icon>
@@ -35,6 +36,7 @@
         <v-btn
           color="error"
           variant="outlined"
+          size="small"
           @click="confirmDelete"
         >
           <v-icon left>mdi-delete</v-icon>
@@ -109,6 +111,7 @@
       <v-btn
         variant="text"
         color="primary"
+        size="small"
         to="/"
         class="mt-4"
       >
